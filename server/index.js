@@ -13,6 +13,19 @@ const io = new Server(server, {
   }
 })
 
+let serverBoard = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+
+io.on("connection", (socket) => {
+  console.log("New user: ", socket.id)
+
+  socket.emit("newServerBoard", serverBoard);
+  socket.on("newClientBoard", (newBoard) => {
+    serverBoard = newBoard;
+    socket.broadcast.emit("newServerBoard", newBoard);
+  })
+})
+
+
 server.listen(4000, () => {
   console.log("Server started!")
 })
