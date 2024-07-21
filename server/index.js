@@ -62,6 +62,22 @@ io.on("connection", (socket) => {
             sigils: ["beesonhit"],
             damage: 0,
             health: 2
+          },
+          {
+            card: "beehive",
+            costType: "blood",
+            cost: 1,
+            sigils: ["beesonhit"],
+            damage: 0,
+            health: 2
+          },
+          {
+            card: "beehive",
+            costType: "blood",
+            cost: 1,
+            sigils: ["beesonhit"],
+            damage: 0,
+            health: 2
           }
         ]
       }

@@ -7,6 +7,7 @@ const socket = io.connect("http://localhost:4000"); //socket.socket.sessionid
 function App() {
   const [room, setRoom] = useState(null)
   const [handHover, setHandHover] = useState(-1)
+  const [handSelection, setHandSelection] = useState(-1);
 
   useEffect(() => {
     socket.on("serverUpdate", (newRoom) => {
@@ -77,12 +78,14 @@ function App() {
           {room.handA.map((card, index) => {
             let l = 295 - (index * 295/(room.handA.length - 1));
             let m;
-            index <= handHover ? m = (125 * room.handA.length - 420)/(room.handA.length-1) : m = 0;
+            index <= handHover ? m = 5 + (125 * room.handA.length - 420)/(room.handA.length-1) : m = 0;
+            index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * room.handA.length - 420)/(room.handA.length-1) : m = m;
 
             return <div 
-              style={{position:"absolute", left: l, paddingLeft: m}}
+              style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
               onMouseEnter={() => setHandHover(index)}
               onMouseLeave={() => setHandHover(-1)}
+              onClick={() => {index === handSelection ? setHandSelection(-1) : setHandSelection(index)}}
             >
               <Card val={card}/>
             </div>
