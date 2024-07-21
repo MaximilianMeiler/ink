@@ -36,3 +36,70 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+
+
+.gameGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 140px);
+  grid-template-rows: repeat(4, 206px)
+}
+
+.card {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.cardBacking {
+  left: 7.5px;
+  top: 8px;
+}
+
+.cardHeader {
+  font-family: Heavyweight;
+  top: 15px;
+  font-size: 24px;
+  text-align: center;
+  width: 100%;
+}
+
+.cardPortrait {
+  top: 42px;
+  left: 13px;
+}
+
+.cardCost {
+  left: 70px;
+  top: 22px;
+  transform: scale(79%);
+}
+
+.cardDamage {
+  font-family: Heavyweight;
+  left: 6px;
+  top: 137px;
+  font-size: 40px;
+  text-align: center;
+  width: 30%;
+}
+
+.cardHealth {
+  font-family: Heavyweight;
+  left: 92px;
+  top: 151px;
+  font-size: 40px;
+  text-align: center;
+  width: 30%;
+}
+
+.cardSigil1 {
+  left: 44px;
+  top: 140px;
+}
+
+.gameSlot {
+  position: relative;
+}

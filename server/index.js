@@ -28,7 +28,7 @@ io.on("connection", (socket) => {
     if (!rooms[room]) { //first player joins room (room created)
       rooms[room] = {
         id: room,
-        board: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+        board: [null, null, null, null, null, null, null, null],
         playerA: socket.id
       }
       socket.join(room);
