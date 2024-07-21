@@ -105,12 +105,3 @@
 .gameSlot {
   position: relative;
 }
-
-.playerHand {
-  display: flex;
-  width: 420px;
-}
-
-.playerHand > .cardContainer:hover {
-  z-index: 100;
-}

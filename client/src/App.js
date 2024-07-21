@@ -6,6 +6,7 @@ const socket = io.connect("http://localhost:4000"); //socket.socket.sessionid
 
 function App() {
   const [room, setRoom] = useState(null)
+  const [handHover, setHandHover] = useState(-1)
 
   useEffect(() => {
     socket.on("serverUpdate", (newRoom) => {
@@ -72,9 +73,19 @@ function App() {
       </div>
 
       {room && room.playerA && room.handA && room.playerA === socket.id ? 
-        <div className='playerHand' >
+        <div style={{position: 'relative'}}>
           {room.handA.map((card, index) => {
-            return <Card val={card}/>
+            let l = 295 - (index * 295/(room.handA.length - 1));
+            let m;
+            index <= handHover ? m = (125 * room.handA.length - 420)/(room.handA.length-1) : m = 0;
+
+            return <div 
+              style={{position:"absolute", left: l, paddingLeft: m}}
+              onMouseEnter={() => setHandHover(index)}
+              onMouseLeave={() => setHandHover(-1)}
+            >
+              <Card val={card}/>
+            </div>
           })}
         </div>
       : room && room.playerB && room.handB ?
