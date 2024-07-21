@@ -44,7 +44,13 @@
 .gameGrid {
   display: grid;
   grid-template-columns: repeat(4, 140px);
-  grid-template-rows: repeat(4, 206px)
+  grid-template-rows: repeat(2, 206px)
+}
+
+.cardContainer {
+  position:relative;
+  width: 125px;
+  height: 190px;
 }
 
 .card {
@@ -53,34 +59,30 @@
   top: 0;
 }
 
-.cardBacking {
-  left: 7.5px;
-  top: 8px;
-}
 
 .cardHeader {
   font-family: Heavyweight;
-  top: 15px;
+  top: 7px;
   font-size: 24px;
   text-align: center;
   width: 100%;
 }
 
 .cardPortrait {
-  top: 42px;
-  left: 13px;
+  top: 34px;
+  left: 6px;
 }
 
 .cardCost {
-  left: 70px;
-  top: 22px;
+  left: 63px;
+  top: 14px;
   transform: scale(79%);
 }
 
 .cardDamage {
   font-family: Heavyweight;
-  left: 6px;
-  top: 137px;
+  left: 1px;
+  top: 129px;
   font-size: 40px;
   text-align: center;
   width: 30%;
@@ -88,18 +90,27 @@
 
 .cardHealth {
   font-family: Heavyweight;
-  left: 92px;
-  top: 151px;
+  left: 86px;
+  top: 143px;
   font-size: 40px;
   text-align: center;
   width: 30%;
 }
 
 .cardSigil1 {
-  left: 44px;
-  top: 140px;
+  left: 37px;
+  top: 133px;
 }
 
 .gameSlot {
   position: relative;
+}
+
+.playerHand {
+  display: flex;
+  width: 420px;
+}
+
+.playerHand > .cardContainer:hover {
+  z-index: 100;
 }
