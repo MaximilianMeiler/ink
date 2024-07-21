@@ -16,41 +16,59 @@ const io = new Server(server, {
 let rooms = {};
 
 io.on("connection", (socket) => {
-  console.log("New user: ", socket.id)
+  console.log("New user:", socket.id)
 
-  socket.on("newClientBoard", (newBoard, room) => {
-    rooms[room].board = newBoard;
-    socket.to(room).emit("newServerBoard", newBoard);
-    console.log(rooms)
+  socket.on("clientUpdate", (newRoom) => {
+    rooms[newRoom.id] = newRoom;
+    io.to(newRoom.id).emit("serverUpdate", newRoom);
   })
 
   socket.on("clientRoomJoin", (room) => {
-    socket.join(room);
+    console.log(socket.id, "attempts to join room", room)
     if (!rooms[room]) { //first player joins room (room created)
       rooms[room] = {
+        id: room,
         board: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
-        players: [socket.id]
+        playerA: socket.id
       }
-    } else { //player joins pre-existing room
-      rooms[room].players = [...rooms[room].players, socket.id];
+      socket.join(room);
+      io.to(room).emit("serverUpdate", rooms[room]);
+    } else if (rooms[room].playerA == socket.id || rooms[room].playerB == socket.id) { 
+      //player already in room
+    } else if (rooms[room].playerA && !rooms[room].playerB) { //player joins pre-existing room
+      rooms[room].playerB = socket.id;
+      socket.join(room);
+      io.to(room).emit("serverUpdate", rooms[room]);
+    } else if (rooms[room].playerB && !rooms[room].playerA) {
+      rooms[room].playerA = socket.id;
+      socket.join(room);
+      io.to(room).emit("serverUpdate", rooms[room]);
+    } else {
+      //room is full
     }
-    socket.emit("newServerBoard", rooms[room].board);
   })
 
-  socket.on("clientRoomLeave", (room) => {
-    console.log(room)
-    if (rooms[room].players.length <= 1) { //last person leaves room
-      delete rooms[room];
+  socket.on("clientRoomLeave", (id) => {
+    console.log(socket.id, "attempts to leave room", id)
+    console.log(rooms[id]);
+    if (!rooms[id].playerA || !rooms[id].playerB) { //last person leaves room
+      delete rooms[id];
     } else {
-      rooms[room].players = rooms[room].players.filter((p) => p != socket.id);
+      if (rooms[id].playerA == socket.id) {
+        delete rooms[id].playerA;
+      } else if (rooms[id].playerB == socket.id){
+        delete rooms[id].playerB;
+        console.log(rooms[id]);
+      }
     }
+    socket.leave(id);
   })
 
   socket.on("disconnect", () => {
     //remove player from everywhere (same thing as clientRoomLeave but dumber)
     Object.keys(rooms).forEach((room) => {
-      rooms[room].players = rooms[room].players.filter((p) => p != socket.id);
-      if (rooms[room].players.length < 1) {
+      rooms[room].playerA == socket.id ? delete rooms[room].playerA : delete rooms[room].playerB;
+      if (!rooms[room].playerA && !rooms[room].playerB) {
         delete rooms[room];
       }
     })

@@ -9,14 +9,15 @@ function App() {
   const [room, setRoom] = useState(null)
 
   useEffect(() => {
-    socket.on("newServerBoard", (newBoard) => {
-      setBoard(newBoard);
+    socket.on("serverUpdate", (newRoom) => {
+      console.log("new room from server:", newRoom)
+      setRoom(newRoom);
     })
   }, [socket])
 
-  function setSendBoard(newBoard) {
-    socket.emit("newClientBoard", newBoard, room);
-    setBoard(newBoard)
+  function setSendRoom(newRoom) {
+    socket.emit("clientUpdate", newRoom);
+    setRoom(newRoom);
   }
 
   return (
@@ -25,21 +26,31 @@ function App() {
         <p>Join room: </p>
         <input type='text' id="roomInput"></input>
         <button onClick={() => {
-          setRoom(document.getElementById('roomInput').value);
+          if (room) {
+            socket.emit("clientRoomLeave", room.id)
+          }
           socket.emit("clientRoomJoin", document.getElementById('roomInput').value)
         }}>Join</button>
         <button onClick={() => {
-          setRoom(null);
-          setBoard([]);
           if (room) {
-            socket.emit("clientRoomLeave", room)
+            socket.emit("clientRoomLeave", room.id)
           }
+          setRoom(null);
         }}>Leave room</button>
       </div>
-      <div>Room: {room}</div>
-      {board.map((val, index) => {
-        return <div onClick={() => setSendBoard(board.map((v, i) => {return i === index ? 0 : v}))}>{val}</div>
-      })}
+      <div>Room: {room ? room.id : ""}</div>
+      {room ? room.board.map((val, index) => {
+        return <div onClick={() => {
+          let newRoom = room;
+          newRoom.board[index] = 0;
+          setSendRoom(newRoom)
+        }
+        }>{val}</div>
+
+        // return (
+          
+        // )
+      }) : <></>}
     </div>
   );
 }
