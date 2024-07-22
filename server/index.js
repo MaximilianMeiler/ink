@@ -29,104 +29,59 @@ io.on("connection", (socket) => {
       rooms[room] = {
         id: room,
         board: [null, null, null, null, null, null, null, null],
-        playerA: socket.id,
-        handA: [
-          {
-            card: "beehive",
-            costType: "blood",
-            cost: 1,
-            sigils: ["beesonhit"],
-            damage: 0,
-            health: 2
-          },
-          {
-            card: "beehive",
-            costType: "blood",
-            cost: 1,
-            sigils: ["beesonhit"],
-            damage: 0,
-            health: 2
-          },
-          {
-            card: "beehive",
-            costType: "blood",
-            cost: 1,
-            sigils: ["beesonhit"],
-            damage: 0,
-            health: 2
-          },
-          {
-            card: "beehive",
-            costType: "blood",
-            cost: 1,
-            sigils: ["beesonhit"],
-            damage: 0,
-            health: 2
-          },
-          {
-            card: "beehive",
-            costType: "blood",
-            cost: 1,
-            sigils: ["beesonhit"],
-            damage: 0,
-            health: 2
-          },
-          {
-            card: "beehive",
-            costType: "blood",
-            cost: 1,
-            sigils: ["beesonhit"],
-            damage: 0,
-            health: 2
-          }
-        ]
+        player0: socket.id,
+        player1: null,
+        hands: [
+          [
+            {
+              card: "squirrel",
+              costType: "blood",
+              cost: 0,
+              sigils: [],
+              damage: 0,
+              health: 0
+            },
+            {
+              card: "beehive",
+              costType: "blood",
+              cost: 1,
+              sigils: ["beesonhit"],
+              damage: 0,
+              health: 2
+            }
+          ],
+          [
+            {
+              card: "squirrel",
+              costType: "blood",
+              cost: 0,
+              sigils: [],
+              damage: 0,
+              health: 0
+            },
+            {
+              card: "beehive",
+              costType: "blood",
+              cost: 1,
+              sigils: ["beesonhit"],
+              damage: 0,
+              health: 2
+            }
+          ]
+        ],
+        bones: [0, 0],
+        sacrifices: []
       }
       socket.join(room);
       io.to(room).emit("serverUpdate", rooms[room]);
-    } else if (rooms[room].playerA == socket.id || rooms[room].playerB == socket.id) { 
+    } else if (rooms[room].player0 == socket.id || rooms[room].player1 == socket.id) { 
       //player already in room
-    } else if (rooms[room].playerA && !rooms[room].playerB) { //player joins pre-existing room
-      rooms[room].playerB = socket.id;
-      rooms[room].handB = [
-        {
-          card: "beehive",
-          costType: "blood",
-          cost: 1,
-          sigils: ["beesonhit"],
-          damage: 0,
-          health: 2
-        },
-        {
-          card: "beehive",
-          costType: "blood",
-          cost: 1,
-          sigils: ["beesonhit"],
-          damage: 0,
-          health: 2
-        }
-      ];
+    } else if (rooms[room].player0 && !rooms[room].player1) { //player joins pre-existing room
+      rooms[room].player1 = socket.id;
       socket.join(room);
       io.to(room).emit("serverUpdate", rooms[room]);
-    } else if (rooms[room].playerB && !rooms[room].playerA) {
-      rooms[room].playerA = socket.id;
-      rooms[room].handA = [
-        {
-          card: "beehive",
-          costType: "blood",
-          cost: 1,
-          sigils: ["beesonhit"],
-          damage: 0,
-          health: 2
-        },
-        {
-          card: "beehive",
-          costType: "blood",
-          cost: 1,
-          sigils: ["beesonhit"],
-          damage: 0,
-          health: 2
-        }
-      ];
+    } else if (rooms[room].player1 && !rooms[room].player0) {
+      rooms[room].player0 = socket.id;
       socket.join(room);
       io.to(room).emit("serverUpdate", rooms[room]);
     } else {
@@ -137,14 +92,13 @@ io.on("connection", (socket) => {
   socket.on("clientRoomLeave", (id) => {
     console.log(socket.id, "attempts to leave room", id)
     console.log(rooms[id]);
-    if (!rooms[id].playerA || !rooms[id].playerB) { //last person leaves room
+    if (!rooms[id].player0 || !rooms[id].player1) { //last person leaves room
       delete rooms[id];
     } else {
-      if (rooms[id].playerA == socket.id) {
-        delete rooms[id].playerA;
-        // delete rooms[id].handA;
-      } else if (rooms[id].playerB == socket.id){
-        delete rooms[id].playerB;
+      if (rooms[id].player0 == socket.id) {
+        delete rooms[id].player0;
+      } else if (rooms[id].player1 == socket.id){
+        delete rooms[id].player1;
         console.log(rooms[id]);
       }
     }
@@ -154,8 +108,8 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     //remove player from everywhere (same thing as clientRoomLeave but dumber)
     Object.keys(rooms).forEach((room) => {
-      rooms[room].playerA == socket.id ? delete rooms[room].playerA : delete rooms[room].playerB;
-      if (!rooms[room].playerA && !rooms[room].playerB) {
+      rooms[room].player0 == socket.id ? delete rooms[room].player0 : delete rooms[room].player1;
+      if (!rooms[room].player0 && !rooms[room].player1) {
         delete rooms[room];
       }
     })

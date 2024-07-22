@@ -43,43 +43,77 @@ function App() {
       <div className='gameGrid'>
         {room ? room.board.map((val, index) => {
           let trueIndex = index;
-          if (room.playerA !== socket.id) { //if player B, flip board
+          if (room.player0 !== socket.id) { //if player B, flip board
             index = (index + 4) % 8;
             val = room.board[index]
           }
 
           return (
             <div className='gameSlot'>
-              <img src='/card_slot_heightmap.png' alt='empty card slot' className='card cardSlot' onClick={() => {
-                let newRoom = room;
-                newRoom.board[index] = {
-                  card: "beehive",
-                  costType: "blood",
-                  cost: 1,
-                  sigils: ["beesonhit"],
-                  damage: 0,
-                  health: 2
-                };
-                setSendRoom(newRoom)
-              }} style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
+              <img src='/card_slot_heightmap.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
               {val && val.card ? 
                 <div style={{marginTop:"8px", marginLeft:"7.5px"}}>
                   <Card val={val}/>
                 </div>
               : <></>
               }
+              {room.sacrifices.indexOf(index) > -1 ?
+                <img src='./sacrifice_mark.png' alt='sacrifice mark' className='card sacrificeMark'></img>
+              : <></>
+              }
+              <img src='/card_slot_heightmap.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
+                if (trueIndex > 3 && handSelection > -1) { //interactable slots
+                  if ((!val || !val.card) &&
+                    (
+                      (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bones" && 
+                       room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.bones[room.player0 === socket.id ? 0 : 1])
+                    || 
+                      (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "blood" && 
+                       room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.sacrifices.length)
+                    )) 
+                  { //empty slot - place selected card
+                    let newBones = room.bones;
+                    newBones[room.player0 === socket.id ? 0 : 1] += room.sacrifices.length; //change for bony boys
+                    let newBoard = room.board;
+                    newBoard[index] = room.hands[room.player0 === socket.id ? 0 : 1][handSelection]; //place selected card
+                    room.sacrifices.forEach((i) => {
+                      newBoard[i] = null; //kill sacrificial cards
+                    });
+                    let newHands = room.hands;
+                    newHands[room.player0 === socket.id ? 0 : 1].splice(handSelection, 1); //remove selected card from hand
+                    setHandSelection(-1);
+
+                    //place sacrificed cards in the discard pile?
+
+                    setSendRoom({...room, sacrifices: [], bones: newBones, board: newBoard, hands: newHands});
+                  } else if (val && val.card) { //toggle sacrifices for selected card
+                    let newSac = room.sacrifices;
+                    let dying = room.sacrifices.indexOf(index) > -1 
+                    if (dying) {
+                      newSac.splice(newSac.indexOf(index), 1);
+                      setSendRoom({...room, sacrifices: newSac});
+                    } else if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bones" || room.sacrifices.length >= room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost) { 
+                      //stop unecessary killing, change for goat
+                    } else {
+                      newSac.push(index);
+                      setSendRoom({...room, sacrifices: newSac});
+                    }
+                  }
+                }
+              }}></img>
             </div>
           )
         }) : <></>}
       </div>
 
-      {room && room.playerA && room.handA && room.playerA === socket.id ? 
+      {room && ((room.player0 === socket.id && room.player0) || room.player1) && room.hands[room.player0 === socket.id ? 0 : 1] ? 
         <div style={{position: 'relative'}}>
-          {room.handA.map((card, index) => {
-            let l = 295 - (index * 295/(room.handA.length - 1));
+          {room.hands[room.player0 === socket.id ? 0 : 1].map((card, index) => {
+            let s = room.hands[room.player0 === socket.id ? 0 : 1].length
+            let l = 295 - (index * 295/(s - 1));
             let m;
-            index <= handHover ? m = 5 + (125 * room.handA.length - 420)/(room.handA.length-1) : m = 0;
-            index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * room.handA.length - 420)/(room.handA.length-1) : m = m;
+            index <= handHover ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
+            index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * s - 420)/(s - 1) : m = m;
 
             return <div 
               style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
@@ -91,8 +125,6 @@ function App() {
             </div>
           })}
         </div>
-      : room && room.playerB && room.handB ?
-        <div>hello player B</div>
       : <></>
       }
     </div>

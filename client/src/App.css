@@ -59,7 +59,6 @@
   top: 0;
 }
 
-
 .cardHeader {
   font-family: Heavyweight;
   top: 7px;
@@ -100,6 +99,13 @@
 .cardSigil1 {
   left: 37px;
   top: 133px;
+}
+
+.sacrificeMark {
+  scale: 82%;
+  top: -12px;
+  left: -8px;
+  filter: invert(70%) sepia(91%) saturate(4994%) hue-rotate(7deg) brightness(50%) contrast(117%);
 }
 
 .gameSlot {
