@@ -28,6 +28,7 @@ io.on("connection", (socket) => {
     if (!rooms[room]) { //first player joins room (room created)
       rooms[room] = {
         id: room,
+        gameState: "turn0",
         board: [null, null, null, null, null, null, null, null],
         player0: socket.id,
         player1: null,
@@ -35,7 +36,7 @@ io.on("connection", (socket) => {
           [
             {
               card: "squirrel",
-              costType: "blood",
+              costType: "bone",
               cost: 0,
               sigils: [],
               damage: 0,
@@ -53,7 +54,7 @@ io.on("connection", (socket) => {
           [
             {
               card: "squirrel",
-              costType: "blood",
+              costType: "bone",
               cost: 0,
               sigils: [],
               damage: 0,
