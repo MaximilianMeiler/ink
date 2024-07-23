@@ -13,6 +13,17 @@ const io = new Server(server, {
   }
 })
 
+/*
+  awaitingPlayers
+  draw0
+  draw1
+  play0
+  play1
+  
+  roundStart0
+  roundStart1
+*/
+
 let rooms = {};
 
 io.on("connection", (socket) => {
@@ -28,19 +39,20 @@ io.on("connection", (socket) => {
     if (!rooms[room]) { //first player joins room (room created)
       rooms[room] = {
         id: room,
-        gameState: "turn0",
+        gameState: "awaitingPlayers",
         board: [null, null, null, null, null, null, null, null],
         player0: socket.id,
         player1: null,
-        hands: [
+        hands: [[],[]],
+        decks: [
           [
             {
-              card: "squirrel",
-              costType: "bone",
-              cost: 0,
-              sigils: [],
+              card: "beehive",
+              costType: "blood",
+              cost: 1,
+              sigils: ["beesonhit"],
               damage: 0,
-              health: 0
+              health: 2
             },
             {
               card: "beehive",
@@ -53,12 +65,12 @@ io.on("connection", (socket) => {
           ],
           [
             {
-              card: "squirrel",
-              costType: "bone",
-              cost: 0,
-              sigils: [],
+              card: "beehive",
+              costType: "blood",
+              cost: 1,
+              sigils: ["beesonhit"],
               damage: 0,
-              health: 0
+              health: 2
             },
             {
               card: "beehive",
@@ -80,10 +92,12 @@ io.on("connection", (socket) => {
     } else if (rooms[room].player0 && !rooms[room].player1) { //player joins pre-existing room
       rooms[room].player1 = socket.id;
       socket.join(room);
+      rooms[room].gameState = "roundStart0";
       io.to(room).emit("serverUpdate", rooms[room]);
     } else if (rooms[room].player1 && !rooms[room].player0) {
       rooms[room].player0 = socket.id;
       socket.join(room);
+      rooms[room].gameState = "roundStart1";
       io.to(room).emit("serverUpdate", rooms[room]);
     } else {
       //room is full

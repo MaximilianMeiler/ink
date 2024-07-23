@@ -8,11 +8,27 @@ function App() {
   const [room, setRoom] = useState(null)
   const [handHover, setHandHover] = useState(-1)
   const [handSelection, setHandSelection] = useState(-1);
+  const [draw, setDraw] = useState([]);
+  const [discard, setDiscard] = useState([]);
 
   useEffect(() => {
     socket.on("serverUpdate", (newRoom) => {
       console.log("new room from server:", newRoom)
       setRoom(newRoom);
+
+      if (newRoom.gameState === "roundStart0" && newRoom.player0 === socket.id) {
+        setDraw(newRoom.decks[0]);
+        setDiscard([]);
+        newRoom.gameState = "roundStart1";
+        setSendRoom(newRoom);
+      }
+      if (newRoom.gameState === "roundStart1" && newRoom.player1 === socket.id) {
+        setDraw(newRoom.decks[1]);
+        setDiscard([]);
+        console.log("TEST ")
+        newRoom.gameState = "draw0";
+        setSendRoom(newRoom);
+      }
     })
   }, [socket])
 
@@ -43,7 +59,7 @@ function App() {
 
       {room ? <div>
         <div onClick={() => {
-          setSendRoom({...room, gameState: (room.player0 === socket.id ? "turn1" : "turn0"), sacrifices: []}); //swap turns
+          setSendRoom({...room, gameState: (room.player0 === socket.id ? "draw1" : "draw0"), sacrifices: []}); //swap turns
         }}>Ring Bell</div>
         
         <div className='gameGrid'>
@@ -68,7 +84,7 @@ function App() {
                 : <></>
                 }
                 <img src='/card_slot_heightmap.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
-                  if (trueIndex > 3 && handSelection > -1 && room.gameState === (room.player0 === socket.id ? "turn0" : "turn1")) { //interactable slots
+                  if (trueIndex > 3 && handSelection > -1 && room.gameState === (room.player0 === socket.id ? "play0" : "play1")) { //interactable slots
                     if ((!val || !val.card) &&
                       (
                         (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone" && 
@@ -137,36 +153,43 @@ function App() {
         : <></>
         }
 
-        <div>
-          <div className='cardContainer' onClick={() => {
-            // 
-            // setSendRoom({...room, })
-          }}>
-            {room.hands[room.player0 === socket.id ? 0 : 1].map((card, index) => {
-              let s = room.hands[room.player0 === socket.id ? 0 : 1].length
-              let t = 20 - index * 20 / (s-1);
-              return <img src='/card_back.png' alt='card back' className='card cardBacking' style={{top: t}}></img>
-            })}
-          </div>
-          <div className='cardContainer' onClick={(() => {
-            let newHands = room.hands;
-            newHands[room.player0 === socket.id ? 0 : 1].push({
-              card: "squirrel",
-              costType: "bone",
-              cost: 0,
-              sigils: [],
-              damage: 0,
-              health: 0
-            });
-            setSendRoom({...room, hands: newHands})
-          })}>
-              {[...Array(8)].map((card, index) => {
-                let s = 8
-                let t = 20 - index * 20 / (s-1) - 190;
-                return <img src='/card_back_squirrel.png' alt='card back' className='card cardBacking' style={{top: t, left:"125px"}}></img>
+        {room.gameState === (room.player0 === socket.id ? "draw0" : "draw1") ? 
+          <div>
+            <div className='cardContainer' onClick={() => {
+              if (draw.length <= 0) {return}
+              let newHands = room.hands;
+              newHands[room.player0 === socket.id ? 0 : 1].push(draw[0]);
+              let newDraw = draw;
+              newDraw.splice(0, 1);
+              setDraw(newDraw)
+              setSendRoom({...room, hands: newHands, gameState: "play0"})
+            }}>
+              {draw.map((card, index) => {
+                let s = draw.length
+                let t = 20 - index * 20 / (s-1);
+                return <img src='/card_back.png' alt='card back' className='card cardBacking' style={{top: t}}></img>
               })}
-            </div>
-        </div>
+            </div> 
+            <div className='cardContainer' onClick={(() => {
+              let newHands = room.hands;
+              newHands[room.player0 === socket.id ? 0 : 1].push({
+                card: "squirrel",
+                costType: "bone",
+                cost: 0,
+                sigils: [],
+                damage: 0,
+                health: 0
+              });
+              setSendRoom({...room, hands: newHands, gameState: "play0"})
+            })}>
+                {[...Array(8)].map((card, index) => {
+                  let s = 8
+                  let t = 20 - index * 20 / (s-1) - 190;
+                  return <img src='/card_back_squirrel.png' alt='card back' className='card cardBacking' style={{top: t, left:"125px"}}></img>
+                })}
+              </div>
+          </div>
+        : <></>}
 
       </div> : <></>}
     </div>
