@@ -15,6 +15,8 @@ const io = new Server(server, {
 
 /*
   awaitingPlayers
+  drafting
+  
   draw0
   draw1
   play0

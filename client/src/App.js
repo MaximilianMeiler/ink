@@ -115,9 +115,9 @@ function App() {
 
             return (
               <div className='gameSlot'>
-                <img src='/card_slot_heightmap.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
+                <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
                 {val && val.card ? 
-                  <div style={{marginTop:"8px", marginLeft:"7.5px"}}>
+                  <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
                     <Card val={val}/>
                   </div>
                 : <></>
@@ -126,7 +126,7 @@ function App() {
                   <img src='./sacrifice_mark.png' alt='sacrifice mark' className='card sacrificeMark'></img>
                 : <></>
                 }
-                <img src='/card_slot_heightmap.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
+                <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                   if (trueIndex > 3 && handSelection > -1 && room.gameState === (room.player0 === socket.id ? "play0" : "play1")) { //interactable slots
                     if ((!val || !val.card) &&
                       (
