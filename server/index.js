@@ -22,6 +22,9 @@ const io = new Server(server, {
   
   roundStart0
   roundStart1
+
+  simulating0
+  simulating1
 */
 
 let rooms = {};
@@ -30,9 +33,11 @@ io.on("connection", (socket) => {
   console.log("New user:", socket.id)
 
   socket.on("clientUpdate", (newRoom) => {
+    console.log("clientUpdate")
     rooms[newRoom.id] = newRoom;
     io.to(newRoom.id).emit("serverUpdate", newRoom);
   })
+
 
   socket.on("clientRoomJoin", (room) => {
     console.log(socket.id, "attempts to join room", room)
@@ -40,44 +45,81 @@ io.on("connection", (socket) => {
       rooms[room] = {
         id: room,
         gameState: "awaitingPlayers",
-        board: [null, null, null, null, null, null, null, null],
+        board: [null, null, null, null, null, null, null, null], //0-3 - 1's cards, 4-7 - 0's cards
+        scale: 0,
+        lit0: true,
+        lit1: true,
+        activityLog: [],
         player0: socket.id,
         player1: null,
         hands: [[],[]],
         decks: [
           [
+            
             {
-              card: "beehive",
+              card: "stoat",
               costType: "blood",
               cost: 1,
-              sigils: ["beesonhit"],
-              damage: 0,
+              sigils: [],
+              damage: 1,
               health: 2
             },
             {
-              card: "beehive",
+              card: "opossum",
+              costType: "bone",
+              cost: 2,
+              sigils: [],
+              damage: 1,
+              health: 1
+            },
+            {
+              card: "bullfrog",
               costType: "blood",
               cost: 1,
-              sigils: ["beesonhit"],
-              damage: 0,
+              sigils: ["reach"],
+              damage: 1,
+              health: 2
+            },
+            {
+              card: "wolf",
+              costType: "blood",
+              cost: 2,
+              sigils: [],
+              damage: 3,
               health: 2
             }
           ],
           [
             {
-              card: "beehive",
+              card: "opossum",
+              costType: "bone",
+              cost: 2,
+              sigils: [],
+              damage: 1,
+              health: 1
+            },
+            {
+              card: "bullfrog",
               costType: "blood",
               cost: 1,
-              sigils: ["beesonhit"],
-              damage: 0,
+              sigils: ["reach"],
+              damage: 1,
               health: 2
             },
             {
-              card: "beehive",
+              card: "stoat",
               costType: "blood",
               cost: 1,
-              sigils: ["beesonhit"],
-              damage: 0,
+              sigils: [],
+              damage: 1,
+              health: 2
+            },
+            {
+              card: "wolf",
+              costType: "blood",
+              cost: 2,
+              sigils: [],
+              damage: 3,
               health: 2
             }
           ]
@@ -106,7 +148,6 @@ io.on("connection", (socket) => {
 
   socket.on("clientRoomLeave", (id) => {
     console.log(socket.id, "attempts to leave room", id)
-    console.log(rooms[id]);
     if (!rooms[id].player0 || !rooms[id].player1) { //last person leaves room
       delete rooms[id];
     } else {
@@ -128,6 +169,26 @@ io.on("connection", (socket) => {
         delete rooms[room];
       }
     })
+  })
+
+  socket.on("bellRung", (room) => { //generate activity log once bell is rung?
+    let offset = rooms[room].gameState == "play1" ? 0 : 4;
+    rooms[room].activityLog = [];
+
+    [...Array(4)].forEach((val, index) => {
+      if (rooms[room].board[index + offset]) {
+        let sigils = rooms[room].board[index + offset].sigils;
+  
+        rooms[room].activityLog.push({
+          index: index + offset,
+          action: "attack"
+        })
+      }
+    })
+
+    rooms[room].gameState = rooms[room].gameState == "play1" ? "simulating1" : "simulating0";
+    console.log("bell rung for room", rooms[room]);
+    io.to(room).emit("serverUpdate", rooms[room]);
   })
 })
 

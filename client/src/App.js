@@ -14,27 +14,69 @@ function App() {
   useEffect(() => {
     socket.on("serverUpdate", (newRoom) => {
       console.log("new room from server:", newRoom)
-      setRoom(newRoom);
 
       if (newRoom.gameState === "roundStart0" && newRoom.player0 === socket.id) {
-        setDraw(newRoom.decks[0]);
+        setDraw(shuffleArray(newRoom.decks[0]));
         setDiscard([]);
         newRoom.gameState = "roundStart1";
         setSendRoom(newRoom);
-      }
+      } else
       if (newRoom.gameState === "roundStart1" && newRoom.player1 === socket.id) {
-        setDraw(newRoom.decks[1]);
+        setDraw(shuffleArray(newRoom.decks[1]));
         setDiscard([]);
-        console.log("TEST ")
         newRoom.gameState = "draw0";
         setSendRoom(newRoom);
+      } else
+      if (newRoom.gameState === "simulating0" || newRoom.gameState === "simulating1") {
+        simulateActivityLog(newRoom);
+      } else {
+        setRoom(newRoom);
       }
     })
   }, [socket])
 
+
   function setSendRoom(newRoom) {
     socket.emit("clientUpdate", newRoom);
     setRoom(newRoom);
+  }
+
+  function shuffleArray(input) {
+    let array = input.slice(0);
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}
+
+  function simulateActivityLog(newRoom) {
+    let newBones = newRoom.bones;
+    let newScale = newRoom.scale;
+    let newBoard = newRoom.board;
+    console.log("simulating room", newRoom)
+
+    newRoom.activityLog.forEach((entry) => {
+      //TODO: add animations
+      if (entry.action === "attack") {
+        let target = (entry.index + 4) % 8; //0>4, 3>7, 4>0, 7->3
+        if (newRoom.board[target]) {
+          //WHY DO I HAVE TO HALF THIS??
+          newBoard[target].health -= newBoard[entry.index].damage / 2;
+          if (newBoard[target].health <= 0) {
+            newBoard[target] = null;
+            newBones[target < 4 ? 1 : 0]++;
+          }
+        } else {
+          newScale += newRoom.board[entry.index].damage * (target < 4 ? 1 : -1);
+        }
+      }
+    })
+
+    console.log("new room after simulation",{...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0")})
+    setRoom({...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0"), activityLog: []}) //TEMP
   }
 
   return (
@@ -59,11 +101,16 @@ function App() {
 
       {room ? <div>
         <div onClick={() => {
-          setSendRoom({...room, gameState: (room.player0 === socket.id ? "draw1" : "draw0"), sacrifices: []}); //swap turns
+          // setSendRoom({...room, gameState: (room.player0 === socket.id ? "draw1" : "draw0"), sacrifices: []}); //swap turns
+          if (room.gameState === (room.player0 === socket.id ? "play0" : "play1")) {
+            socket.emit("bellRung", room.id);
+          }
         }}>Ring Bell</div>
+        <div>{room.scale}</div>
+        <div>Bones: P0-{room.bones[0]} P1-{room.bones[1]}</div>
         
         <div className='gameGrid'>
-          {room.board.map((val, index) => {
+          {room.board ? room.board.map((val, index) => {
             let trueIndex = index;
             if (room.player0 !== socket.id) { //if player B, flip board
               index = (index + 4) % 8;
@@ -125,7 +172,7 @@ function App() {
                 }}></img>
               </div>
             )
-          })}
+          }) : <></>}
         </div>
 
         {((room.player0 === socket.id && room.player0) || room.player1) && room.hands[room.player0 === socket.id ? 0 : 1] ? 
@@ -162,7 +209,7 @@ function App() {
               let newDraw = draw;
               newDraw.splice(0, 1);
               setDraw(newDraw)
-              setSendRoom({...room, hands: newHands, gameState: "play0"})
+              setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
             }}>
               {draw.map((card, index) => {
                 let s = draw.length
@@ -180,7 +227,7 @@ function App() {
                 damage: 0,
                 health: 0
               });
-              setSendRoom({...room, hands: newHands, gameState: "play0"})
+              setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
             })}>
                 {[...Array(8)].map((card, index) => {
                   let s = 8
