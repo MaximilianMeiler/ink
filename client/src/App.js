@@ -9,7 +9,6 @@ function App() {
   const [handHover, setHandHover] = useState(-1)
   const [handSelection, setHandSelection] = useState(-1);
   const [draw, setDraw] = useState([]);
-  const [discard, setDiscard] = useState([]);
 
   useEffect(() => {
     socket.on("serverUpdate", (newRoom) => {
@@ -17,13 +16,11 @@ function App() {
 
       if (newRoom.gameState === "roundStart0" && newRoom.player0 === socket.id) {
         setDraw(shuffleArray(newRoom.decks[0]));
-        setDiscard([]);
         newRoom.gameState = "roundStart1";
         setSendRoom(newRoom);
       } else
       if (newRoom.gameState === "roundStart1" && newRoom.player1 === socket.id) {
         setDraw(shuffleArray(newRoom.decks[1]));
-        setDiscard([]);
         newRoom.gameState = "draw0";
         setSendRoom(newRoom);
       } else
@@ -63,11 +60,10 @@ function App() {
       if (entry.action === "attack") {
         let target = (entry.index + 4) % 8; //0>4, 3>7, 4>0, 7->3
         if (newRoom.board[target]) {
-          //WHY DO I HAVE TO HALF THIS??
-          newBoard[target].health -= newBoard[entry.index].damage / 2;
+          newBoard[target].health -= newBoard[entry.index].damage /2; //have to half this for some reason
           if (newBoard[target].health <= 0) {
-            newBoard[target] = null;
             newBones[target < 4 ? 1 : 0]++;
+            newBoard[target] = null;
           }
         } else {
           newScale += newRoom.board[entry.index].damage * (target < 4 ? 1 : -1);
@@ -208,7 +204,11 @@ function App() {
               newHands[room.player0 === socket.id ? 0 : 1].push(draw[0]);
               let newDraw = draw;
               newDraw.splice(0, 1);
-              setDraw(newDraw)
+              if (newDraw.length === 0) { //when the draw pile runs dry, reshuffle the deck in
+                setDraw(shuffleArray(room.decks[room.player0 === socket.id ? 0 : 1]));
+              } else {
+                setDraw(newDraw)
+              }
               setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
             }}>
               {draw.map((card, index) => {
