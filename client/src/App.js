@@ -72,8 +72,26 @@ function App() {
       }
     })
 
-    console.log("new room after simulation",{...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0")})
-    setRoom({...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0"), activityLog: []}) //TEMP
+    if (newRoom.scale * (newRoom.gameState === "simulating0" ? 1 : -1) <= -5) {
+      //restart game
+      setSendRoom({...newRoom, 
+        gameState:"drafting", 
+        board: [null, null, null, null, null, null, null, null], 
+        scale: 0,
+        lit0: true,
+        lit1: true,
+        activityLog: [],
+        hands: [[],[]],
+        bones: [0, 0],
+        sacrifices: [],
+        draft: {
+          phase: -1, //draw new cards for draft
+          options: []
+        }})
+    } else {
+      console.log("new room after simulation",{...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0")})
+      setRoom({...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0"), activityLog: []}) //TEMP
+    }
   }
 
   let blankCard = {
@@ -198,7 +216,7 @@ function App() {
               socket.emit("bellRung", room.id);
             }
           }}>Ring Bell</div>
-          <div>{room.scale}</div>
+          <div style={room.scale * (room.player0 === socket.id ? 1 : -1) <= -5 ? {color: "red"} : {}}>{room.scale}</div>
           <div>Bones: P0-{room.bones[0]} P1-{room.bones[1]}</div>
 
           <div className='gameGrid'>

@@ -39,6 +39,10 @@ io.on("connection", (socket) => {
   socket.on("clientUpdate", (newRoom) => {
     console.log("update on room", newRoom)
 
+    if (newRoom.draft.phase === -1) { //start new draft
+      newRoom.draft.phase = 0;
+      newRoom.draft.options = getCardsForDraft(6)
+    }
     if (newRoom.draft.phase === 2) { //restart draft
       newRoom.draft.phase = 3;
       newRoom.draft.options = getCardsForDraft(6);
@@ -211,7 +215,7 @@ io.on("connection", (socket) => {
     })
 
     rooms[room].gameState = rooms[room].gameState == "play1" ? "simulating1" : "simulating0";
-    console.log("bell rung for room", rooms[room]);
+    console.log("bell rung for room", room);
     io.to(room).emit("serverUpdate", rooms[room]);
   })
 })
