@@ -3,6 +3,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors')
 
+const {allCards} = require('./cardList');
+
 const app = express();
 app.use(cors())
 
@@ -35,7 +37,13 @@ io.on("connection", (socket) => {
   console.log("New user:", socket.id)
 
   socket.on("clientUpdate", (newRoom) => {
-    console.log("clientUpdate")
+    console.log("update on room", newRoom)
+
+    if (newRoom.draft.phase === 2) { //restart draft
+      newRoom.draft.phase = 3;
+      newRoom.draft.options = getCardsForDraft(6);
+    }
+
     rooms[newRoom.id] = newRoom;
     io.to(newRoom.id).emit("serverUpdate", newRoom);
   })
@@ -130,14 +138,7 @@ io.on("connection", (socket) => {
         sacrifices: [],
         draft: {
           phase: 0,
-          options: [{
-            card: "opossum",
-            costType: "bone",
-            cost: 2,
-            sigils: [],
-            damage: 1,
-            health: 1
-          }]
+          options: []
         }
       }
       socket.join(room);
@@ -148,11 +149,15 @@ io.on("connection", (socket) => {
       rooms[room].player1 = socket.id;
       socket.join(room);
       rooms[room].gameState = "drafting";
+      rooms[room].draft.phase = 0;
+      rooms[room].draft.options = getCardsForDraft(6)
       io.to(room).emit("serverUpdate", rooms[room]);
     } else if (rooms[room].player1 && !rooms[room].player0) {
       rooms[room].player0 = socket.id;
       socket.join(room);
       rooms[room].gameState = "drafting";
+      rooms[room].draft.phase = 0;
+      rooms[room].draft.options = getCardsForDraft(6)
       io.to(room).emit("serverUpdate", rooms[room]);
     } else {
       //room is full
@@ -211,6 +216,13 @@ io.on("connection", (socket) => {
   })
 })
 
+function getCardsForDraft(n) {
+  let cards = [];
+  for (let x = 0; x < n; x++) {
+    cards.push(Object.values(allCards)[Math.floor(Math.random() * Object.values(allCards).length)])
+  }
+  return cards;
+}
 
 server.listen(4000, () => {
   console.log("Server started!")

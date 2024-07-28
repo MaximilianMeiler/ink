@@ -43,8 +43,8 @@
 
 .gameGrid {
   display: grid;
-  grid-template-columns: repeat(4, 140px);
-  grid-template-rows: repeat(2, 206px)
+  grid-template-columns: repeat(4, 154px);
+  grid-template-rows: repeat(2, 226px)
 }
 
 .cardContainer {
@@ -114,6 +114,6 @@
 
 .draftGrid {
   display: grid;
-  grid-template-columns: repeat(5, 154px);
+  grid-template-columns: repeat(7, 154px);
   grid-template-rows: repeat(1, 226px)
 }

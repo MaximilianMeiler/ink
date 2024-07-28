@@ -79,16 +79,6 @@ let allCards = {
     tribe: "none",
     rare: false
   },
-  "bee": {
-    card: "bee",
-    costType:"bone",
-    cost: 0,
-    sigils: ["flying"],
-    damage: 1,
-    health: 1,
-    tribe: "insect",
-    rare: false
-  },
   "beehive": {
     card: "beehive",
     costType:"blood",
@@ -103,7 +93,7 @@ let allCards = {
     card: "bloodhound",
     costType:"blood",
     cost: 2,
-    sigils: ["guarddog  "],
+    sigils: ["guarddog"],
     damage: 2,
     health: 3,
     tribe: "canine",
@@ -658,6 +648,7 @@ let allCards = {
     health: 3,
     tribe: "none",
     rare: false
-  },
-
+  }
 }
+
+module.exports = {allCards: allCards}

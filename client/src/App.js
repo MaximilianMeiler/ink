@@ -126,22 +126,48 @@ function App() {
               })}
             </div>
             <div className='draftGrid'>
-              {room.draft ? room.draft.options.map((card) => {
+              {room.draft ? room.draft.options.map((card, index) => {
                 return <div className='gameSlot'>
-                  <img src='/card_queue_slot.png' alt='empty draft slot' className='card cardSlot'></img>
-                  <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-                    <Card val={card}/>
-                  </div>
-                  <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
-                  }}></img>
+                  <img src='/card_queue_slot.png' alt='empty draft slot' className='card cardSlot' style={room.draft.phase % 2 !== (room.player0 === socket.id ? 0 : 1) ? {transform: 'rotate(180deg)'} : {}}></img>
+                  { card ? 
+                    <div>
+                      <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
+                        <Card val={card}/>
+                      </div>
+                      <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
+                        if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
+                          let newDecks = room.decks;
+                          newDecks[room.player0 === socket.id ? 0 : 1].push(card);
+                          let newDraw = room.draft;
+                          newDraw.options[index] = null;
+                          if (newDraw.phase === 4) {
+                            setSendRoom({...room, decks: newDecks, draft: newDraw, gameState: "roundStart0"})
+                          } else {
+                            newDraw.phase++;
+                            setSendRoom({...room, decks: newDecks, draft: newDraw})
+                          }
+                        }
+                      }}></img>
+                    </div>
+                  : <></>}
                 </div>
               }) : <></>}
               <div className='gameSlot'>
-                <img src='/card_queue_slot.png' alt='empty draft slot' className='card cardSlot'></img>
+                <img src='/card_queue_slot.png' alt='empty draft slot' className='card cardSlot' style={room.draft.phase % 2 !== (room.player0 === socket.id ? 0 : 1) ? {transform: 'rotate(180deg)'} : {}}></img>
                 <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-                  <Card val={blankCard}/>
+                  {room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1) ? <Card val={blankCard}/> : <></>}
                 </div>
                 <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
+                  if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
+                    if (room.draft.phase === 4) {
+                      setSendRoom({...room, gameState: "roundStart0"})
+                    } else {
+                      let newDraw = room.draft;
+                      newDraw.phase++;
+                      setSendRoom({...room, draft: newDraw})
+                    }
+                  }
+
                 }}></img>
               </div>
             </div>
