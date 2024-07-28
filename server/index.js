@@ -127,7 +127,18 @@ io.on("connection", (socket) => {
           ]
         ],
         bones: [0, 0],
-        sacrifices: []
+        sacrifices: [],
+        draft: {
+          phase: 0,
+          options: [{
+            card: "opossum",
+            costType: "bone",
+            cost: 2,
+            sigils: [],
+            damage: 1,
+            health: 1
+          }]
+        }
       }
       socket.join(room);
       io.to(room).emit("serverUpdate", rooms[room]);

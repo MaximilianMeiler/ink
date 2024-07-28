@@ -111,3 +111,9 @@
 .gameSlot {
   position: relative;
 }
+
+.draftGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 154px);
+  grid-template-rows: repeat(1, 226px)
+}
