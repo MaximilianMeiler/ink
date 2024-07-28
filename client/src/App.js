@@ -242,7 +242,7 @@ function App() {
                   }
                   <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                     if (trueIndex > 3 && handSelection > -1 && room.gameState === (room.player0 === socket.id ? "play0" : "play1")) { //interactable slots
-                      if ((!val || !val.card) &&
+                      if ((!val || !val.card || room.sacrifices.indexOf(index) > -1) &&
                         (
                           (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone" && 
                           room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.bones[room.player0 === socket.id ? 0 : 1])
@@ -253,11 +253,14 @@ function App() {
                       { //empty slot - place selected card
                         let newBones = room.bones;
                         newBones[room.player0 === socket.id ? 0 : 1] += room.sacrifices.length; //change for bony boys
+                        if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone") {
+                          newBones[room.player0 === socket.id ? 0 : 1] -= room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost;
+                        }
                         let newBoard = room.board;
-                        newBoard[index] = room.hands[room.player0 === socket.id ? 0 : 1][handSelection]; //place selected card
                         room.sacrifices.forEach((i) => {
                           newBoard[i] = null; //kill sacrificial cards
                         });
+                        newBoard[index] = room.hands[room.player0 === socket.id ? 0 : 1][handSelection]; //place selected card
                         let newHands = room.hands;
                         newHands[room.player0 === socket.id ? 0 : 1].splice(handSelection, 1); //remove selected card from hand
                         setHandSelection(-1);
