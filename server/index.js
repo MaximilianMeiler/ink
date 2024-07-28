@@ -16,7 +16,7 @@ const io = new Server(server, {
 /*
   awaitingPlayers
   drafting
-  
+
   draw0
   draw1
   play0
@@ -136,12 +136,12 @@ io.on("connection", (socket) => {
     } else if (rooms[room].player0 && !rooms[room].player1) { //player joins pre-existing room
       rooms[room].player1 = socket.id;
       socket.join(room);
-      rooms[room].gameState = "roundStart0";
+      rooms[room].gameState = "drafting";
       io.to(room).emit("serverUpdate", rooms[room]);
     } else if (rooms[room].player1 && !rooms[room].player0) {
       rooms[room].player0 = socket.id;
       socket.join(room);
-      rooms[room].gameState = "roundStart1";
+      rooms[room].gameState = "drafting";
       io.to(room).emit("serverUpdate", rooms[room]);
     } else {
       //room is full
@@ -157,16 +157,22 @@ io.on("connection", (socket) => {
         delete rooms[id].player0;
       } else if (rooms[id].player1 == socket.id){
         delete rooms[id].player1;
-        console.log(rooms[id]);
       }
     }
     socket.leave(id);
+    io.to(id).emit("serverUpdate", {...rooms[id], gameState:"awaitingPlayers"});
   })
 
   socket.on("disconnect", () => {
     //remove player from everywhere (same thing as clientRoomLeave but dumber)
     Object.keys(rooms).forEach((room) => {
-      rooms[room].player0 == socket.id ? delete rooms[room].player0 : delete rooms[room].player1;
+      if (rooms[room].player0 == socket.id) {
+        delete rooms[room].player0;
+        io.to(room).emit("serverUpdate", {...rooms[room], gameState:"awaitingPlayers"});
+      } else if (rooms[room].player1 == socket.id) {
+        delete rooms[room].player1;
+        io.to(room).emit("serverUpdate", {...rooms[room], gameState:"awaitingPlayers"});
+      }
       if (!rooms[room].player0 && !rooms[room].player1) {
         delete rooms[room];
       }
