@@ -73,7 +73,7 @@ function App() {
     })
 
     if (newRoom.scale * (newRoom.gameState === "simulating0" ? 1 : -1) <= -5) {
-      //restart game
+      //restart game if scale is tipped at end of turn
       setSendRoom({...newRoom, 
         gameState:"drafting", 
         board: [null, null, null, null, null, null, null, null], 

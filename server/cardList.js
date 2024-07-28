@@ -559,6 +559,46 @@ let allCards = {
     tribe: "canine",
     rare: false
   },
+  "direwolf": {
+    card: "direwolf",
+    costType:"blood",
+    cost: 3,
+    sigils: ["doublestrike"],
+    damage: 2,
+    health: 5,
+    tribe: "canine",
+    rare: false
+  },
+  "direwolfcub": {
+    card: "direwolfcub",
+    costType:"blood",
+    cost: 2,
+    sigils: ["bonedigger", "evolve"],
+    damage: 1,
+    health: 1,
+    tribe: "canine",
+    rare: false
+  },
+  "antflying": {
+    card: "antflying",
+    costType:"blood",
+    cost: 1,
+    sigils: ["flying"],
+    damage: -5,
+    health: 1,
+    tribe: "insect",
+    rare: false
+  },
+  "kraken": {
+    card: "kraken",
+    costType:"blood",
+    cost: 1,
+    sigils: ["submergesquid"],
+    damage: 1,
+    health: 1,
+    tribe: "none",
+    rare: false
+  },
   "hodag": {
     card: "hodag",
     costType:"blood",
