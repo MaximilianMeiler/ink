@@ -13,7 +13,7 @@ let allCards = {
     card: "alpha",
     costType:"bone",
     cost: 4,
-    sigils: ["buffneighbors"],
+    sigils: ["buffneighbours"],
     damage: 1,
     health: 2,
     tribe: "canine",

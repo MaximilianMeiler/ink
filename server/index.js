@@ -69,38 +69,15 @@ io.on("connection", (socket) => {
         hands: [[],[]],
         decks: [
           [
-            
             {
-              card: "stoat",
-              costType: "blood",
-              cost: 1,
-              sigils: [],
-              damage: 1,
-              health: 2
-            },
-            {
-              card: "opossum",
-              costType: "bone",
+              card: "adder",
+              costType:"blood",
               cost: 2,
-              sigils: [],
+              sigils: ["deathtouch"],
               damage: 1,
-              health: 1
-            },
-            {
-              card: "bullfrog",
-              costType: "blood",
-              cost: 1,
-              sigils: ["reach"],
-              damage: 1,
-              health: 2
-            },
-            {
-              card: "wolf",
-              costType: "blood",
-              cost: 2,
-              sigils: [],
-              damage: 3,
-              health: 2
+              health: 1,
+              tribe: "reptile",
+              rare: false
             }
           ],
           [
@@ -204,13 +181,13 @@ io.on("connection", (socket) => {
     rooms[room].activityLog = [];
 
     [...Array(4)].forEach((val, index) => {
-      if (rooms[room].board[index + offset]) {
+      if (rooms[room].board[index + offset] && rooms[room].board[index + offset].damage > 0) {
         let sigils = rooms[room].board[index + offset].sigils;
   
         rooms[room].activityLog.push({
           index: index + offset,
           action: "attack"
-        })
+        })  
       }
     })
 

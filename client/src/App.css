@@ -103,8 +103,7 @@
 
 .sacrificeMark {
   scale: 82%;
-  top: -12px;
-  left: -8px;
+  top: -3px;
   filter: invert(70%) sepia(91%) saturate(4994%) hue-rotate(7deg) brightness(50%) contrast(117%);
 }
 

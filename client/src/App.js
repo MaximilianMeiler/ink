@@ -26,7 +26,7 @@ function App() {
         setSendRoom(newRoom);
       } else
       if (newRoom.gameState === "simulating0" || newRoom.gameState === "simulating1") {
-        simulateActivityLog(newRoom);
+        simulateActivityLog(structuredClone(newRoom));
       } else {
         setRoom(newRoom);
       }
@@ -54,6 +54,7 @@ function App() {
     let newBones = newRoom.bones;
     let newScale = newRoom.scale;
     let newBoard = newRoom.board;
+    let newHands = newRoom.hands;
     console.log("simulating room", newRoom)
 
     newRoom.activityLog.forEach((entry) => {
@@ -61,8 +62,22 @@ function App() {
       if (entry.action === "attack") {
         let target = (entry.index + 4) % 8; //0>4, 3>7, 4>0, 7->3
         if (newRoom.board[target]) {
-          newBoard[target].health -= newBoard[entry.index].damage /2; //have to half this for some reason
-          if (newBoard[target].health <= 0) {
+          newBoard[target].health -= newBoard[entry.index].damage;
+          if (newBoard[target].sigils.indexOf("beesonhit") > -1) { //SIGILS - beesonhit
+            let newSigils = Array.from(newBoard[target].sigils);
+            newSigils.splice(newSigils.indexOf("beesonhit"), 1, "flying")
+            newHands[target < 4 ? 1 : 0].push({
+              card: "bee",
+              costType:"bone",
+              cost: 0,
+              sigils: newSigils,
+              damage: 1,
+              health: 1,
+              tribe: "insect",
+              rare: false
+            })
+          }
+          if (newBoard[target].health <= 0 || newBoard[entry.index].sigils.indexOf("deathtouch") > -1) {
             newBones[target < 4 ? 1 : 0]++;
             newBoard[target] = null;
           }
@@ -262,6 +277,20 @@ function App() {
                         });
                         newBoard[index] = room.hands[room.player0 === socket.id ? 0 : 1][handSelection]; //place selected card
                         let newHands = room.hands;
+                        if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawrabbits") > -1) { //SIGILS - drawrabbits
+                          let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);
+                          newSigils.splice(newSigils.indexOf("drawrabbits"), 1);
+                          newHands[room.player0 === socket.id ? 0 : 1].push({
+                            card: "rabbit",
+                            costType:"bone",
+                            cost: 0,
+                            sigils: newSigils,
+                            damage: 0,
+                            health: 1,
+                            tribe: "none",
+                            rare: false
+                          })
+                        }
                         newHands[room.player0 === socket.id ? 0 : 1].splice(handSelection, 1); //remove selected card from hand
                         setHandSelection(-1);
 
