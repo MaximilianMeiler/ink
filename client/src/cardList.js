@@ -692,4 +692,3 @@ let allCards = {
 }
 
 module.exports = {allCards: allCards}
-// export default allCards

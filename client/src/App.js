@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react'
 import './App.css';
 import io from "socket.io-client";
 import Card from './Card';
+import allCards from './cardList';
 const socket = io.connect("http://localhost:4000"); //socket.socket.sessionid
 
 function App() {
@@ -77,12 +78,79 @@ function App() {
               rare: false
             })
           }
-          if (newBoard[target].health <= 0 || newBoard[entry.index].sigils.indexOf("deathtouch") > -1) {
+          if (newBoard[target].health <= 0 || newBoard[entry.index].sigils.indexOf("deathtouch") > -1) { //SIGILS - deathtouch
             newBones[target < 4 ? 1 : 0]++;
             newBoard[target] = null;
           }
         } else {
           newScale += newRoom.board[entry.index].damage * (target < 4 ? 1 : -1);
+        }
+      } else if (entry.action === "evolve") {
+        let newSigils = Array.from(newBoard[entry.index].sigils);
+        newSigils.splice(newSigils.indexOf("evolve"), 1); //SIGILS - evolve
+
+        if (newBoard[entry.index].card === "wolfcub") {
+          newBoard[entry.index].card = "wolf";
+          newBoard[entry.index].damage += 2;
+          newBoard[entry.index].health += 1;
+          newBoard[entry.index].sigils = newSigils;
+        } else if (newBoard[entry.index].card === "deercub") {
+          newBoard[entry.index].card = "deer";
+          newBoard[entry.index].damage += 1;
+          newBoard[entry.index].health += 3;
+          newBoard[entry.index].sigils = newSigils;
+        } else if (newBoard[entry.index].card === "ravenegg") {
+          newBoard[entry.index].card = "raven";
+          newBoard[entry.index].damage += 2;
+          newBoard[entry.index].health += 1;
+          newBoard[entry.index].sigils = [...newSigils, "flying"];
+        } else if (newBoard[entry.index].card === "mothman_1") {
+          newBoard[entry.index].card = "mothman_2";
+          newBoard[entry.index].sigils = [...newSigils, "evolve"];
+        } else if (newBoard[entry.index].card === "mothman_2") {
+          newBoard[entry.index].card = "mothman_3";
+          newBoard[entry.index].damage += 7;
+          newBoard[entry.index].sigils = [...newSigils, "flying"];
+        } else if (newBoard[entry.index].card === "direwolfcub") {
+          newBoard[entry.index].card = "direwolf";
+          newBoard[entry.index].damage += 1;
+          newBoard[entry.index].health += 4;
+          newSigils.splice(newSigils.indexOf("bonedigger"), 1);
+          newBoard[entry.index].sigils = [...newSigils, "doublestrike"];
+        } else if (newBoard[entry.index].card === "tadpole") {
+          newBoard[entry.index].card = "bullfrog";
+          newBoard[entry.index].damage += 1;
+          newBoard[entry.index].health += 1;
+          newSigils.splice(newSigils.indexOf("submerge"), 1);
+          newBoard[entry.index].sigils = [...newSigils, "reach"];
+        } else if (newBoard[entry.index].card === "ant" || newBoard[entry.index].card === "antflying") {
+          newBoard[entry.index].card = "antqueen";
+          newBoard[entry.index].health += 2;
+          if (newBoard[entry.index].card === "antflying") {
+            newSigils.splice(newSigils.indexOf("flying"), 1);
+          }
+          newBoard[entry.index].sigils = [...newSigils, "drawant"];
+          //fix - draw ant for fun?
+        } else if (newBoard[entry.index].card === "deer") {
+          newBoard[entry.index].card = "moose";
+          newBoard[entry.index].damage += 1;
+          newBoard[entry.index].health += 3;
+          newSigils.splice(newSigils.indexOf("strafe"), 1);
+          newBoard[entry.index].sigils = [...newSigils, "strafepush"];
+        } else if (newBoard[entry.index].card === "mole") {
+          newBoard[entry.index].card = "moleman";
+          newBoard[entry.index].health += 2;
+          newBoard[entry.index].sigils = [...newSigils, "reach"];
+        } else if (newBoard[entry.index].card === "mantis") {
+          newBoard[entry.index].card = "mantisgod";
+          newSigils.splice(newSigils.indexOf("splitstrike"), 1);
+          newBoard[entry.index].sigils = [...newSigils, "tristrike"];
+        } else {
+          newBoard[entry.index].health += 2;
+          if (newBoard[entry.index].damage > -3) { //fix: no special damage
+            newBoard[entry.index].damage += 1;
+          }
+          newBoard[entry.index].sigils = newSigils;
         }
       }
     })
