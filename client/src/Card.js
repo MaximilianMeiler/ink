@@ -1,7 +1,9 @@
 import './App.css';
 
 function Card({val}) {
+  let sigilClasses = ["cardSigilSmall1", "cardSigilSmall2", "cardSigilPatch1", "cardSigilPatch2", "cardSigil1"]
 
+  if (val)
   return (
         <div className='cardContainer'>
           {val.card === "blank" ? <img src='/card_empty_nostats.png' alt='blank card' className='card cardBacking'></img>
@@ -11,16 +13,26 @@ function Card({val}) {
           <img src={`/cost_${val.cost}${val.costType}.png`} alt={`${val.card} cost`} className='card cardCost'></img>
           <div className='card cardDamage'>{val.card === "blank" ? "" : val.damage}</div>
           <div className='card cardHealth'>{val.card === "blank" ? "" : val.health}</div>
-          {val.sigils && val.sigils.length > 0 ? 
-            <img src={`/ability_${val.sigils[0]}.png`} alt={`${val.sigils[0]} sigil`} className='card cardSigil1'></img>
-          : val.sigils && val.sigils.length > 1 ?
-            <></>
-          : val.sigils && val.sigils.length > 2 ?
-            <></>
-          : val.sigils && val.sigils.length > 3 ?
-            <></>
-          : <></>
-          }
+          {val.sigils ? val.sigils.map((sigil, i) => {
+            let indexAdj = i + 2 - val.defaultSigils;
+            if (indexAdj === 1 && val.defaultSigils === 1) {
+              indexAdj = 4;
+            }
+
+            return (
+              <div>
+                {i >= val.defaultSigils ? 
+                  <img src={'./card_added_ability.png'} alt="Added sigil patch" className={`card sigilPatch${i - val.defaultSigils + 1}`}></img>
+                : <></>}  
+                <img src={`/ability_${val.sigils[i]}.png`} alt={`${val.sigils[i]} sigil`} className={`card ${sigilClasses[indexAdj]}`}></img>
+              </div>
+            )
+          })
+          : <></>}
+          
+          {val.sigils.length > val.defaultSigils ? 
+            <img src={`/portrait_${val.card}_emission.png`} className='card cardPortrait' style={{filter: "brightness(0) saturate(100%) invert(89%) sepia(20%) saturate(601%) hue-rotate(78deg) brightness(101%) contrast(93%)"}}></img>
+          : <></>}
         </div>
     )
 }

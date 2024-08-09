@@ -74,6 +74,7 @@ io.on("connection", (socket) => {
               costType:"blood",
               cost: 1,
               sigils: ["evolve"],
+              defaultSigils: 1,
               damage: 0,
               health: 2,
               tribe: "avian",
@@ -86,6 +87,7 @@ io.on("connection", (socket) => {
               costType: "bone",
               cost: 2,
               sigils: [],
+              defaultSigils: 0,
               damage: 1,
               health: 1
             },
@@ -94,6 +96,7 @@ io.on("connection", (socket) => {
               costType: "blood",
               cost: 1,
               sigils: ["reach"],
+              defaultSigils: 1,
               damage: 1,
               health: 2
             },
@@ -102,6 +105,7 @@ io.on("connection", (socket) => {
               costType: "blood",
               cost: 1,
               sigils: [],
+              defaultSigils: 0,
               damage: 1,
               health: 2
             },
@@ -110,6 +114,7 @@ io.on("connection", (socket) => {
               costType: "blood",
               cost: 2,
               sigils: [],
+              defaultSigils: 0,
               damage: 3,
               health: 2
             }

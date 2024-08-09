@@ -101,6 +101,50 @@
   top: 133px;
 }
 
+.cardSigilSmall1 {
+  left: 24px;
+  top: 143px;
+  scale: 65%;
+}
+
+.cardSigilSmall2 {
+  left: 51px;
+  top: 122px;
+  scale: 65%;
+}
+
+.cardSigilPatch1 {
+  left: 14px;
+  top: 88px;
+  filter: brightness(0) saturate(100%) invert(89%) sepia(20%) saturate(601%) hue-rotate(78deg) brightness(101%) contrast(93%);
+  width: 39px;
+  height: 39px;
+}
+
+.cardSigilPatch2 {
+  left: 13px;
+  top: 35px;
+  filter: brightness(0) saturate(100%) invert(89%) sepia(20%) saturate(601%) hue-rotate(78deg) brightness(101%) contrast(93%);
+  width: 39px;
+  height: 39px;
+}
+
+.sigilPatch1 { 
+  width: 63px;
+  height: 63px;
+
+  top: 75px;
+  left: 3px;
+}
+
+.sigilPatch2 {
+  width: 63px;
+  height: 63px;
+
+  top: 22px;
+  left: 2px;
+}
+
 .sacrificeMark {
   scale: 82%;
   top: -3px;
