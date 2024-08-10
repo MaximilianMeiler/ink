@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react'
 import './App.css';
 import io from "socket.io-client";
 import Card from './Card';
-import allCards from './cardList';
+import {allCards, allSigils} from './cardList';
 const socket = io.connect("http://localhost:4000"); //socket.socket.sessionid
 
 function App() {
@@ -62,8 +62,14 @@ function App() {
       //TODO: add animations
       if (entry.action === "attack") {
         let target = (entry.index + 4) % 8; //0>4, 3>7, 4>0, 7->3
-        if (newRoom.board[target]) {
-          newBoard[target].health -= newBoard[entry.index].damage;
+        let trueDamage = newBoard[entry.index].damage //SIGILS - buffneighbours,
+          + (entry.index % 4 !== 0 && newBoard[entry.index-1] && newBoard[entry.index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
+          + (entry.index % 4 !== 3 && newBoard[entry.index+1] && newBoard[entry.index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
+
+        if (trueDamage < 1) {
+          //do nothing
+        } else if (newBoard[target] && newBoard[entry.index].sigils.indexOf("flying") < 0) { //SIGILS - flying
+          newBoard[target].health -= trueDamage;
           if (newBoard[target].sigils.indexOf("beesonhit") > -1) { //SIGILS - beesonhit
             let newSigils = Array.from(newBoard[target].sigils);
             newSigils.splice(newSigils.indexOf("beesonhit"), 1, "flying")
@@ -72,6 +78,7 @@ function App() {
               costType:"bone",
               cost: 0,
               sigils: newSigils,
+              defaultSigils: 0,
               damage: 1,
               health: 1,
               tribe: "insect",
@@ -83,7 +90,7 @@ function App() {
             newBoard[target] = null;
           }
         } else {
-          newScale += newRoom.board[entry.index].damage * (target < 4 ? 1 : -1);
+          newScale += trueDamage * (target < 4 ? 1 : -1);
         }
       } else if (entry.action === "evolve") {
         let newSigils = Array.from(newBoard[entry.index].sigils);
@@ -94,43 +101,60 @@ function App() {
           newBoard[entry.index].damage += 2;
           newBoard[entry.index].health += 1;
           newBoard[entry.index].sigils = newSigils;
+          newBoard[entry.index].defaultSigils = 0;
         } else if (newBoard[entry.index].card === "deercub") {
           newBoard[entry.index].card = "deer";
           newBoard[entry.index].damage += 1;
           newBoard[entry.index].health += 3;
           newBoard[entry.index].sigils = newSigils;
+          newBoard[entry.index].defaultSigils = 1;
         } else if (newBoard[entry.index].card === "ravenegg") {
           newBoard[entry.index].card = "raven";
           newBoard[entry.index].damage += 2;
           newBoard[entry.index].health += 1;
-          newBoard[entry.index].sigils = [...newSigils, "flying"];
+          newBoard[entry.index].sigils = ["flying", ...newSigils];
         } else if (newBoard[entry.index].card === "mothman_1") {
           newBoard[entry.index].card = "mothman_2";
-          newBoard[entry.index].sigils = [...newSigils, "evolve"];
+          newBoard[entry.index].sigils = ["evolve", ...newSigils];
         } else if (newBoard[entry.index].card === "mothman_2") {
           newBoard[entry.index].card = "mothman_3";
           newBoard[entry.index].damage += 7;
-          newBoard[entry.index].sigils = [...newSigils, "flying"];
+          newBoard[entry.index].sigils = ["flying", ...newSigils];
         } else if (newBoard[entry.index].card === "direwolfcub") {
           newBoard[entry.index].card = "direwolf";
           newBoard[entry.index].damage += 1;
           newBoard[entry.index].health += 4;
           newSigils.splice(newSigils.indexOf("bonedigger"), 1);
-          newBoard[entry.index].sigils = [...newSigils, "doublestrike"];
+          newBoard[entry.index].defaultSigils = 1;
+          newBoard[entry.index].sigils = ["doublestrike", ...newSigils];
         } else if (newBoard[entry.index].card === "tadpole") {
           newBoard[entry.index].card = "bullfrog";
           newBoard[entry.index].damage += 1;
           newBoard[entry.index].health += 1;
+          newBoard[entry.index].defaultSigils = 1;
           newSigils.splice(newSigils.indexOf("submerge"), 1);
-          newBoard[entry.index].sigils = [...newSigils, "reach"];
+          newBoard[entry.index].sigils = ["reach", ...newSigils];
         } else if (newBoard[entry.index].card === "ant" || newBoard[entry.index].card === "antflying") {
-          newBoard[entry.index].card = "antqueen";
-          newBoard[entry.index].health += 2;
           if (newBoard[entry.index].card === "antflying") {
             newSigils.splice(newSigils.indexOf("flying"), 1);
           }
-          newBoard[entry.index].sigils = [...newSigils, "drawant"];
-          //fix - draw ant for fun?
+          newBoard[entry.index].card = "antqueen";
+          newBoard[entry.index].health += 2;
+          newBoard[entry.index].defaultSigils = 1;
+          newBoard[entry.index].sigils = ["drawant", ...newSigils];
+          //deviation - draw ant for fun?
+          //SIGILS - drawant
+          newRoom.hands[entry.index < 4 ? 1 : 0].push({ //modifies newRoom directly?
+            card: "ant",
+            costType:"blood",
+            cost: 1,
+            sigils: newSigils,
+            defaultSigils: 0,
+            damage: -5,
+            health: 2,
+            tribe: "insect",
+            rare: false
+          })
         } else if (newBoard[entry.index].card === "deer") {
           newBoard[entry.index].card = "moose";
           newBoard[entry.index].damage += 1;
@@ -139,6 +163,7 @@ function App() {
           newBoard[entry.index].sigils = [...newSigils, "strafepush"];
         } else if (newBoard[entry.index].card === "mole") {
           newBoard[entry.index].card = "moleman";
+          newBoard[entry.index].defaultSigils = 2;
           newBoard[entry.index].health += 2;
           newBoard[entry.index].sigils = [...newSigils, "reach"];
         } else if (newBoard[entry.index].card === "mantis") {
@@ -150,12 +175,13 @@ function App() {
           if (newBoard[entry.index].damage > -3) { //fix: no special damage
             newBoard[entry.index].damage += 1;
           }
+          newBoard[entry.index].defaultSigils -= 1;
           newBoard[entry.index].sigils = newSigils;
         }
       }
     })
 
-    if (newRoom.scale * (newRoom.gameState === "simulating0" ? 1 : -1) <= -5) {
+    if (newScale * (newRoom.gameState === "simulating0" ? 1 : -1) <= -5) {
       //restart game if scale is tipped at end of turn
       setSendRoom({...newRoom, 
         gameState:"drafting", 
@@ -310,12 +336,18 @@ function App() {
                 val = room.board[index]
               }
 
+              console.log(index, room.board, room.board[index-1])
+
               return (
                 <div className='gameSlot'>
                   <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
                   {val && val.card ? 
                     <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-                      <Card val={val}/>
+                      <Card val={{...val, //SIGILS - buffneighbours,
+                        damage: val.damage 
+                          + (index % 4 !== 0 && room.board[index-1] && room.board[index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
+                          + (index % 4 !== 3 && room.board[index+1] && room.board[index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
+                      }}/>
                     </div>
                   : <></>
                   }
@@ -353,9 +385,24 @@ function App() {
                             costType:"bone",
                             cost: 0,
                             sigils: newSigils,
+                            defaultSigils: 0,
                             damage: 0,
                             health: 1,
                             tribe: "none",
+                            rare: false
+                          })
+                        } else if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawant") > -1) { //SIGILS - drawant
+                          let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);
+                          newSigils.splice(newSigils.indexOf("drawant"), 1);
+                          newHands[room.player0 === socket.id ? 0 : 1].push({
+                            card: "ant",
+                            costType:"blood",
+                            cost: 1,
+                            sigils: newSigils,
+                            defaultSigils: 0,
+                            damage: -5,
+                            health: 2,
+                            tribe: "insect",
                             rare: false
                           })
                         }
@@ -420,6 +467,11 @@ function App() {
             <div className='cardContainer' onClick={() => {
               if (draw.length <= 0) {return}
               let newHands = room.hands;
+              let drawnCard = draw[0];
+              let randomIndex = drawnCard.sigils.indexOf("randomability"); //SIGILS - randomability
+              if (randomIndex >= 0) {
+                drawnCard.sigils.splice(randomIndex, 1, allSigils[Math.floor(Math.random() * allSigils.length)])
+              }
               newHands[room.player0 === socket.id ? 0 : 1].push(draw[0]);
               let newDraw = draw;
               newDraw.splice(0, 1);
@@ -444,7 +496,7 @@ function App() {
                 cost: 0,
                 sigils: [],
                 damage: 0,
-                health: 0
+                health: 1
               });
               setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
             })}>

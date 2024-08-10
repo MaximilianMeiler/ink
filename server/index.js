@@ -70,16 +70,16 @@ io.on("connection", (socket) => {
         decks: [
           [
             {
-              card: "ravenegg",
-              costType:"blood",
-              cost: 1,
-              sigils: ["evolve"],
+              card: "sparrow",
+              costType:"bone",
+              cost: 0,
+              sigils: ["flying"],
               defaultSigils: 1,
-              damage: 0,
-              health: 2,
+              damage: 1,
+              health: 6,
               tribe: "avian",
               rare: false
-            },
+            }
           ],
           [
             {
@@ -187,7 +187,7 @@ io.on("connection", (socket) => {
 
     //attacks
     [...Array(4)].forEach((val, index) => {
-      if (rooms[room].board[index + offset] && rooms[room].board[index + offset].damage > 0) {
+      if (rooms[room].board[index + offset] /*&& rooms[room].board[index + offset].damage > 0*/) {
         let sigils = rooms[room].board[index + offset].sigils;
   
         rooms[room].activityLog.push({

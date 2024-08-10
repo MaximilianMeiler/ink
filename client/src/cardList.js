@@ -760,4 +760,11 @@ let allCards = {
   }
 }
 
-module.exports = {allCards: allCards}
+let allSigils = [ //fix - add rest and sync with server
+  "deathtouch",
+  "buffneighbours",
+  "drawant",
+  "flying"
+]
+
+module.exports = {allCards: allCards, allSigils: allSigils}
