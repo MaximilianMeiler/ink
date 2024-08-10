@@ -1,4 +1,4 @@
-### Sigils created:
+### Sigils implemented:
 - drawrabbits
 - beesonhit
 - deathtouch
@@ -6,6 +6,7 @@
 - randomability - FINISH SIGIL LIST
 - drawant
 - flying
+- doublestrike
 
 ### Sigils skipped:
 - damage for ants

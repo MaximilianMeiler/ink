@@ -70,14 +70,14 @@ io.on("connection", (socket) => {
         decks: [
           [
             {
-              card: "sparrow",
+              card: "direwolfcub",
               costType:"bone",
               cost: 0,
-              sigils: ["flying"],
-              defaultSigils: 1,
+              sigils: ["bonedigger", "evolve"],
+              defaultSigils: 2,
               damage: 1,
-              health: 6,
-              tribe: "avian",
+              health: 1,
+              tribe: "canine",
               rare: false
             }
           ],
@@ -194,6 +194,12 @@ io.on("connection", (socket) => {
           index: index + offset,
           action: "attack"
         })  
+        if (sigils.indexOf("doublestrike") >= 0) { //SIGILS - doublestrike
+          rooms[room].activityLog.push({
+            index: index + offset,
+            action: "attack"
+          })  
+        }
       }
     });
 
