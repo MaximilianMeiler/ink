@@ -450,17 +450,17 @@ let allCards = {
     tribe: "avian",
     rare: false
   },
-  "ringworm": {
-    card: "ringworm",
-    costType:"blood",
-    cost: 1,
-    sigils: [],
-    defaultSigils: 0,
-    damage: 0,
-    health: 1,
-    tribe: "insect",
-    rare: false
-  },
+  // "ringworm": {
+  //   card: "ringworm",
+  //   costType:"blood",
+  //   cost: 1,
+  //   sigils: [],
+  //   defaultSigils: 0,
+  //   damage: 0,
+  //   health: 1,
+  //   tribe: "insect",
+  //   rare: false
+  // },
   "shark": {
     card: "shark",
     costType:"blood",
@@ -760,5 +760,20 @@ let allCards = {
   }
 }
 
-module.exports = {allCards: allCards}
-// export default allCards
+let allSigils = [
+  'deathtouch',  'buffneighbours',
+  'drawant',     'flying',          'createdams',
+  'beesonhit',   'guarddog',        'reach',
+  'sacrificial', 'drawcopyondeath', 'createbells',
+  'strafe',      'evolve',          'drawcopy',
+  'tripleblood', 'submerge',        'corpseeater',
+  'tutor',       'splitstrike',     'tristrike',
+  'whackamole',  'strafepush',      'randomconsumable',
+  'sharp',       'quadruplebones',  'tailonhit',
+  'debuffenemy', 'drawrabbits',     'doublestrike',
+  'bonedigger',  'submergesquid',   'gainattackonkill',
+  'morsel',      'deathshield',     'opponentbones',
+  'strafeswap'
+]
+
+module.exports = {allCards: allCards, allSigils: allSigils}

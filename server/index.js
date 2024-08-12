@@ -70,14 +70,14 @@ io.on("connection", (socket) => {
         decks: [
           [
             {
-              card: "raccoon",
+              card: "sparrow",
               costType:"bone",
               cost: 0,
-              sigils: ["opponentbones"],
+              sigils: ["flying"],
               defaultSigils: 1,
               damage: 1,
-              health: 1,
-              tribe: "none",
+              health: 99,
+              tribe: "avian",
               rare: false
             }
           ],
@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
             {
               card: "opossum",
               costType: "bone",
-              cost: 2,
+              cost: 0,
               sigils: [],
               defaultSigils: 0,
               damage: 1,
@@ -94,7 +94,7 @@ io.on("connection", (socket) => {
             {
               card: "bullfrog",
               costType: "blood",
-              cost: 1,
+              cost: 0,
               sigils: ["reach"],
               defaultSigils: 1,
               damage: 1,
@@ -103,7 +103,7 @@ io.on("connection", (socket) => {
             {
               card: "stoat",
               costType: "blood",
-              cost: 1,
+              cost: 0,
               sigils: [],
               defaultSigils: 0,
               damage: 1,
@@ -112,7 +112,7 @@ io.on("connection", (socket) => {
             {
               card: "wolf",
               costType: "blood",
-              cost: 2,
+              cost: 0,
               sigils: [],
               defaultSigils: 0,
               damage: 3,

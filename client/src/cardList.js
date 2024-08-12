@@ -760,11 +760,20 @@ let allCards = {
   }
 }
 
-let allSigils = [ //fix - add rest and sync with server
-  "deathtouch",
-  "buffneighbours",
-  "drawant",
-  "flying"
+let allSigils = [
+  'deathtouch',  'buffneighbours',
+  'drawant',     'flying',          'createdams',
+  'beesonhit',   'guarddog',        'reach',
+  'sacrificial', 'drawcopyondeath', 'createbells',
+  'strafe',      'evolve',          'drawcopy',
+  'tripleblood', 'submerge',        'corpseeater',
+  'tutor',       'splitstrike',     'tristrike',
+  'whackamole',  'strafepush',      'randomconsumable',
+  'sharp',       'quadruplebones',  'tailonhit',
+  'debuffenemy', 'drawrabbits',     'doublestrike',
+  'bonedigger',  'submergesquid',   'gainattackonkill',
+  'morsel',      'deathshield',     'opponentbones',
+  'strafeswap'
 ]
 
 module.exports = {allCards: allCards, allSigils: allSigils}

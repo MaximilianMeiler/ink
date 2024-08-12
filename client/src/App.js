@@ -68,7 +68,7 @@ function App() {
 
         if (trueDamage < 1) {
           //do nothing
-        } else if (newBoard[target] && newBoard[entry.index].sigils.indexOf("flying") < 0) { //SIGILS - flying
+        } else if (newBoard[target] && (newBoard[entry.index].sigils.indexOf("flying") < 0 || newBoard[target].sigils.indexOf("reach") > -1)) { //SIGILS - flying, reach
           
           let shieldIndex = newBoard[target].sigils.indexOf("deathshield"); //SIGILS - deathshield
           if (shieldIndex > -1) {
@@ -390,12 +390,15 @@ function App() {
                       { //empty slot - place selected card
                         let newBones = room.bones;
                         newBones[room.player0 === socket.id ? 0 : 1] += room.sacrifices.length; //fix - should be based on state and not socket id...
-                        let scavenging = 0; //SIGILS - opponentbones (stacks)
+                        let scavenging = 0; //SIGILS - opponentbones (stacks), guarddog
+                        let guarding = -1;
                         let offset = room.player0 === socket.id ? 0 : 4;
                         for (let i = 0; i < 4; i++) {
-                          console.log(i, offset)
                           if (room.board[i + offset] && room.board[i + offset].sigils.indexOf("opponentbones") > -1) {
                             scavenging++;
+                          }
+                          if (room.board[i + offset] && room.board[i + offset].sigils.indexOf("guarddog") > -1 && guarding < 0) {
+                            guarding = i + offset;
                           }
                         }
                         newBones[room.player0 === socket.id ? 1 : 0] += scavenging * room.sacrifices.length
@@ -418,6 +421,10 @@ function App() {
                                             damage: room.hands[room.player0 === socket.id ? 0 : 1][handSelection].damage + damageBonus,
                                             health: room.hands[room.player0 === socket.id ? 0 : 1][handSelection].health + healthBonus
                                           }; //place selected card
+                        if (!newBoard[(index + 4) % 8]) { //rush over guarding cards to opposing spot
+                          newBoard[(index + 4) % 8] = newBoard[guarding];
+                          newBoard[guarding] = null;
+                        }
                         let newHands = room.hands;
                         if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawrabbits") > -1) { //SIGILS - drawrabbits
                           let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);
