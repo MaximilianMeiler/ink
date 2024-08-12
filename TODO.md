@@ -7,8 +7,13 @@
 - drawant
 - flying
 - doublestrike
+- bonedigger
+- gainattackonkill
+- morsel
+- deathshield
 
 ### Sigils skipped:
 - damage for ants
 - damage for bell squid, card squid, mirror squid
-- strafe
+- submergesquid (prereq: submerge)
+- hodag's special skill

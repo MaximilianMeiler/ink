@@ -69,7 +69,17 @@ function App() {
         if (trueDamage < 1) {
           //do nothing
         } else if (newBoard[target] && newBoard[entry.index].sigils.indexOf("flying") < 0) { //SIGILS - flying
-          newBoard[target].health -= trueDamage;
+          
+          let shieldIndex = newBoard[target].sigils.indexOf("deathshield"); //SIGILS - deathshield
+          if (shieldIndex > -1) {
+            if (shieldIndex < newBoard[target].defaultSigils) {
+              newBoard[target].defaultSigils--;
+            }
+            newBoard[target].sigils.splice(shieldIndex, 1);
+          } else {
+            newBoard[target].health -= trueDamage;
+          }
+
           if (newBoard[target].sigils.indexOf("beesonhit") > -1) { //SIGILS - beesonhit
             let newSigils = Array.from(newBoard[target].sigils);
             newSigils.splice(newSigils.indexOf("beesonhit"), 1, "flying")
@@ -85,9 +95,12 @@ function App() {
               rare: false
             })
           }
-          if (newBoard[target].health <= 0 || newBoard[entry.index].sigils.indexOf("deathtouch") > -1) { //SIGILS - deathtouch
+          if (newBoard[target].health <= 0 || newBoard[entry.index].sigils.indexOf("deathtouch") > -1) { //SIGILS - deathtouch, gainattackkonkill
             newBones[target < 4 ? 1 : 0]++;
             newBoard[target] = null;
+            if (newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {
+              newBoard[entry.index].damage++;
+            }
           }
         } else {
           newScale += trueDamage * (target < 4 ? 1 : -1);
@@ -372,10 +385,20 @@ function App() {
                           newBones[room.player0 === socket.id ? 0 : 1] -= room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost;
                         }
                         let newBoard = room.board;
+                        let damageBonus = 0;
+                        let healthBonus = 0;
                         room.sacrifices.forEach((i) => {
+                          if (newBoard[i].sigils.indexOf("morsel") > -1) { //SIGILS - morsel
+                            damageBonus += newBoard[i].damage;
+                            healthBonus += newBoard[i].health;
+                          }
                           newBoard[i] = null; //kill sacrificial cards
                         });
-                        newBoard[index] = room.hands[room.player0 === socket.id ? 0 : 1][handSelection]; //place selected card
+                        newBoard[index] = {
+                                            ...room.hands[room.player0 === socket.id ? 0 : 1][handSelection], 
+                                            damage: room.hands[room.player0 === socket.id ? 0 : 1][handSelection].damage + damageBonus,
+                                            health: room.hands[room.player0 === socket.id ? 0 : 1][handSelection].health + healthBonus
+                                          }; //place selected card
                         let newHands = room.hands;
                         if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawrabbits") > -1) { //SIGILS - drawrabbits
                           let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);

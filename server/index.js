@@ -70,14 +70,14 @@ io.on("connection", (socket) => {
         decks: [
           [
             {
-              card: "direwolfcub",
+              card: "mudturtle",
               costType:"bone",
               cost: 0,
-              sigils: ["bonedigger", "evolve"],
-              defaultSigils: 2,
-              damage: 1,
-              health: 1,
-              tribe: "canine",
+              sigils: ["deathshield"],
+              defaultSigils: 1,
+              damage: 2,
+              health: 2,
+              tribe: "reptile",
               rare: false
             }
           ],
@@ -199,6 +199,9 @@ io.on("connection", (socket) => {
             index: index + offset,
             action: "attack"
           })  
+        }
+        if (sigils.indexOf("bonedigger") >= 0) { //SIGILS - bonedigger
+          rooms[room].bones[index < 4 ? 1 : 0]++;
         }
       }
     });
