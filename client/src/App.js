@@ -97,6 +97,15 @@ function App() {
           }
           if (newBoard[target].health <= 0 || newBoard[entry.index].sigils.indexOf("deathtouch") > -1) { //SIGILS - deathtouch, gainattackkonkill
             newBones[target < 4 ? 1 : 0]++;
+            let scavenging = 0; //SIGILS - opponentbones (stacks)
+            let offset = target < 4 ? 4 : 0;
+            for (let index = 0; index < 4; index++) {
+              if (newBoard[index + offset] && newBoard[index + offset].sigils.indexOf("opponentbones") > -1) {
+                scavenging++;
+              }
+            }
+            newBones[target < 4 ? 0 : 1] += scavenging
+
             newBoard[target] = null;
             if (newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {
               newBoard[entry.index].damage++;
@@ -380,7 +389,17 @@ function App() {
                         )) 
                       { //empty slot - place selected card
                         let newBones = room.bones;
-                        newBones[room.player0 === socket.id ? 0 : 1] += room.sacrifices.length; //change for bony boys
+                        newBones[room.player0 === socket.id ? 0 : 1] += room.sacrifices.length; //fix - should be based on state and not socket id...
+                        let scavenging = 0; //SIGILS - opponentbones (stacks)
+                        let offset = room.player0 === socket.id ? 0 : 4;
+                        for (let i = 0; i < 4; i++) {
+                          console.log(i, offset)
+                          if (room.board[i + offset] && room.board[i + offset].sigils.indexOf("opponentbones") > -1) {
+                            scavenging++;
+                          }
+                        }
+                        newBones[room.player0 === socket.id ? 1 : 0] += scavenging * room.sacrifices.length
+
                         if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone") {
                           newBones[room.player0 === socket.id ? 0 : 1] -= room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost;
                         }

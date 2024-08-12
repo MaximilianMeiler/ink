@@ -70,14 +70,14 @@ io.on("connection", (socket) => {
         decks: [
           [
             {
-              card: "mudturtle",
+              card: "raccoon",
               costType:"bone",
               cost: 0,
-              sigils: ["deathshield"],
+              sigils: ["opponentbones"],
               defaultSigils: 1,
-              damage: 2,
-              health: 2,
-              tribe: "reptile",
+              damage: 1,
+              health: 1,
+              tribe: "none",
               rare: false
             }
           ],
