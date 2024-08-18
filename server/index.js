@@ -70,16 +70,16 @@ io.on("connection", (socket) => {
         decks: [
           [
             {
-              card: "sparrow",
-              costType:"bone",
-              cost: 0,
-              sigils: ["flying"],
+              card: "warren",
+              costType:"blood",
+              cost: 1,
+              sigils: ["drawrabbits", "drawcopyondeath"],
               defaultSigils: 1,
-              damage: 1,
-              health: 99,
-              tribe: "avian",
+              damage: 0,
+              health: 2,
+              tribe: "none",
               rare: false,
-              index: 0,
+              index: 0
             }
           ],
           [
@@ -97,7 +97,7 @@ io.on("connection", (socket) => {
               card: "bullfrog",
               costType: "blood",
               cost: 2,
-              sigils: ["reach"],
+              sigils: ["reach", "beesonhit"],
               defaultSigils: 1,
               damage: 1,
               health: 2,

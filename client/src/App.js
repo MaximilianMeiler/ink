@@ -83,7 +83,7 @@ function App() {
           if (newBoard[target].sigils.indexOf("beesonhit") > -1) { //SIGILS - beesonhit
             let newSigils = Array.from(newBoard[target].sigils);
             newSigils.splice(newSigils.indexOf("beesonhit"), 1, "flying")
-            newHands[target < 4 ? 1 : 0].push({
+            newHands[target < 4 ? 1 : 0].push({ //newHands is never applied - is this all unnecessary and passed by reference????
               card: "bee",
               costType:"bone",
               cost: 0,
@@ -92,11 +92,29 @@ function App() {
               damage: 1,
               health: 1,
               tribe: "insect",
-              rare: false
+              rare: false,
+              clone: {
+                card: "bee",
+                costType:"bone",
+                cost: 0,
+                sigils: newSigils,
+                defaultSigils: 0,
+                damage: 1,
+                health: 1,
+                tribe: "insect",
+                rare: false,
+              }
             })
           }
           if (newBoard[target].health <= 0 || newBoard[entry.index].sigils.indexOf("deathtouch") > -1) { //SIGILS - deathtouch, gainattackkonkill
             newBones[target < 4 ? 1 : 0]++;
+            if (newBoard[target].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath
+              if (newBoard[target].clone) {
+                newRoom.hands[target < 4 ? 1 : 0].push({...newBoard[target].clone, clone: newBoard[target].clone}) //screw it, just gonna change stuff straight through newRoom
+              } else {
+                newRoom.hands[target < 4 ? 1 : 0].push(newRoom.decks[target < 4 ? 1 : 0].find((c) => c.index === newBoard[target].index)) 
+              }
+            }
             let scavenging = 0; //SIGILS - opponentbones (stacks)
             let offset = target < 4 ? 4 : 0;
             for (let index = 0; index < 4; index++) {
@@ -415,6 +433,13 @@ function App() {
                             healthBonus += newBoard[i].health;
                           }
                           if (newBoard[i].sigils.indexOf("sacrificial") < 0) { //SIGILS - sacrificial
+                            if (newBoard[i].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath
+                              if (newBoard[i].clone) {
+                                room.hands[room.player0 === socket.id ? 0 : 1].push({...newBoard[i].clone, clone: newBoard[i].clone}) //screw it, just gonna change stuff straight through newRoom
+                              } else {
+                                room.hands[room.player0 === socket.id ? 0 : 1].push(room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === newBoard[i].index)) 
+                              }
+                            }
                             newBoard[i] = null; //kill sacrificial cards
                           }
                         });
@@ -440,7 +465,18 @@ function App() {
                             damage: 0,
                             health: 1,
                             tribe: "none",
-                            rare: false
+                            rare: false,
+                            clone: {
+                              card: "rabbit",
+                              costType:"bone",
+                              cost: 0,
+                              sigils: newSigils,
+                              defaultSigils: 0,
+                              damage: 0,
+                              health: 1,
+                              tribe: "none",
+                              rare: false,
+                            }
                           })
                         } else if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawant") > -1) { //SIGILS - drawant
                           let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);
@@ -454,7 +490,18 @@ function App() {
                             damage: -5,
                             health: 2,
                             tribe: "insect",
-                            rare: false
+                            rare: false,
+                            clone: {
+                              card: "ant",
+                              costType:"blood",
+                              cost: 1,
+                              sigils: newSigils,
+                              defaultSigils: 0,
+                              damage: -5,
+                              health: 2,
+                              tribe: "insect",
+                              rare: false,
+                            }
                           })
                         }
                         newHands[room.player0 === socket.id ? 0 : 1].splice(handSelection, 1); //remove selected card from hand

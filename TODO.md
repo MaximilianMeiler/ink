@@ -14,6 +14,7 @@
 - opponentbones (stacks)
 - guarddog
 - reach
+- sacrificial
 
 ### Sigils skipped:
 - damage for ants
@@ -21,3 +22,4 @@
 - submergesquid (prereq: submerge)
 - hodag's special skill
 - createdams (rewrite card placement first)
+- ourobouros drawcopyondeath
