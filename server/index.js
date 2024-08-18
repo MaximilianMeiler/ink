@@ -96,7 +96,7 @@ io.on("connection", (socket) => {
             {
               card: "bullfrog",
               costType: "blood",
-              cost: 2,
+              cost: 4,
               sigils: ["reach", "beesonhit"],
               defaultSigils: 1,
               damage: 1,
@@ -107,7 +107,7 @@ io.on("connection", (socket) => {
               card: "stoat",
               costType: "blood",
               cost: 0,
-              sigils: ["sacrificial"],
+              sigils: ["tripleblood"],
               defaultSigils: 0,
               damage: 1,
               health: 2,

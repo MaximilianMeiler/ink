@@ -403,7 +403,13 @@ function App() {
                           room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.bones[room.player0 === socket.id ? 0 : 1])
                         || 
                           (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "blood" && 
-                          room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.sacrifices.length)
+                          room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.sacrifices.reduce((acc, val) => { //SIGILS - tripleblood
+                            if (room.board[val].sigils.indexOf("tripleblood") > -1) {
+                              return acc + 3;
+                            } else {
+                              return acc + 1;
+                            }
+                          }, 0))
                         )) 
                       { //empty slot - place selected card
                         let newBones = room.bones;
@@ -535,7 +541,15 @@ function App() {
                         if (dying) {
                           newSac.splice(newSac.indexOf(index), 1);
                           setSendRoom({...room, sacrifices: newSac});
-                        } else if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone" || room.sacrifices.length >= room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost) { 
+                        } else if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone" || 
+                          room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.sacrifices.reduce((acc, val) => { //SIGILS - tripleblood
+                            if (room.board[val].sigils.indexOf("tripleblood") > -1) {
+                              return acc + 3;
+                            } else {
+                              return acc + 1;
+                            }
+                          }, 0)
+                        ) { 
                           //stop unecessary killing, change for goat
                         } else {
                           newSac.push(index);
