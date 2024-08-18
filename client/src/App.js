@@ -478,7 +478,8 @@ function App() {
                               rare: false,
                             }
                           })
-                        } else if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawant") > -1) { //SIGILS - drawant
+                        }
+                        if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawant") > -1) { //SIGILS - drawant
                           let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);
                           newSigils.splice(newSigils.indexOf("drawant"), 1);
                           newHands[room.player0 === socket.id ? 0 : 1].push({
@@ -503,6 +504,24 @@ function App() {
                               rare: false,
                             }
                           })
+                        }
+                        if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawcopy") > -1) {//SIGILS - drawcopy
+                          let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);
+                          newSigils.splice(newSigils.indexOf("drawcopy"), 1);
+                          if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].clone) {
+                            newHands[room.player0 === socket.id ? 0 : 1].push({
+                              ...room.hands[room.player0 === socket.id ? 0 : 1][handSelection].clone, 
+                              clone: {...room.hands[room.player0 === socket.id ? 0 : 1][handSelection].clone, sigils: newSigils},
+                              sigils: newSigils
+                            })
+                          } else {
+                            let cardIndex = room.hands[room.player0 === socket.id ? 0 : 1][handSelection].index;
+                            newHands[room.player0 === socket.id ? 0 : 1].push({
+                              ...room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex),
+                              clone: {...room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex), sigils: newSigils}, //create a clone for any card not exactly in deck
+                              sigils: newSigils
+                            })
+                          }
                         }
                         newHands[room.player0 === socket.id ? 0 : 1].splice(handSelection, 1); //remove selected card from hand
                         setHandSelection(-1);

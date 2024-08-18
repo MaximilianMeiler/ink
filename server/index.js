@@ -73,7 +73,7 @@ io.on("connection", (socket) => {
               card: "warren",
               costType:"blood",
               cost: 1,
-              sigils: ["drawrabbits", "drawcopyondeath"],
+              sigils: ["drawrabbits", "drawcopyondeath", "drawcopy"],
               defaultSigils: 1,
               damage: 0,
               health: 2,
