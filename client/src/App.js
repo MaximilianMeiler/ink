@@ -286,7 +286,7 @@ function App() {
                       <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                         if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
                           let newDecks = room.decks;
-                          newDecks[room.player0 === socket.id ? 0 : 1].push(card);
+                          newDecks[room.player0 === socket.id ? 0 : 1].push({...card, index: newDecks[room.player0 === socket.id ? 0 : 1].length});
                           let newDraw = room.draft;
                           newDraw.options[index] = null;
                           if (newDraw.phase === 4) {
@@ -379,7 +379,7 @@ function App() {
                   }
                   <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                     if (trueIndex > 3 && handSelection > -1 && room.gameState === (room.player0 === socket.id ? "play0" : "play1")) { //interactable slots
-                      if ((!val || !val.card || room.sacrifices.indexOf(index) > -1) &&
+                      if ((!val || (room.sacrifices.indexOf(index) > -1 && val.sigils.indexOf("sacrificial") < 0)) &&
                         (
                           (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone" && 
                           room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.bones[room.player0 === socket.id ? 0 : 1])
@@ -414,7 +414,9 @@ function App() {
                             damageBonus += newBoard[i].damage;
                             healthBonus += newBoard[i].health;
                           }
-                          newBoard[i] = null; //kill sacrificial cards
+                          if (newBoard[i].sigils.indexOf("sacrificial") < 0) { //SIGILS - sacrificial
+                            newBoard[i] = null; //kill sacrificial cards
+                          }
                         });
                         newBoard[index] = {
                                             ...room.hands[room.player0 === socket.id ? 0 : 1][handSelection], 

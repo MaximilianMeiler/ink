@@ -78,7 +78,8 @@ io.on("connection", (socket) => {
               damage: 1,
               health: 99,
               tribe: "avian",
-              rare: false
+              rare: false,
+              index: 0,
             }
           ],
           [
@@ -89,34 +90,28 @@ io.on("connection", (socket) => {
               sigils: [],
               defaultSigils: 0,
               damage: 1,
-              health: 1
+              health: 1,
+              index: 0,
             },
             {
               card: "bullfrog",
               costType: "blood",
-              cost: 0,
+              cost: 2,
               sigils: ["reach"],
               defaultSigils: 1,
               damage: 1,
-              health: 2
+              health: 2,
+              index: 1,
             },
             {
               card: "stoat",
               costType: "blood",
               cost: 0,
-              sigils: [],
+              sigils: ["sacrificial"],
               defaultSigils: 0,
               damage: 1,
-              health: 2
-            },
-            {
-              card: "wolf",
-              costType: "blood",
-              cost: 0,
-              sigils: [],
-              defaultSigils: 0,
-              damage: 3,
-              health: 2
+              health: 2,
+              index: 2,
             }
           ]
         ],
