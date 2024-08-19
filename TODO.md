@@ -17,12 +17,13 @@
 - sacrificial
 - drawcopyondeath
 - drawcopy
+- submerge
+- submergesquid
 
 ### Sigils skipped:
 - damage for ants
 - damage for bell squid, card squid, mirror squid
 
-- submergesquid (prereq: submerge)
 - strafe (best for last)
 
 - hodag's special skill

@@ -68,7 +68,10 @@ function App() {
 
         if (trueDamage < 1) {
           //do nothing
-        } else if (newBoard[target] && (newBoard[entry.index].sigils.indexOf("flying") < 0 || newBoard[target].sigils.indexOf("reach") > -1)) { //SIGILS - flying, reach
+        } else if (newBoard[target] && 
+          (newBoard[entry.index].sigils.indexOf("flying") < 0 || newBoard[target].sigils.indexOf("reach") > -1) &&
+          (newBoard[target].sigils.indexOf("submerge") < 0 && newBoard[target].sigils.indexOf("submergesquid") < 0))
+        { //SIGILS - flying, reach, submerge
           
           let shieldIndex = newBoard[target].sigils.indexOf("deathshield"); //SIGILS - deathshield
           if (shieldIndex > -1) {
@@ -132,6 +135,81 @@ function App() {
         } else {
           newScale += trueDamage * (target < 4 ? 1 : -1);
         }
+      } else if (entry.action === "transform") { 
+        let newSigils = Array.from(newBoard[entry.index].sigils);
+        newSigils.splice(newSigils.indexOf("submergesquid"), 1); //SIGILS - evolve
+
+        if (entry.rand < .333) {
+          newBoard[entry.index] = {
+            card: "squidbell",
+            costType:"blood",
+            cost: 2,
+            sigils: newSigils,
+            defaultSigils: 0,
+            damage: -6,
+            health: 3,
+            tribe: "none",
+            rare: false,
+            clone: {
+              card: "squidbell",
+              costType:"blood",
+              cost: 2,
+              sigils: newSigils,
+              defaultSigils: 0,
+              damage: -6,
+              health: 3,
+              tribe: "none",
+              rare: false
+            }
+          }
+        } else if (entry.rand < .667) {
+          newBoard[entry.index] = {
+            card: "squidcards",
+            costType:"blood",
+            cost: 1,
+            sigils: newSigils,
+            defaultSigils: 0,
+            damage: -7,
+            health: 1,
+            tribe: "none",
+            rare: false,
+            clone: {
+              card: "squidcards",
+              costType:"blood",
+              cost: 1,
+              sigils: newSigils,
+              defaultSigils: 0,
+              damage: -7,
+              health: 1,
+              tribe: "none",
+              rare: false
+            }
+          }
+        } else {
+          newBoard[entry.index] = {
+            card: "squidmirror",
+            costType:"blood",
+            cost: 1,
+            sigils: newSigils,
+            defaultSigils: 0,
+            damage: -8,
+            health: 1,
+            tribe: "none",
+            rare: false, 
+            clone: {
+              card: "squidmirror",
+              costType:"blood",
+              cost: 1,
+              sigils: newSigils,
+              defaultSigils: 0,
+              damage: -8,
+              health: 1,
+              tribe: "none",
+              rare: false, 
+            }
+          }
+        }
+
       } else if (entry.action === "evolve") {
         let newSigils = Array.from(newBoard[entry.index].sigils);
         newSigils.splice(newSigils.indexOf("evolve"), 1); //SIGILS - evolve
@@ -215,7 +293,9 @@ function App() {
           if (newBoard[entry.index].damage > -3) { //fix: no special damage
             newBoard[entry.index].damage += 1;
           }
-          newBoard[entry.index].defaultSigils -= 1;
+          if (newBoard[entry.index].sigils.indexOf("evolve") < newBoard[entry.index].defaultSigils)  {
+            newBoard[entry.index].defaultSigils -= 1;
+          }
           newBoard[entry.index].sigils = newSigils;
         }
       }

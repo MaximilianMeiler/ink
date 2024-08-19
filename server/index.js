@@ -70,16 +70,15 @@ io.on("connection", (socket) => {
         decks: [
           [
             {
-              card: "warren",
-              costType:"blood",
-              cost: 1,
-              sigils: ["drawrabbits", "drawcopyondeath", "drawcopy"],
+              card: "kraken",
+              costType:"bone",
+              cost: 0,
+              sigils: ["submergesquid", "evolve", "drawcopyondeath"],
               defaultSigils: 1,
-              damage: 0,
-              health: 2,
+              damage: 1,
+              health: 1,
               tribe: "none",
-              rare: false,
-              index: 0
+              rare: false
             }
           ],
           [
@@ -96,7 +95,7 @@ io.on("connection", (socket) => {
             {
               card: "bullfrog",
               costType: "blood",
-              cost: 4,
+              cost: 1,
               sigils: ["reach", "beesonhit"],
               defaultSigils: 1,
               damage: 1,
@@ -105,7 +104,7 @@ io.on("connection", (socket) => {
             },
             {
               card: "stoat",
-              costType: "blood",
+              costType: "bone",
               cost: 0,
               sigils: ["tripleblood"],
               defaultSigils: 0,
@@ -201,6 +200,16 @@ io.on("connection", (socket) => {
       }
     });
 
+    [...Array(4)].forEach((val, index) => {
+      if (rooms[room].board[(index + offset + 4) % 8] && rooms[room].board[(index + offset + 4) % 8].sigils.indexOf("submergesquid") > -1) {
+        rooms[room].activityLog.push({
+          index: (index + offset + 4) % 8,
+          action: "transform",
+          rand: Math.random()
+        })  
+      }
+    });
+
     //evolutions
     [...Array(4)].forEach((val, index) => {
       if (rooms[room].board[(index + offset + 4) % 8] && rooms[room].board[(index + offset + 4) % 8].sigils.indexOf("evolve") > -1) {
@@ -209,7 +218,7 @@ io.on("connection", (socket) => {
           action: "evolve"
         })  
       }
-    })
+    });
 
     rooms[room].gameState = rooms[room].gameState == "play1" ? "simulating1" : "simulating0";
     console.log("bell rung for room", room);

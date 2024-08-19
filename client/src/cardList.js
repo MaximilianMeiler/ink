@@ -194,7 +194,7 @@ let allCards = {
     defaultSigils: 1,
     damage: 2,
     health: 2,
-    tribe: "none  ",
+    tribe: "none",
     rare: false
   },
   "geck": {

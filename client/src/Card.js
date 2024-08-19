@@ -13,6 +13,11 @@ function Card({val}) {
           <img src={`/cost_${val.cost}${val.costType}.png`} alt={`${val.card} cost`} className='card cardCost'></img>
           <div className='card cardDamage'>{val.card === "blank" ? "" : val.damage}</div>
           <div className='card cardHealth'>{val.card === "blank" ? "" : val.health}</div>
+          
+          {val.sigils.length > val.defaultSigils ? 
+            <img src={`/portrait_${val.card}_emission.png`} className='card cardPortrait' style={{filter: "brightness(0) saturate(100%) invert(89%) sepia(20%) saturate(601%) hue-rotate(78deg) brightness(101%) contrast(93%)"}}></img>
+          : <></>}
+          
           {val.sigils ? val.sigils.map((sigil, i) => {
             let indexAdj = i + 2 - val.defaultSigils;
             if (indexAdj === 1 && val.defaultSigils === 1) {
@@ -30,9 +35,6 @@ function Card({val}) {
           })
           : <></>}
           
-          {val.sigils.length > val.defaultSigils ? 
-            <img src={`/portrait_${val.card}_emission.png`} className='card cardPortrait' style={{filter: "brightness(0) saturate(100%) invert(89%) sepia(20%) saturate(601%) hue-rotate(78deg) brightness(101%) contrast(93%)"}}></img>
-          : <></>}
         </div>
     )
 }
