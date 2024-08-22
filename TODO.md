@@ -17,6 +17,7 @@
 - sacrificial
 - drawcopyondeath
 - drawcopy
+- tripleblood
 - submerge
 - submergesquid
 
@@ -25,6 +26,7 @@
 - damage for bell squid, card squid, mirror squid
 
 - strafe (best for last)
+- tutor
 
 - hodag's special skill
 - ourobouros drawcopyondeath

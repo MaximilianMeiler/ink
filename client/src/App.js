@@ -12,6 +12,138 @@ function App() {
   const [handSelection, setHandSelection] = useState(-1);
   const [draw, setDraw] = useState([]);
 
+  const placeSelectedCard = (index, placedCard = null) => {
+    //try not to use this, but it's here in case
+    if (index < 0 || index > 7) {return;}
+
+    let newHands = room.hands;
+    
+    if (!placedCard) {
+      placedCard = room.hands[room.player0 === socket.id ? 0 : 1][handSelection];
+      newHands[room.player0 === socket.id ? 0 : 1].splice(handSelection, 1); //remove selected card from hand
+      setHandSelection(-1);
+    }
+
+    let newBones = room.bones;
+    newBones[room.player0 === socket.id ? 0 : 1] += room.sacrifices.length; //fix - should be based on state and not socket id...
+    let scavenging = 0; //SIGILS - opponentbones (stacks), guarddog
+    let guarding = -1;
+    let offset = room.player0 === socket.id ? 0 : 4;
+    for (let i = 0; i < 4; i++) {
+      if (room.board[i + offset] && room.board[i + offset].sigils.indexOf("opponentbones") > -1) {
+        scavenging++;
+      }
+      if (room.board[i + offset] && room.board[i + offset].sigils.indexOf("guarddog") > -1 && guarding < 0) {
+        guarding = i + offset;
+      }
+    }
+    newBones[room.player0 === socket.id ? 1 : 0] += scavenging * room.sacrifices.length
+
+    if (placedCard.costType === "bone") {
+      newBones[room.player0 === socket.id ? 0 : 1] -= placedCard.cost;
+    }
+    let newBoard = room.board;
+    let damageBonus = 0;
+    let healthBonus = 0;
+    room.sacrifices.forEach((i) => {
+      if (newBoard[i].sigils.indexOf("morsel") > -1) { //SIGILS - morsel
+        damageBonus += newBoard[i].damage;
+        healthBonus += newBoard[i].health;
+      }
+      if (newBoard[i].sigils.indexOf("sacrificial") < 0) { //SIGILS - sacrificial
+        if (newBoard[i].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath
+          if (newBoard[i].clone) {
+            room.hands[room.player0 === socket.id ? 0 : 1].push({...newBoard[i].clone, clone: newBoard[i].clone}) //screw it, just gonna change stuff straight through newRoom
+          } else {
+            room.hands[room.player0 === socket.id ? 0 : 1].push(room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === newBoard[i].index)) 
+          }
+        }
+        newBoard[i] = null; //kill sacrificial cards
+      }
+    });
+    newBoard[index] = {
+                        ...placedCard, 
+                        damage: placedCard.damage + damageBonus,
+                        health: placedCard.health + healthBonus
+                      }; //place selected card
+    if (!newBoard[(index + 4) % 8]) { //rush over guarding cards to opposing spot
+      newBoard[(index + 4) % 8] = newBoard[guarding];
+      newBoard[guarding] = null;
+    }
+    if (placedCard.sigils.indexOf("drawrabbits") > -1) { //SIGILS - drawrabbits
+      let newSigils = Array.from(placedCard.sigils);
+      newSigils.splice(newSigils.indexOf("drawrabbits"), 1);
+      newHands[room.player0 === socket.id ? 0 : 1].push({
+        card: "rabbit",
+        costType:"bone",
+        cost: 0,
+        sigils: newSigils,
+        defaultSigils: 0,
+        damage: 0,
+        health: 1,
+        tribe: "none",
+        rare: false,
+        clone: {
+          card: "rabbit",
+          costType:"bone",
+          cost: 0,
+          sigils: newSigils,
+          defaultSigils: 0,
+          damage: 0,
+          health: 1,
+          tribe: "none",
+          rare: false,
+        }
+      })
+    }
+    if (placedCard.sigils.indexOf("drawant") > -1) { //SIGILS - drawant
+      let newSigils = Array.from(placedCard.sigils);
+      newSigils.splice(newSigils.indexOf("drawant"), 1);
+      newHands[room.player0 === socket.id ? 0 : 1].push({
+        card: "ant",
+        costType:"blood",
+        cost: 1,
+        sigils: newSigils,
+        defaultSigils: 0,
+        damage: -5,
+        health: 2,
+        tribe: "insect",
+        rare: false,
+        clone: {
+          card: "ant",
+          costType:"blood",
+          cost: 1,
+          sigils: newSigils,
+          defaultSigils: 0,
+          damage: -5,
+          health: 2,
+          tribe: "insect",
+          rare: false,
+        }
+      })
+    }
+    if (placedCard.sigils.indexOf("drawcopy") > -1) {//SIGILS - drawcopy
+      let newSigils = Array.from(placedCard.sigils);
+      newSigils.splice(newSigils.indexOf("drawcopy"), 1);
+      if (placedCard.clone) {
+        newHands[room.player0 === socket.id ? 0 : 1].push({
+          ...placedCard.clone, 
+          clone: {...placedCard.clone, sigils: newSigils},
+          sigils: newSigils
+        })
+      } else {
+        let cardIndex = placedCard.index;
+        newHands[room.player0 === socket.id ? 0 : 1].push({
+          ...room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex),
+          clone: {...room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex), sigils: newSigils}, //create a clone for any card not exactly in deck
+          sigils: newSigils
+        })
+      }
+    }
+
+    setSendRoom({...room, sacrifices: [], bones: newBones, board: newBoard, hands: newHands});
+  }
+
   useEffect(() => {
     socket.on("serverUpdate", (newRoom) => {
       console.log("new room from server:", newRoom)
@@ -492,129 +624,7 @@ function App() {
                           }, 0))
                         )) 
                       { //empty slot - place selected card
-                        let newBones = room.bones;
-                        newBones[room.player0 === socket.id ? 0 : 1] += room.sacrifices.length; //fix - should be based on state and not socket id...
-                        let scavenging = 0; //SIGILS - opponentbones (stacks), guarddog
-                        let guarding = -1;
-                        let offset = room.player0 === socket.id ? 0 : 4;
-                        for (let i = 0; i < 4; i++) {
-                          if (room.board[i + offset] && room.board[i + offset].sigils.indexOf("opponentbones") > -1) {
-                            scavenging++;
-                          }
-                          if (room.board[i + offset] && room.board[i + offset].sigils.indexOf("guarddog") > -1 && guarding < 0) {
-                            guarding = i + offset;
-                          }
-                        }
-                        newBones[room.player0 === socket.id ? 1 : 0] += scavenging * room.sacrifices.length
-
-                        if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone") {
-                          newBones[room.player0 === socket.id ? 0 : 1] -= room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost;
-                        }
-                        let newBoard = room.board;
-                        let damageBonus = 0;
-                        let healthBonus = 0;
-                        room.sacrifices.forEach((i) => {
-                          if (newBoard[i].sigils.indexOf("morsel") > -1) { //SIGILS - morsel
-                            damageBonus += newBoard[i].damage;
-                            healthBonus += newBoard[i].health;
-                          }
-                          if (newBoard[i].sigils.indexOf("sacrificial") < 0) { //SIGILS - sacrificial
-                            if (newBoard[i].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath
-                              if (newBoard[i].clone) {
-                                room.hands[room.player0 === socket.id ? 0 : 1].push({...newBoard[i].clone, clone: newBoard[i].clone}) //screw it, just gonna change stuff straight through newRoom
-                              } else {
-                                room.hands[room.player0 === socket.id ? 0 : 1].push(room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === newBoard[i].index)) 
-                              }
-                            }
-                            newBoard[i] = null; //kill sacrificial cards
-                          }
-                        });
-                        newBoard[index] = {
-                                            ...room.hands[room.player0 === socket.id ? 0 : 1][handSelection], 
-                                            damage: room.hands[room.player0 === socket.id ? 0 : 1][handSelection].damage + damageBonus,
-                                            health: room.hands[room.player0 === socket.id ? 0 : 1][handSelection].health + healthBonus
-                                          }; //place selected card
-                        if (!newBoard[(index + 4) % 8]) { //rush over guarding cards to opposing spot
-                          newBoard[(index + 4) % 8] = newBoard[guarding];
-                          newBoard[guarding] = null;
-                        }
-                        let newHands = room.hands;
-                        if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawrabbits") > -1) { //SIGILS - drawrabbits
-                          let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);
-                          newSigils.splice(newSigils.indexOf("drawrabbits"), 1);
-                          newHands[room.player0 === socket.id ? 0 : 1].push({
-                            card: "rabbit",
-                            costType:"bone",
-                            cost: 0,
-                            sigils: newSigils,
-                            defaultSigils: 0,
-                            damage: 0,
-                            health: 1,
-                            tribe: "none",
-                            rare: false,
-                            clone: {
-                              card: "rabbit",
-                              costType:"bone",
-                              cost: 0,
-                              sigils: newSigils,
-                              defaultSigils: 0,
-                              damage: 0,
-                              health: 1,
-                              tribe: "none",
-                              rare: false,
-                            }
-                          })
-                        }
-                        if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawant") > -1) { //SIGILS - drawant
-                          let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);
-                          newSigils.splice(newSigils.indexOf("drawant"), 1);
-                          newHands[room.player0 === socket.id ? 0 : 1].push({
-                            card: "ant",
-                            costType:"blood",
-                            cost: 1,
-                            sigils: newSigils,
-                            defaultSigils: 0,
-                            damage: -5,
-                            health: 2,
-                            tribe: "insect",
-                            rare: false,
-                            clone: {
-                              card: "ant",
-                              costType:"blood",
-                              cost: 1,
-                              sigils: newSigils,
-                              defaultSigils: 0,
-                              damage: -5,
-                              health: 2,
-                              tribe: "insect",
-                              rare: false,
-                            }
-                          })
-                        }
-                        if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils.indexOf("drawcopy") > -1) {//SIGILS - drawcopy
-                          let newSigils = Array.from(room.hands[room.player0 === socket.id ? 0 : 1][handSelection].sigils);
-                          newSigils.splice(newSigils.indexOf("drawcopy"), 1);
-                          if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].clone) {
-                            newHands[room.player0 === socket.id ? 0 : 1].push({
-                              ...room.hands[room.player0 === socket.id ? 0 : 1][handSelection].clone, 
-                              clone: {...room.hands[room.player0 === socket.id ? 0 : 1][handSelection].clone, sigils: newSigils},
-                              sigils: newSigils
-                            })
-                          } else {
-                            let cardIndex = room.hands[room.player0 === socket.id ? 0 : 1][handSelection].index;
-                            newHands[room.player0 === socket.id ? 0 : 1].push({
-                              ...room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex),
-                              clone: {...room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex), sigils: newSigils}, //create a clone for any card not exactly in deck
-                              sigils: newSigils
-                            })
-                          }
-                        }
-                        newHands[room.player0 === socket.id ? 0 : 1].splice(handSelection, 1); //remove selected card from hand
-                        setHandSelection(-1);
-
-                        //place sacrificed cards in the discard pile?
-
-                        setSendRoom({...room, sacrifices: [], bones: newBones, board: newBoard, hands: newHands});
+                        placeSelectedCard(index);
                       } else if (val && val.card) { //toggle sacrifices for selected card
                         let newSac = room.sacrifices;
                         let dying = room.sacrifices.indexOf(index) > -1 
@@ -630,7 +640,7 @@ function App() {
                             }
                           }, 0)
                         ) { 
-                          //stop unecessary killing, change for goat
+                          //stop unecessary killing
                         } else {
                           newSac.push(index);
                           setSendRoom({...room, sacrifices: newSac});
