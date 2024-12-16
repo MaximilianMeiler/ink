@@ -275,6 +275,22 @@ function App() {
             if (newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {
               newBoard[entry.index].damage++;
             }
+
+            let corpseIndex = null;
+            newHands[target < 4 ? 1 : 0].forEach((card, j) => {
+              if (card.sigils.indexOf("corpseeater") > -1) { //SIGILS - corpseeater
+                corpseIndex = j; //last card in arr currrently used
+              }
+            })
+            if (corpseIndex !== null) {
+              newRoom = placeSelectedCard(target, newHands[target < 4 ? 1 : 0][corpseIndex], newRoom);
+
+              if (handSelection === corpseIndex) {
+                setHandSelection(-1);
+              }
+              newHands[target < 4 ? 1 : 0].splice(corpseIndex, 1); //remove selected card from hand
+            } 
+
           }
         } else {
           newScale += trueDamage * (target < 4 ? 1 : -1);
