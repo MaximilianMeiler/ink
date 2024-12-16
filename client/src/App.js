@@ -12,40 +12,50 @@ function App() {
   const [handSelection, setHandSelection] = useState(-1);
   const [draw, setDraw] = useState([]);
 
-  const placeSelectedCard = (index, placedCard = null) => {
+  const placeSelectedCard = (index, placedCard = null, newRoom = null) => {
+
+    if (!newRoom) {
+      const ret = placeSelectedCard(index, placedCard, room);
+      setSendRoom(ret);
+      return null;
+    }
+
     //try not to use this, but it's here in case
     if (index < 0 || index > 7) {return;}
 
-    let newHands = room.hands;
-    
-    if (!placedCard) {
-      placedCard = room.hands[room.player0 === socket.id ? 0 : 1][handSelection];
-      newHands[room.player0 === socket.id ? 0 : 1].splice(handSelection, 1); //remove selected card from hand
+    let newHands = newRoom.hands;
+    let newBones = newRoom.bones;
+
+    if (!placedCard) { //placing selected card
+      placedCard = newRoom.hands[newRoom.player0 === socket.id ? 0 : 1][handSelection];
+
+      if (placedCard.costType === "bone") {
+        newBones[newRoom.player0 === socket.id ? 0 : 1] -= placedCard.cost;
+      }
+
+      newHands[newRoom.player0 === socket.id ? 0 : 1].splice(handSelection, 1); //remove selected card from hand
       setHandSelection(-1);
     }
 
-    let newBones = room.bones;
-    newBones[room.player0 === socket.id ? 0 : 1] += room.sacrifices.length; //fix - should be based on state and not socket id...
+
+    newBones[newRoom.player0 === socket.id ? 0 : 1] += newRoom.sacrifices.length; //fix - should be based on state and not socket id...
     let scavenging = 0; //SIGILS - opponentbones (stacks), guarddog
     let guarding = -1;
-    let offset = room.player0 === socket.id ? 0 : 4;
+    let offset = newRoom.player0 === socket.id ? 0 : 4;
     for (let i = 0; i < 4; i++) {
-      if (room.board[i + offset] && room.board[i + offset].sigils.indexOf("opponentbones") > -1) {
+      if (newRoom.board[i + offset] && newRoom.board[i + offset].sigils.indexOf("opponentbones") > -1) {
         scavenging++;
       }
-      if (room.board[i + offset] && room.board[i + offset].sigils.indexOf("guarddog") > -1 && guarding < 0) {
+      if (newRoom.board[i + offset] && newRoom.board[i + offset].sigils.indexOf("guarddog") > -1 && guarding < 0) {
         guarding = i + offset;
       }
     }
-    newBones[room.player0 === socket.id ? 1 : 0] += scavenging * room.sacrifices.length
+    newBones[newRoom.player0 === socket.id ? 1 : 0] += scavenging * newRoom.sacrifices.length
 
-    if (placedCard.costType === "bone") {
-      newBones[room.player0 === socket.id ? 0 : 1] -= placedCard.cost;
-    }
-    let newBoard = room.board;
+    let newBoard = newRoom.board;
     let damageBonus = 0;
     let healthBonus = 0;
-    room.sacrifices.forEach((i) => {
+    newRoom.sacrifices.forEach((i) => {
       if (newBoard[i].sigils.indexOf("morsel") > -1) { //SIGILS - morsel
         damageBonus += newBoard[i].damage;
         healthBonus += newBoard[i].health;
@@ -53,9 +63,9 @@ function App() {
       if (newBoard[i].sigils.indexOf("sacrificial") < 0) { //SIGILS - sacrificial
         if (newBoard[i].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath
           if (newBoard[i].clone) {
-            room.hands[room.player0 === socket.id ? 0 : 1].push({...newBoard[i].clone, clone: newBoard[i].clone}) //screw it, just gonna change stuff straight through newRoom
+            newRoom.hands[newRoom.player0 === socket.id ? 0 : 1].push({...newBoard[i].clone, clone: newBoard[i].clone}) //screw it, just gonna change stuff straight through newnewRoom
           } else {
-            room.hands[room.player0 === socket.id ? 0 : 1].push(room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === newBoard[i].index)) 
+            newRoom.hands[newRoom.player0 === socket.id ? 0 : 1].push(newRoom.decks[newRoom.player0 === socket.id ? 0 : 1].find((c) => c.index === newBoard[i].index)) 
           }
         }
         newBoard[i] = null; //kill sacrificial cards
@@ -73,7 +83,7 @@ function App() {
     if (placedCard.sigils.indexOf("drawrabbits") > -1) { //SIGILS - drawrabbits
       let newSigils = Array.from(placedCard.sigils);
       newSigils.splice(newSigils.indexOf("drawrabbits"), 1);
-      newHands[room.player0 === socket.id ? 0 : 1].push({
+      newHands[newRoom.player0 === socket.id ? 0 : 1].push({
         card: "rabbit",
         costType:"bone",
         cost: 0,
@@ -99,7 +109,7 @@ function App() {
     if (placedCard.sigils.indexOf("drawant") > -1) { //SIGILS - drawant
       let newSigils = Array.from(placedCard.sigils);
       newSigils.splice(newSigils.indexOf("drawant"), 1);
-      newHands[room.player0 === socket.id ? 0 : 1].push({
+      newHands[newRoom.player0 === socket.id ? 0 : 1].push({
         card: "ant",
         costType:"blood",
         cost: 1,
@@ -126,22 +136,22 @@ function App() {
       let newSigils = Array.from(placedCard.sigils);
       newSigils.splice(newSigils.indexOf("drawcopy"), 1);
       if (placedCard.clone) {
-        newHands[room.player0 === socket.id ? 0 : 1].push({
+        newHands[newRoom.player0 === socket.id ? 0 : 1].push({
           ...placedCard.clone, 
           clone: {...placedCard.clone, sigils: newSigils},
           sigils: newSigils
         })
       } else {
         let cardIndex = placedCard.index;
-        newHands[room.player0 === socket.id ? 0 : 1].push({
-          ...room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex),
-          clone: {...room.decks[room.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex), sigils: newSigils}, //create a clone for any card not exactly in deck
+        newHands[newRoom.player0 === socket.id ? 0 : 1].push({
+          ...newRoom.decks[newRoom.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex),
+          clone: {...newRoom.decks[newRoom.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex), sigils: newSigils}, //create a clone for any card not exactly in deck
           sigils: newSigils
         })
       }
     }
 
-    setSendRoom({...room, sacrifices: [], bones: newBones, board: newBoard, hands: newHands});
+    return {...newRoom, sacrifices: [], bones: newBones, board: newBoard, hands: newHands}
   }
 
   useEffect(() => {
@@ -217,13 +227,14 @@ function App() {
 
           if (newBoard[target].sigils.indexOf("beesonhit") > -1) { //SIGILS - beesonhit
             let newSigils = Array.from(newBoard[target].sigils);
-            newSigils.splice(newSigils.indexOf("beesonhit"), 1, "flying")
+            newSigils.splice(newSigils.indexOf("beesonhit"), 1);
+            newSigils.splice(0, 0, "flying");
             newHands[target < 4 ? 1 : 0].push({ //newHands is never applied - is this all unnecessary and passed by reference????
               card: "bee",
               costType:"bone",
               cost: 0,
               sigils: newSigils,
-              defaultSigils: 0,
+              defaultSigils: 1,
               damage: 1,
               health: 1,
               tribe: "insect",
@@ -243,6 +254,7 @@ function App() {
           }
           if (newBoard[target].health <= 0 || newBoard[entry.index].sigils.indexOf("deathtouch") > -1) { //SIGILS - deathtouch, gainattackkonkill
             newBones[target < 4 ? 1 : 0]++;
+
             if (newBoard[target].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath
               if (newBoard[target].clone) {
                 newRoom.hands[target < 4 ? 1 : 0].push({...newBoard[target].clone, clone: newBoard[target].clone}) //screw it, just gonna change stuff straight through newRoom
@@ -450,7 +462,7 @@ function App() {
           options: []
         }})
     } else {
-      console.log("new room after simulation",{...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0")})
+      console.log("new room after simulation",structuredClone({...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0")}))
       setRoom({...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0"), activityLog: []}) //TEMP
     }
   }

@@ -70,19 +70,6 @@ io.on("connection", (socket) => {
         decks: [
           [
             {
-              card: "kraken",
-              costType:"bone",
-              cost: 0,
-              sigils: ["submergesquid", "evolve", "drawcopyondeath"],
-              defaultSigils: 1,
-              damage: 1,
-              health: 1,
-              tribe: "none",
-              rare: false
-            }
-          ],
-          [
-            {
               card: "opossum",
               costType: "bone",
               cost: 0,
@@ -92,25 +79,37 @@ io.on("connection", (socket) => {
               health: 1,
               index: 0,
             },
+          ],
+          [
             {
-              card: "bullfrog",
-              costType: "blood",
-              cost: 1,
-              sigils: ["reach", "beesonhit"],
-              defaultSigils: 1,
-              damage: 1,
-              health: 2,
-              index: 1,
-            },
-            {
-              card: "stoat",
+              card: "opossum",
               costType: "bone",
               cost: 0,
-              sigils: ["tripleblood"],
+              sigils: ["corpseeater"],
               defaultSigils: 0,
               damage: 1,
-              health: 2,
-              index: 2,
+              health: 1,
+              index: 0,
+            // },
+            // {
+            //   card: "bullfrog",
+            //   costType: "blood",
+            //   cost: 1,
+            //   sigils: ["reach", "beesonhit"],
+            //   defaultSigils: 1,
+            //   damage: 1,
+            //   health: 2,
+            //   index: 1,
+            // },
+            // {
+            //   card: "stoat",
+            //   costType: "bone",
+            //   cost: 0,
+            //   sigils: ["tripleblood"],
+            //   defaultSigils: 0,
+            //   damage: 1,
+            //   health: 2,
+            //   index: 2,
             }
           ]
         ],
