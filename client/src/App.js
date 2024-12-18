@@ -76,7 +76,7 @@ function App() {
                         damage: placedCard.damage + damageBonus,
                         health: placedCard.health + healthBonus
                       }; //place selected card
-    if (!newBoard[(index + 4) % 8]) { //rush over guarding cards to opposing spot
+    if (!newBoard[(index + 4) % 8] && guarding > -1) { //rush over guarding cards to opposing spot
       newBoard[(index + 4) % 8] = newBoard[guarding];
       newBoard[guarding] = null;
     }
@@ -200,7 +200,8 @@ function App() {
     let newHands = newRoom.hands;
     console.log("simulating room", newRoom)
 
-    newRoom.activityLog.forEach((entry) => {
+    for (let logIndex = 0; logIndex < newRoom.activityLog.length; logIndex++) {
+      let entry = newRoom.activityLog[logIndex];
       //TODO: add animations
       if (entry.action === "attack") {
         let target = entry.target
@@ -276,13 +277,13 @@ function App() {
               newBoard[entry.index].damage++;
             }
 
-            let corpseIndex = null;
+            let corpseIndex = -1;
             newHands[target < 4 ? 1 : 0].forEach((card, j) => {
-              if (card.sigils.indexOf("corpseeater") > -1) { //SIGILS - corpseeater
-                corpseIndex = j; //last card in arr currrently used
+              if (card.sigils.indexOf("corpseeater") > -1 && corpseIndex > 0) { //SIGILS - corpseeater
+                corpseIndex = j; //first in hand always used
               }
             })
-            if (corpseIndex !== null) {
+            if (corpseIndex > -1) {
               newRoom = placeSelectedCard(target, newHands[target < 4 ? 1 : 0][corpseIndex], newRoom);
 
               if (handSelection === corpseIndex) {
@@ -293,7 +294,22 @@ function App() {
 
           }
         } else {
-          newScale += trueDamage * (target < 4 ? 1 : -1);
+          //SIGILS - whackamole
+          let offset = target < 4 ? 0 : 4;
+          let moleIndex = -1;
+          for (let i = 0; i < 4; i++) { //FIXME - add priority to submerge / reach moles?
+            if (newRoom.board[i + offset] && newRoom.board[i + offset].sigils.indexOf("whackamole") > -1 && moleIndex < 0) {
+              moleIndex = i + offset;
+            }
+          }
+          console.log("mole: ", moleIndex)
+          if (moleIndex > -1) {
+            newBoard[target] = newBoard[moleIndex];
+            newBoard[moleIndex] = null;
+            logIndex--;
+          } else {
+            newScale += trueDamage * (target < 4 ? 1 : -1);
+          }
         }
       } else if (entry.action === "transform") { 
         let newSigils = Array.from(newBoard[entry.index].sigils);
@@ -459,7 +475,7 @@ function App() {
           newBoard[entry.index].sigils = newSigils;
         }
       }
-    })
+    }
 
     if (newScale * (newRoom.gameState === "simulating0" ? 1 : -1) <= -5) {
       //restart game if scale is tipped at end of turn

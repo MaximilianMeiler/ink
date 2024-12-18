@@ -73,10 +73,10 @@ io.on("connection", (socket) => {
               card: "opossum",
               costType: "bone",
               cost: 0,
-              sigils: ["drawcopy"],
+              sigils: ["whackamole"],
               defaultSigils: 0,
-              damage: 1,
-              health: 1,
+              damage: 0,
+              health: 6,
               index: 0,
             },
           ],
@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
               card: "opossum",
               costType: "bone",
               cost: 0,
-              sigils: ["tristrike", "splitstrike"],
+              sigils: ["splitstrike"],
               defaultSigils: 0,
               damage: 1,
               health: 1,
@@ -180,7 +180,8 @@ io.on("connection", (socket) => {
 
     //attacks
     [...Array(4)].forEach((val, index) => {
-      if (rooms[room].board[index + offset] && rooms[room].board[index + offset].damage > 0) { //second clause was originally commented out?
+      if (rooms[room].board[index + offset] /*&& rooms[room].board[index + offset].damage > 0*/) { //second clause was originally commented out? 
+                                                                                                   //this was for alpha you silly billy
         let sigils = rooms[room].board[index + offset].sigils;
         let target = (index+offset + 4) % 8; //0>4, 3>7, 4>0, 7->3
   
