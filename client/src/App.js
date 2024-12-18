@@ -203,7 +203,7 @@ function App() {
     newRoom.activityLog.forEach((entry) => {
       //TODO: add animations
       if (entry.action === "attack") {
-        let target = (entry.index + 4) % 8; //0>4, 3>7, 4>0, 7->3
+        let target = entry.target
         let trueDamage = newBoard[entry.index].damage //SIGILS - buffneighbours,
           + (entry.index % 4 !== 0 && newBoard[entry.index-1] && newBoard[entry.index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
           + (entry.index % 4 !== 3 && newBoard[entry.index+1] && newBoard[entry.index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)

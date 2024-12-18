@@ -73,7 +73,7 @@ io.on("connection", (socket) => {
               card: "opossum",
               costType: "bone",
               cost: 0,
-              sigils: [],
+              sigils: ["drawcopy"],
               defaultSigils: 0,
               damage: 1,
               health: 1,
@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
               card: "opossum",
               costType: "bone",
               cost: 0,
-              sigils: ["corpseeater"],
+              sigils: ["tristrike", "splitstrike"],
               defaultSigils: 0,
               damage: 1,
               health: 1,
@@ -180,17 +180,62 @@ io.on("connection", (socket) => {
 
     //attacks
     [...Array(4)].forEach((val, index) => {
-      if (rooms[room].board[index + offset] /*&& rooms[room].board[index + offset].damage > 0*/) {
+      if (rooms[room].board[index + offset] && rooms[room].board[index + offset].damage > 0) { //second clause was originally commented out?
         let sigils = rooms[room].board[index + offset].sigils;
+        let target = (index+offset + 4) % 8; //0>4, 3>7, 4>0, 7->3
   
-        rooms[room].activityLog.push({
-          index: index + offset,
-          action: "attack"
-        })  
+        if (sigils.indexOf("splitstrike") < 0 && sigils.indexOf("tristrike") < 0) {
+          rooms[room].activityLog.push({
+            index: index + offset,
+            action: "attack",
+            target: target
+          })  
+        }
+
+        if (sigils.indexOf("splitstrike") > -1) { //SIGILS - splitstrike
+          if (Math.floor(target / 4) == Math.floor((target-1) / 4)) { //target on same "level" as straight
+            rooms[room].activityLog.push({
+              index: index + offset,
+              action: "attack",
+              target: target-1 
+            })  
+          }
+          if (Math.floor(target / 4) == Math.floor((target+1) / 4)) {
+            rooms[room].activityLog.push({
+              index: index + offset,
+              action: "attack",
+              target: target+1
+            })  
+          }
+        }
+        //must be done twice for them to stack
+        if (sigils.indexOf("tristrike") > -1) { //SIGILS - tristrike
+          if (Math.floor(target / 4) == Math.floor((target-1) / 4)) { 
+            rooms[room].activityLog.push({
+              index: index + offset,
+              action: "attack",
+              target: target-1 
+            })  
+          }
+          rooms[room].activityLog.push({ //this is isolated to avoid bugs when stacked with splitstrike
+            index: index + offset,
+            action: "attack",
+            target: target
+          })  
+          if (Math.floor(target / 4) == Math.floor((target+1) / 4)) {
+            rooms[room].activityLog.push({
+              index: index + offset,
+              action: "attack",
+              target: target+1
+            })  
+          }
+        }
+
         if (sigils.indexOf("doublestrike") >= 0) { //SIGILS - doublestrike
           rooms[room].activityLog.push({
             index: index + offset,
-            action: "attack"
+            action: "attack",
+            target: target
           })  
         }
         if (sigils.indexOf("bonedigger") >= 0) { //SIGILS - bonedigger

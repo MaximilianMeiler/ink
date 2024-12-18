@@ -20,6 +20,8 @@
 - tripleblood
 - submerge
 - submergesquid
+- splitstrike
+- tristrike
 
 ### Sigils skipped:
 - damage for ants
