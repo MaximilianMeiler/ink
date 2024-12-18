@@ -203,17 +203,18 @@ function App() {
     for (let logIndex = 0; logIndex < newRoom.activityLog.length; logIndex++) {
       let entry = newRoom.activityLog[logIndex];
       //TODO: add animations
-      if (entry.action === "attack") {
+      if (entry.action.substr(0,6) === "attack") { //covers attack, attacksharp, attacksharplethal
         let target = entry.target
-        let trueDamage = newBoard[entry.index].damage //SIGILS - buffneighbours,
+        let trueDamage = entry.action.length > 6 ? 1 :
+          newBoard[entry.index].damage //SIGILS - buffneighbours,
           + (entry.index % 4 !== 0 && newBoard[entry.index-1] && newBoard[entry.index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
           + (entry.index % 4 !== 3 && newBoard[entry.index+1] && newBoard[entry.index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
 
         if (trueDamage < 1) {
           //do nothing
-        } else if (newBoard[target] && 
-          (newBoard[entry.index].sigils.indexOf("flying") < 0 || newBoard[target].sigils.indexOf("reach") > -1) &&
-          (newBoard[target].sigils.indexOf("submerge") < 0 && newBoard[target].sigils.indexOf("submergesquid") < 0))
+        } else if (newBoard[target] && (entry.action.length > 6 || 
+          ((newBoard[entry.index].sigils.indexOf("flying") < 0 || newBoard[target].sigils.indexOf("reach") > -1) &&
+           (newBoard[target].sigils.indexOf("submerge") < 0 && newBoard[target].sigils.indexOf("submergesquid") < 0))))
         { //SIGILS - flying, reach, submerge
           
           let shieldIndex = newBoard[target].sigils.indexOf("deathshield"); //SIGILS - deathshield
@@ -223,7 +224,7 @@ function App() {
             }
             newBoard[target].sigils.splice(shieldIndex, 1);
           } else {
-            newBoard[target].health -= trueDamage;
+            newBoard[target].health -= trueDamage; //FIXME - should deathtouch not kill a deathshield?
           }
 
           if (newBoard[target].sigils.indexOf("beesonhit") > -1) { //SIGILS - beesonhit
@@ -253,7 +254,18 @@ function App() {
               }
             })
           }
-          if (newBoard[target].health <= 0 || newBoard[entry.index].sigils.indexOf("deathtouch") > -1) { //SIGILS - deathtouch, gainattackkonkill
+
+          
+          if (newBoard[entry.index] && newBoard[target].sigils.indexOf("sharp") > -1) { //SIGILS - sharp
+            newRoom.activityLog[logIndex] = {
+              index: entry.target, //careful - this may be null at next iteration
+              action: newBoard[target].sigils.indexOf("deathtouch") > -1 ? "attacksharplethal" : "attacksharp", //deathtouch + sharp synergy
+              target: entry.index
+            }
+            logIndex--;
+          }
+
+          if (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1))) { //SIGILS - deathtouch, gainattackkonkill
             newBones[target < 4 ? 1 : 0]++;
 
             if (newBoard[target].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath
@@ -273,7 +285,7 @@ function App() {
             newBones[target < 4 ? 0 : 1] += scavenging
 
             newBoard[target] = null;
-            if (newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {
+            if (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {
               newBoard[entry.index].damage++;
             }
 

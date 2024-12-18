@@ -24,7 +24,7 @@ function Card({val}) {
               indexAdj = 4;
             }
 
-            return (
+            return ( //FIXME - 3 patches at once still doesn't work
               <div>
                 {i >= val.defaultSigils ? 
                   <img src={'./card_added_ability.png'} alt="Added sigil patch" className={`card sigilPatch${i - val.defaultSigils + 1}`}></img>

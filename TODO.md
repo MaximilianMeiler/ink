@@ -22,12 +22,15 @@
 - submergesquid
 - splitstrike
 - tristrike
+- whackamole
+- sharp
 
 ### Sigils skipped:
 - damage for ants
 - damage for bell squid, card squid, mirror squid
 
 - strafe (best for last)
+- strafepush
 - tutor
 
 - hodag's special skill
@@ -37,3 +40,5 @@
 - createbells (rewrite card placement first)
 
 - child 13
+
+- randomconsumable ???
