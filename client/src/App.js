@@ -38,7 +38,8 @@ function App() {
     }
 
 
-    newBones[newRoom.player0 === socket.id ? 0 : 1] += newRoom.sacrifices.length; //fix - should be based on state and not socket id...
+    let boneGain = newRoom.sacrifices.reduce((acc, i) => acc + newRoom.board[i].sigils.indexOf("quadruplebones") > -1 ? 4 : 1, 0) //SIGILS - quadruplebones
+    newBones[newRoom.player0 === socket.id ? 0 : 1] += boneGain; //fix - should be based on state and not socket id...
     let scavenging = 0; //SIGILS - opponentbones (stacks), guarddog
     let guarding = -1;
     let offset = newRoom.player0 === socket.id ? 0 : 4;
@@ -50,7 +51,7 @@ function App() {
         guarding = i + offset;
       }
     }
-    newBones[newRoom.player0 === socket.id ? 1 : 0] += scavenging * newRoom.sacrifices.length
+    newBones[newRoom.player0 === socket.id ? 1 : 0] += scavenging * boneGain
 
     let newBoard = newRoom.board;
     let damageBonus = 0;
@@ -266,7 +267,7 @@ function App() {
           }
 
           if (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1))) { //SIGILS - deathtouch, gainattackkonkill
-            newBones[target < 4 ? 1 : 0]++;
+            newBones[target < 4 ? 1 : 0] += newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1; //SIGILS - quadruplebones
 
             if (newBoard[target].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath
               if (newBoard[target].clone) {
@@ -282,7 +283,7 @@ function App() {
                 scavenging++;
               }
             }
-            newBones[target < 4 ? 0 : 1] += scavenging
+            newBones[target < 4 ? 0 : 1] += scavenging * newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1;
 
             newBoard[target] = null;
             if (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {

@@ -71,24 +71,24 @@ io.on("connection", (socket) => {
           [
             {
               card: "opossum",
-              costType: "bone",
-              cost: 0,
-              sigils: ["sharp", "deathtouch"],
+              costType: "blood",
+              cost: 1,
+              sigils: ["opponentbones", "quadruplebones"],
               defaultSigils: 0,
-              damage: 0,
-              health: 6,
+              damage: 1,
+              health: 1,
               index: 0,
             },
           ],
           [
             {
               card: "opossum",
-              costType: "bone",
-              cost: 0,
-              sigils: ["splitstrike", "sharp"],
+              costType: "blood",
+              cost: 1,
+              sigils: ["opponentbones"],
               defaultSigils: 0,
               damage: 1,
-              health: 3,
+              health: 1,
               index: 0,
             // },
             // {
