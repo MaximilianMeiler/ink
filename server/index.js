@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
               card: "opossum",
               costType: "bone",
               cost: 0,
-              sigils: ["tailonhit", "splitstrike"],
+              sigils: ["tailonhit", "evolve"],
               defaultSigils: 0,
               damage: 1,
               health: 1,

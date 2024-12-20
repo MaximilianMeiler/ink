@@ -38,7 +38,7 @@ function App() {
     }
 
 
-    let boneGain = newRoom.sacrifices.reduce((acc, i) => acc + newRoom.board[i].sigils.indexOf("quadruplebones") > -1 ? 4 : 1, 0) //SIGILS - quadruplebones
+    let boneGain = newRoom.sacrifices.reduce((acc, i) => acc + (newRoom.board[i].sigils.indexOf("quadruplebones") > -1 ? 4 : 1), 0) //SIGILS - quadruplebones
     newBones[newRoom.player0 === socket.id ? 0 : 1] += boneGain; //fix - should be based on state and not socket id...
     let scavenging = 0; //SIGILS - opponentbones (stacks), guarddog
     let guarding = -1;
@@ -322,7 +322,7 @@ function App() {
                 scavenging++;
               }
             }
-            newBones[target < 4 ? 0 : 1] += scavenging * newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1;
+            newBones[target < 4 ? 0 : 1] += scavenging * (newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1);
 
             newBoard[target] = null;
             if (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {
