@@ -225,6 +225,41 @@ function App() {
             }
             newBoard[target].sigils.splice(shieldIndex, 1);
           } else {
+            if (newBoard[target].sigils.indexOf("tailonhit") > -1) { //SIGILS - tailonhit
+              let newSigils = Array.from(newBoard[target].sigils);
+              newSigils.splice(newSigils.indexOf("tailonhit"), 1);
+              let tailCard = {
+                card: newBoard[target].tribe === "insect" ? "insect_tail" : newBoard[target].tribe === "canine" ? "canine_tail" : newBoard[target].tribe === "avian" ? "bird_tail" : "skink_tail",
+                costType:"bone",
+                cost: 0,
+                sigils: newSigils,
+                defaultSigils: 0,
+                damage: 0,
+                health: 2,
+                tribe: newBoard[target].tribe,
+                rare: false,
+                clone: {
+                  card: newBoard[target].tribe === "insect" ? "insect_tail" : newBoard[target].tribe === "canine" ? "canine_tail" : newBoard[target].tribe === "avian" ? "bird_tail" : "skink_tail",
+                  costType:"bone",
+                  cost: 0,
+                  sigils: newSigils,
+                  defaultSigils: 0,
+                  damage: 0,
+                  health: 2,
+                  tribe: newBoard[target].tribe,
+                  rare: false
+                }
+              }
+
+              if (Math.floor(target / 4) === Math.floor((target+1) / 4) && !newBoard[target+1]) { //empty slot
+                newBoard[target+1] = {...newBoard[target], sigils: newSigils}; //does a copy need to be made?
+                newBoard[target] = tailCard;
+              } else if (Math.floor(target / 4) === Math.floor((target-1) / 4) && !newBoard[target-1]) {
+                newBoard[target-1] = {...newBoard[target], sigils: newSigils};
+                newBoard[target] = tailCard;
+              }
+            }
+
             newBoard[target].health -= trueDamage; //FIXME - should deathtouch not kill a deathshield?
           }
 

@@ -24,6 +24,8 @@
 - tristrike
 - whackamole
 - sharp
+- quadruplebones
+- tailonhit
 
 ### Sigils skipped:
 - damage for ants
