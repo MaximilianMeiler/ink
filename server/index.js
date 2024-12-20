@@ -73,7 +73,7 @@ io.on("connection", (socket) => {
               card: "opossum",
               costType: "bone",
               cost: 0,
-              sigils: ["buffneighbours"],
+              sigils: [],
               defaultSigils: 0,
               damage: 1,
               health: 1,
@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
               card: "opossum",
               costType: "bone",
               cost: 0,
-              sigils: ["debuffenemy"],
+              sigils: ["tailonhit", "splitstrike"],
               defaultSigils: 0,
               damage: 1,
               health: 1,
@@ -174,6 +174,7 @@ io.on("connection", (socket) => {
     })
   })
 
+  //FIXME - activity log should reflect all things that require an animation. move simulation logic here from frontend
   socket.on("bellRung", (room) => { //generate activity log once bell is rung?
     let offset = rooms[room].gameState == "play1" ? 0 : 4;
     rooms[room].activityLog = [];
@@ -183,60 +184,51 @@ io.on("connection", (socket) => {
       if (rooms[room].board[index + offset] /*&& rooms[room].board[index + offset].damage > 0*/) { //second clause was originally commented out? 
                                                                                                    //this was for alpha you silly billy
         let sigils = rooms[room].board[index + offset].sigils;
-        let target = (index+offset + 4) % 8; //0>4, 3>7, 4>0, 7->3
   
         if (sigils.indexOf("splitstrike") < 0 && sigils.indexOf("tristrike") < 0) {
           rooms[room].activityLog.push({
             index: index + offset,
             action: "attack",
-            target: target
+            aim: 0
           })  
         }
 
         if (sigils.indexOf("splitstrike") > -1) { //SIGILS - splitstrike
-          if (Math.floor(target / 4) == Math.floor((target-1) / 4)) { //target on same "level" as straight
-            rooms[room].activityLog.push({
-              index: index + offset,
-              action: "attack",
-              target: target-1 
-            })  
-          }
-          if (Math.floor(target / 4) == Math.floor((target+1) / 4)) {
-            rooms[room].activityLog.push({
-              index: index + offset,
-              action: "attack",
-              target: target+1
-            })  
-          }
+          rooms[room].activityLog.push({
+            index: index + offset,
+            action: "attack",
+            aim: -1 
+          })  
+          rooms[room].activityLog.push({
+            index: index + offset,
+            action: "attack",
+            aim: 1
+          })  
         }
         //must be done twice for them to stack
         if (sigils.indexOf("tristrike") > -1) { //SIGILS - tristrike
-          if (Math.floor(target / 4) == Math.floor((target-1) / 4)) { 
-            rooms[room].activityLog.push({
-              index: index + offset,
-              action: "attack",
-              target: target-1 
-            })  
-          }
+          rooms[room].activityLog.push({
+            index: index + offset,
+            action: "attack",
+            aim: -1 
+          })  
           rooms[room].activityLog.push({ //this is isolated to avoid bugs when stacked with splitstrike
             index: index + offset,
             action: "attack",
-            target: target
+            aim: 0
           })  
-          if (Math.floor(target / 4) == Math.floor((target+1) / 4)) {
-            rooms[room].activityLog.push({
-              index: index + offset,
-              action: "attack",
-              target: target+1
-            })  
-          }
+          rooms[room].activityLog.push({
+            index: index + offset,
+            action: "attack",
+            aim: 1
+          })  
         }
 
         if (sigils.indexOf("doublestrike") >= 0) { //SIGILS - doublestrike
           rooms[room].activityLog.push({
             index: index + offset,
             action: "attack",
-            target: target
+            aim: 0
           })  
         }
         if (sigils.indexOf("bonedigger") >= 0) { //SIGILS - bonedigger

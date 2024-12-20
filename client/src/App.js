@@ -205,7 +205,10 @@ function App() {
       let entry = newRoom.activityLog[logIndex];
       //TODO: add animations
       if (entry.action.substr(0,6) === "attack") { //covers "attack", "attacksharp", "attacksharplethal"
-        let target = entry.target
+        let target = entry.target ? entry.target : (entry.index + 4) % 8 + entry.aim
+        if (Math.floor(target / 4) !== Math.floor(((entry.index + 4) % 8) / 4)) { //null atk if it goes off of board
+          continue;
+        }
         let trueDamage = entry.action.length > 6 ? 1 :
           newBoard[entry.index].damage //SIGILS - buffneighbours, debuffenemy
           + (entry.index % 4 !== 0 && newBoard[entry.index-1] && newBoard[entry.index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
@@ -719,7 +722,7 @@ function App() {
                         )) 
                       { //empty slot - place selected card
                         placeSelectedCard(index);
-                      } else if (val && val.card) { //toggle sacrifices for selected card
+                      } else if (val && val.card) { //toggle sacrifices for selected card //FIXME - terrain cant be sacrificed?
                         let newSac = room.sacrifices;
                         let dying = room.sacrifices.indexOf(index) > -1 
                         if (dying) {

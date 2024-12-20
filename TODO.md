@@ -26,6 +26,7 @@
 - sharp
 - quadruplebones
 - tailonhit
+- debuffenemy
 
 ### Sigils skipped:
 - damage for ants
@@ -44,3 +45,6 @@
 - child 13
 
 - randomconsumable ???
+
+### TODO
+### FIXME
