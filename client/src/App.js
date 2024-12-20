@@ -204,12 +204,13 @@ function App() {
     for (let logIndex = 0; logIndex < newRoom.activityLog.length; logIndex++) {
       let entry = newRoom.activityLog[logIndex];
       //TODO: add animations
-      if (entry.action.substr(0,6) === "attack") { //covers attack, attacksharp, attacksharplethal
+      if (entry.action.substr(0,6) === "attack") { //covers "attack", "attacksharp", "attacksharplethal"
         let target = entry.target
         let trueDamage = entry.action.length > 6 ? 1 :
-          newBoard[entry.index].damage //SIGILS - buffneighbours,
+          newBoard[entry.index].damage //SIGILS - buffneighbours, debuffenemy
           + (entry.index % 4 !== 0 && newBoard[entry.index-1] && newBoard[entry.index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
           + (entry.index % 4 !== 3 && newBoard[entry.index+1] && newBoard[entry.index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
+          + (newBoard[(entry.index + 4) % 8] && newBoard[(entry.index + 4) % 8].sigils.indexOf("debuffenemy") > -1 ? -1 : 0)
 
         if (trueDamage < 1) {
           //do nothing
@@ -687,10 +688,11 @@ function App() {
                   <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
                   {val && val.card ? 
                     <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-                      <Card val={{...val, //SIGILS - buffneighbours,
+                      <Card val={{...val, //SIGILS - buffneighbours, debuffenemy
                         damage: val.damage 
                           + (index % 4 !== 0 && room.board[index-1] && room.board[index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
                           + (index % 4 !== 3 && room.board[index+1] && room.board[index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
+                          + (room.board[(index + 4) % 8] && room.board[(index + 4) % 8].sigils.indexOf("debuffenemy") > -1 ? -1 : 0)
                       }}/>
                     </div>
                   : <></>
