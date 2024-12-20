@@ -152,6 +152,39 @@ function App() {
       }
     }
 
+    if (placedCard.sigils.indexOf("createdams") > -1) { //SIGILS - createdams
+      let newSigils = Array.from(placedCard.sigils);
+      newSigils.splice(newSigils.indexOf("createdams"), 1);
+      let damCard = {
+        card: "dam",
+        costType:"bone",
+        cost: 0,
+        sigils: newSigils,
+        defaultSigils: 0,
+        damage: 0,
+        health: 2,
+        tribe: "none",
+        rare: false,
+        clone: {
+          card: "dam",
+          costType:"bone",
+          cost: 0,
+          sigils: newSigils,
+          defaultSigils: 0,
+          damage: 0,
+          health: 2,
+          tribe: "none",
+          rare: false,
+        }
+      }
+      if (Math.floor(index / 4) === Math.floor((index+1) / 4) && !newBoard[index+1]) {
+        newRoom = placeSelectedCard(index+1, damCard, newRoom);
+      }
+      if (Math.floor(index / 4) === Math.floor((index-1) / 4) && !newBoard[index-1]) {
+        newRoom = placeSelectedCard(index-1, damCard, newRoom);
+      }
+    }
+
     return {...newRoom, sacrifices: [], bones: newBones, board: newBoard, hands: newHands}
   }
 
