@@ -200,9 +200,15 @@ function App() {
     let newBoard = newRoom.board;
     let newHands = newRoom.hands;
     console.log("simulating room", newRoom)
+    let indexMapping = [0, 1, 2, 3, 4, 5, 6, 7];
 
     for (let logIndex = 0; logIndex < newRoom.activityLog.length; logIndex++) {
       let entry = newRoom.activityLog[logIndex];
+      entry.index = indexMapping[entry.index] //adjust for card movements
+      if (!newBoard[entry.index]) { //no card left to act
+        continue;
+      }
+
       //TODO: add animations
       if (entry.action.substr(0,6) === "attack") { //covers "attack", "attacksharp", "attacksharplethal"
         let target = entry.target ? entry.target : (entry.index + 4) % 8 + entry.aim
@@ -258,9 +264,11 @@ function App() {
               if (Math.floor(target / 4) === Math.floor((target+1) / 4) && !newBoard[target+1]) { //empty slot
                 newBoard[target+1] = {...newBoard[target], sigils: newSigils}; //does a copy need to be made?
                 newBoard[target] = tailCard;
+                indexMapping[target] = target+1; //make any actions by the target actually occur at the new location
               } else if (Math.floor(target / 4) === Math.floor((target-1) / 4) && !newBoard[target-1]) {
                 newBoard[target-1] = {...newBoard[target], sigils: newSigils};
                 newBoard[target] = tailCard;
+                indexMapping[target] = target-1;
               }
             }
 
@@ -358,6 +366,7 @@ function App() {
           if (moleIndex > -1) {
             newBoard[target] = newBoard[moleIndex];
             newBoard[moleIndex] = null;
+            newBoard[moleIndex] = target;
             logIndex--;
           } else {
             newScale += trueDamage * (target < 4 ? 1 : -1);
