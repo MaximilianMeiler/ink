@@ -11,7 +11,7 @@ function Card({val}) {
           <div className='card cardHeader'>{val.card === "blank" ? "Skip draw" : val.card}</div>
           <img src={`/portrait_${val.card}.png`} alt={`${val.card} portrait`} className='card cardPortrait'></img>
           <img src={`/cost_${val.cost}${val.costType}.png`} alt={`${val.card} cost`} className='card cardCost'></img>
-          <div className='card cardDamage'>{val.card === "blank" ? "" : val.damage}</div>
+          <div className='card cardDamage'>{val.card === "blank" ? "" : Math.max(val.damage, 0)}</div>
           <div className='card cardHealth'>{val.card === "blank" ? "" : val.health}</div>
           
           {val.sigils.length > val.defaultSigils ? 

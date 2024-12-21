@@ -238,15 +238,20 @@ function App() {
     for (let logIndex = 0; logIndex < newRoom.activityLog.length; logIndex++) {
       let entry = newRoom.activityLog[logIndex];
       entry.index = indexMapping[entry.index] //adjust for card movements
-      if (!newBoard[entry.index]) { //no card left to act
+      if (!newBoard[entry.index] && entry.action !== "attacksharp" && entry.action !== "attacksharplethal") { //no card left to act
         continue;
       }
 
       //TODO: add animations
       if (entry.action.substr(0,6) === "attack") { //covers "attack", "attacksharp", "attacksharplethal"
-        let target = entry.target ? entry.target : (entry.index + 4) % 8 + entry.aim
-        if (Math.floor(target / 4) !== Math.floor(((entry.index + 4) % 8) / 4)) { //null atk if it goes off of board
-          continue;
+        let target;
+        if (entry.target) {
+          target = entry.target;
+        } else {
+          target = (entry.index + 4) % 8 + entry.aim;
+          if (Math.floor(target / 4) !== Math.floor(((entry.index + 4) % 8) / 4)) { //null atk if it goes off of board
+            continue;
+          }
         }
         let trueDamage = entry.action.length > 6 ? 1 :
           newBoard[entry.index].damage //SIGILS - buffneighbours, debuffenemy
@@ -338,12 +343,11 @@ function App() {
 
           
           if (newBoard[entry.index] && newBoard[target].sigils.indexOf("sharp") > -1) { //SIGILS - sharp
-            newRoom.activityLog[logIndex] = {
+            newRoom.activityLog.splice(logIndex+1, 0, {
               index: entry.target, //careful - this may be null at next iteration
               action: newBoard[target].sigils.indexOf("deathtouch") > -1 ? "attacksharplethal" : "attacksharp", //deathtouch + sharp synergy
               target: entry.index
-            }
-            logIndex--;
+            })
           }
 
           if (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1))) { //SIGILS - deathtouch, gainattackkonkill

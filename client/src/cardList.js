@@ -509,8 +509,8 @@ let allCards = {
     card: "squidbell",
     costType:"blood",
     cost: 2,
-    sigils: [],
-    defaultSigils: 0,
+    sigils: ["loud"],
+    defaultSigils: 1,
     damage: -6,
     health: 3,
     tribe: "none",
@@ -777,3 +777,5 @@ let allSigils = [
 ]
 
 module.exports = {allCards: allCards, allSigils: allSigils}
+
+//custom sigils for secrets - "loud"

@@ -27,24 +27,22 @@
 - quadruplebones
 - tailonhit
 - debuffenemy
+- createdams
+
+- secrets: 
 
 ### Sigils skipped:
-- damage for ants
-- damage for bell squid, card squid, mirror squid
-
-- strafe (best for last)
+- strafe 
 - strafepush
 - tutor
 
-- hodag's special skill
-- ourobouros drawcopyondeath
-
-- createdams (rewrite card placement first)
 - createbells (rewrite card placement first)
 
-- child 13
 
 - randomconsumable ???
+
+Cards with secret effects: daus, ouro, hodag, child 13, terrain, long elk???, ant dmg, bell squid dmg, card squid dmg, mirror squid dmg
+https://inscryption.fandom.com/wiki/Traits
 
 ### TODO
 ### FIXME
