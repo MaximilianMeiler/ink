@@ -152,6 +152,41 @@ function App() {
       }
     }
 
+    //chimes get the "loud" sigil, which they can pass on to derived cards
+    if (placedCard.sigils.indexOf("createbells") > -1) { //SIGILS - createbells
+      let newSigils = Array.from(placedCard.sigils);
+      newSigils.splice(newSigils.indexOf("createbells"), 1);
+      newSigils.splice(0, 0, "loud");
+      let chimeCard = {
+        card: "dausbell",
+        costType:"bone",
+        cost: 0,
+        sigils: newSigils,
+        defaultSigils: 1,
+        damage: 0,
+        health: 1,
+        tribe: "none",
+        rare: false,
+        clone: {
+          card: "dausbell",
+          costType:"bone",
+          cost: 0,
+          sigils: newSigils,
+          defaultSigils: 1,
+          damage: 0,
+          health: 1,
+          tribe: "none",
+          rare: false,
+        }
+      }
+      if (Math.floor(index / 4) === Math.floor((index+1) / 4) && !newBoard[index+1]) {
+        newRoom = placeSelectedCard(index+1, chimeCard, newRoom);
+      }
+      if (Math.floor(index / 4) === Math.floor((index-1) / 4) && !newBoard[index-1]) {
+        newRoom = placeSelectedCard(index-1, chimeCard, newRoom);
+      }
+    }
+
     if (placedCard.sigils.indexOf("createdams") > -1) { //SIGILS - createdams
       let newSigils = Array.from(placedCard.sigils);
       newSigils.splice(newSigils.indexOf("createdams"), 1);
@@ -350,6 +385,21 @@ function App() {
             })
           }
 
+          if (newBoard[entry.index] && newBoard[target].sigils.indexOf("loud") > -1) { //SIGILS - loud/createbells
+            let offset = Math.floor(target / 4) * 4; //check for createbells on all cards of the side attacked
+
+            // eslint-disable-next-line no-loop-func
+            [...Array(4)].forEach((val, index) => {
+              if (newBoard[(index + offset) % 8] && newBoard[index + offset].sigils.indexOf("createbells") > -1) {
+                newRoom.activityLog.splice(logIndex+1, 0, {
+                  index: index+offset,
+                  action: "attack",
+                  target: entry.index
+                })
+              }
+            });
+          }
+
           if (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1))) { //SIGILS - deathtouch, gainattackkonkill
             newBones[target < 4 ? 1 : 0] += newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1; //SIGILS - quadruplebones
 
@@ -414,12 +464,13 @@ function App() {
         newSigils.splice(newSigils.indexOf("submergesquid"), 1); //SIGILS - evolve
 
         if (entry.rand < .333) {
+          newSigils.splice(0, 0, "loud")
           newBoard[entry.index] = {
             card: "squidbell",
             costType:"blood",
             cost: 2,
             sigils: newSigils,
-            defaultSigils: 0,
+            defaultSigils: 1,
             damage: -6,
             health: 3,
             tribe: "none",
@@ -429,7 +480,7 @@ function App() {
               costType:"blood",
               cost: 2,
               sigils: newSigils,
-              defaultSigils: 0,
+              defaultSigils: 1,
               damage: -6,
               health: 3,
               tribe: "none",

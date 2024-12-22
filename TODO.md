@@ -28,20 +28,18 @@
 - tailonhit
 - debuffenemy
 - createdams
+- createbells
 
-- secrets: 
+- secrets: daus ("loud" sigil)
 
 ### Sigils skipped:
 - strafe 
 - strafepush
 - tutor
 
-- createbells (rewrite card placement first)
-
-
 - randomconsumable ???
 
-Cards with secret effects: daus, ouro, hodag, child 13, terrain, long elk???, ant dmg, bell squid dmg, card squid dmg, mirror squid dmg
+Cards with secret effects: ouro, hodag, child 13, terrain, long elk???, ant dmg, bell squid dmg, card squid dmg, mirror squid dmg
 https://inscryption.fandom.com/wiki/Traits
 
 ### TODO
