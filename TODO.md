@@ -35,11 +35,12 @@
 ### Sigils skipped:
 - strafe 
 - strafepush
+- strafeswap  
 - tutor
 
 - randomconsumable ???
 
-Cards with secret effects: ouro, hodag, child 13, terrain, long elk???, ant dmg, bell squid dmg, card squid dmg, mirror squid dmg
+Cards with secret effects: ouro, hodag, child 13, terrain, long elk???, ant dmg, bell squid dmg, card squid dmg, mirror squid dmg, red hart damage, lammergeier damage
 https://inscryption.fandom.com/wiki/Traits
 
 ### TODO

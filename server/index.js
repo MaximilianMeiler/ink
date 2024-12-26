@@ -231,6 +231,42 @@ io.on("connection", (socket) => {
             aim: 0
           })  
         }
+      }
+    });
+
+    [...Array(4)].forEach((val, index) => {
+      if (rooms[room].board[index + offset]) {
+        let sigils = rooms[room].board[index + offset].sigils;
+
+        //this really needs to just be consolidated into one "move" action later
+        if (sigils.indexOf("strafeswap") > -1 || sigils.indexOf("strafeswapleft") > -1) { //SIGILS - strafeswap
+          rooms[room].activityLog.push({
+            index: index + offset,
+            action: "strafeswap",
+            swapped: false
+          })
+        }
+        if (sigils.indexOf("strafepush") > -1 || sigils.indexOf("strafepushleft") > -1) { //SIGILS - strafepush
+          rooms[room].activityLog.push({
+            index: index + offset,
+            action: "strafepush",
+            swapped: false
+          })
+        }
+        if (sigils.indexOf("strafe") > -1 || sigils.indexOf("strafeleft") > -1) { //SIGILS - strafeswap
+          rooms[room].activityLog.push({
+            index: index + offset,
+            action: "strafe",
+            swapped: false
+          })
+        }
+      }
+    });
+
+    [...Array(4)].forEach((val, index) => {
+      if (rooms[room].board[index + offset]) {
+        let sigils = rooms[room].board[index + offset].sigils;
+  
         if (sigils.indexOf("bonedigger") >= 0) { //SIGILS - bonedigger
           rooms[room].bones[index < 4 ? 1 : 0]++;
         }

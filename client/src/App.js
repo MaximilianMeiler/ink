@@ -449,7 +449,6 @@ function App() {
               moleIndex = i + offset;
             }
           }
-          console.log("mole: ", moleIndex)
           if (moleIndex > -1) {
             newBoard[target] = newBoard[moleIndex];
             newBoard[moleIndex] = null;
@@ -622,6 +621,148 @@ function App() {
             newBoard[entry.index].defaultSigils -= 1;
           }
           newBoard[entry.index].sigils = newSigils;
+        }
+      } else if (entry.action === "strafe") {
+        if (newBoard[entry.index].sigils.indexOf("strafeleft") > -1) {
+          if (entry.index % 4 !== 0 && !newBoard[entry.index-1]) { //move
+            newBoard[entry.index-1] = newBoard[entry.index];
+            newBoard[entry.index] = null;
+            indexMapping[originalIndex] -= 1;
+          } else if (!entry.swapped) {
+            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
+              return val === "strafeleft" ? "strafe" : 
+                     val === "strafepushleft" ? "strafepush" : 
+                     val === "strafeswapleft" ? "strafeswap" : val;
+            })
+            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
+              index: originalIndex,
+              swapped: true
+            })
+          }
+        } else {
+          if (entry.index % 4 !== 3 && !newBoard[entry.index+1]) { //move
+            newBoard[entry.index+1] = newBoard[entry.index];
+            newBoard[entry.index] = null;
+            indexMapping[originalIndex] += 1;
+          } else if (!entry.swapped) {
+            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
+              return val === "strafe" ? "strafeleft" : 
+                     val === "strafepush" ? "strafepushleft" : 
+                     val === "strafeswap" ? "strafeswapleft" : val;
+            })
+            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
+              index: originalIndex,
+              swapped: true
+            })
+          }
+        }
+      } else if (entry.action === "strafepush") {
+        if (newBoard[entry.index].sigils.indexOf("strafepushleft") > -1) {
+          let searchIndex = entry.index;
+          let stack = [];
+          while (Math.floor(searchIndex / 4) === Math.floor(entry.index / 4) && newBoard[searchIndex]) {
+            stack.push(searchIndex);
+            searchIndex--;
+          }
+          stack.reverse();
+          searchIndex++;
+          if (searchIndex % 4 !== 0) { //pushing possible
+            for (const i of stack) {
+              newBoard[i-1] = newBoard[i];
+              newBoard[i] = null;
+              for (let j = 0; j < indexMapping.length; j++) {
+                if (indexMapping[j] === i) {
+                  indexMapping[j] -= 1
+                } 
+              }
+            }
+          } else if (!entry.swapped) {
+            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
+              return val === "strafeleft" ? "strafe" : 
+                     val === "strafepushleft" ? "strafepush" : 
+                     val === "strafeswapleft" ? "strafeswap" : val;
+            })
+            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
+              index: originalIndex,
+              swapped: true
+            })
+          }
+        } else {
+          let searchIndex = entry.index;
+          let stack = [];
+          while (Math.floor(searchIndex / 4) === Math.floor(entry.index / 4) && newBoard[searchIndex]) {
+            stack.push(searchIndex);
+            searchIndex++;
+          }
+          stack.reverse();
+          searchIndex--;
+          if (searchIndex % 4 !== 3) { //pushing possible
+            for (const i of stack) {
+              newBoard[i+1] = newBoard[i];
+              newBoard[i] = null;
+              for (let j = 0; j < indexMapping.length; j++) {
+                if (indexMapping[j] === i) {
+                  indexMapping[j] += 1
+                } 
+              }
+            }
+          } else if (!entry.swapped) {
+            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
+              return val === "strafe" ? "strafeleft" : 
+                     val === "strafepush" ? "strafepushleft" : 
+                     val === "strafeswap" ? "strafeswapleft" : val;
+            })
+            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
+              index: originalIndex,
+              swapped: true
+            })
+          }
+        }
+      } else if (entry.action === "strafeswap") {
+        if (newBoard[entry.index].sigils.indexOf("strafeswapleft") > -1) {
+          if (entry.index % 4 !== 0) {
+            let temp = newBoard[entry.index-1];
+            newBoard[entry.index-1] = newBoard[entry.index];
+            newBoard[entry.index] = temp;
+            for (let j = 0; j < indexMapping.length; j++) {
+              if (indexMapping[j] === entry.index-1) {
+                indexMapping[j] += 1
+              }
+            }
+            indexMapping[originalIndex] -= 1;
+          } else if (!entry.swapped) {
+            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
+              return val === "strafeleft" ? "strafe" : 
+                     val === "strafepushleft" ? "strafepush" : 
+                     val === "strafeswapleft" ? "strafeswap" : val;
+            })
+            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
+              index: originalIndex,
+              swapped: true
+            })
+          }
+        } else {
+          if (entry.index % 4 !== 3) {
+            let temp = newBoard[entry.index+1];
+            newBoard[entry.index+1] = newBoard[entry.index];
+            newBoard[entry.index] = temp;
+            for (let j = 0; j < indexMapping.length; j++) {
+              if (indexMapping[j] === entry.index-1) {
+                indexMapping[j] -= 1
+              }
+            }
+            indexMapping[originalIndex] += 1;
+          } else if (!entry.swapped) {
+            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
+              return val === "strafe" ? "strafeleft" : 
+                     val === "strafepush" ? "strafepushleft" : 
+                     val === "strafeswap" ? "strafeswapleft" : val;
+            })
+            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
+              index: originalIndex,
+              swapped: true
+            })
+          }
         }
       }
     }
