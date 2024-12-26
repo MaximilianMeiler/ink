@@ -29,14 +29,14 @@
 - debuffenemy
 - createdams
 - createbells
+- strafe
+- strafepush
+- strafeswap
 
 - secrets: daus ("loud" sigil)
 
 ### Sigils skipped:
-- strafe 
-- strafepush
-- strafeswap  
-- tutor
+- tutor (will be done post-deck editing)
 
 - randomconsumable ???
 

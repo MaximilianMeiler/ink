@@ -234,6 +234,7 @@ io.on("connection", (socket) => {
       }
     });
 
+    //fixme - new cards such as tails never take a move action
     [...Array(4)].forEach((val, index) => {
       if (rooms[room].board[index + offset]) {
         let sigils = rooms[room].board[index + offset].sigils;

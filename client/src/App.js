@@ -272,8 +272,11 @@ function App() {
 
     for (let logIndex = 0; logIndex < newRoom.activityLog.length; logIndex++) {
       let entry = newRoom.activityLog[logIndex];
-      entry.index = indexMapping[entry.index] //adjust for card movements
-      if (!newBoard[entry.index] && entry.action !== "attacksharp" && entry.action !== "attacksharplethal") { //no card left to act
+      let originalIndex = entry.index;
+      if (!entry.target) { //sharp attack
+        entry.index = indexMapping[entry.index] //adjust for card movements
+      }
+      if (!newBoard[entry.index] && !entry.target) { //no card left to act
         continue;
       }
 
@@ -281,7 +284,7 @@ function App() {
       if (entry.action.substr(0,6) === "attack") { //covers "attack", "attacksharp", "attacksharplethal"
         let target;
         if (entry.target) {
-          target = entry.target;
+          target = entry.target; //erm should this mapping be applied
         } else {
           target = (entry.index + 4) % 8 + entry.aim;
           if (Math.floor(target / 4) !== Math.floor(((entry.index + 4) % 8) / 4)) { //null atk if it goes off of board
@@ -337,11 +340,19 @@ function App() {
               if (Math.floor(target / 4) === Math.floor((target+1) / 4) && !newBoard[target+1]) { //empty slot
                 newBoard[target+1] = {...newBoard[target], sigils: newSigils}; //does a copy need to be made?
                 newBoard[target] = tailCard;
-                indexMapping[target] = target+1; //make any actions by the target actually occur at the new location
+                for (let j = 0; j < indexMapping.length; j++) {
+                  if (indexMapping[j] === target) {
+                    indexMapping[j] += 1;
+                  }
+                } //make any actions by the target actually occur at the new location
               } else if (Math.floor(target / 4) === Math.floor((target-1) / 4) && !newBoard[target-1]) {
                 newBoard[target-1] = {...newBoard[target], sigils: newSigils};
                 newBoard[target] = tailCard;
-                indexMapping[target] = target-1;
+                for (let j = 0; j < indexMapping.length; j++) {
+                  if (indexMapping[j] === target) {
+                    indexMapping[j] -= 1;
+                  }
+                }
               }
             }
 
@@ -379,7 +390,7 @@ function App() {
           
           if (newBoard[entry.index] && newBoard[target].sigils.indexOf("sharp") > -1) { //SIGILS - sharp
             newRoom.activityLog.splice(logIndex+1, 0, {
-              index: entry.target, //careful - this may be null at next iteration
+              index: target, //careful - this may be null at next iteration
               action: newBoard[target].sigils.indexOf("deathtouch") > -1 ? "attacksharplethal" : "attacksharp", //deathtouch + sharp synergy
               target: entry.index
             })
@@ -450,9 +461,10 @@ function App() {
             }
           }
           if (moleIndex > -1) {
+            let temp = newBoard[target]
             newBoard[target] = newBoard[moleIndex];
             newBoard[moleIndex] = null;
-            newBoard[moleIndex] = target;
+            newBoard[moleIndex] = temp;
             logIndex--;
           } else {
             newScale += trueDamage * (target < 4 ? 1 : -1);
