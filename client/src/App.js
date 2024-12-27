@@ -38,7 +38,7 @@ function App() {
         newBones[newRoom.player0 === socket.id ? 0 : 1] -= placedCard.cost;
       } else {
         let boneGain = newRoom.sacrifices.reduce((acc, i) => acc + (newRoom.board[i].sigils.indexOf("quadruplebones") > -1 ? 4 : 1), 0) //SIGILS - quadruplebones
-        newBones[newRoom.player0 === socket.id ? 0 : 1] += boneGain; //fix - should be based on state and not socket id...
+        newBones[newRoom.player0 === socket.id ? 0 : 1] += boneGain; //FIXME - should be based on state and not socket id...
         let scavenging = 0; //SIGILS - opponentbones (stacks)
         for (let i = 0; i < 4; i++) {
           if (newRoom.board[i + offset] && newRoom.board[i + offset].sigils.indexOf("opponentbones") > -1) {
@@ -55,20 +55,20 @@ function App() {
           if (newBoard[i].sigils.indexOf("sacrificial") < 0) { //SIGILS - sacrificial
             if (newBoard[i].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath, buffondeath
               //i < 4 ? 1 : 0
-              if (newBoard[i].clone) {
-                newRoom.hands[newRoom.player0 === socket.id ? 0 : 1].push({
-                  ...newBoard[i].clone, 
-                  clone: newBoard[i].clone,
-                  damage: newBoard[i].clone.damage + (newBoard[i].sigils.indexOf("buffondeath") > -1 ? 1 : 0),
-                  health: newBoard[i].clone.damage + (newBoard[i].sigils.indexOf("buffondeath") > -1 ? 1 : 0)
-                }) //screw it, just gonna change stuff straight through newRoom
-              } else {
+              let undeadCard = {
+                ...newBoard[i].clone, 
+                clone: newBoard[i].clone,
+                damage: newBoard[i].clone.damage + (newBoard[i].sigils.indexOf("buffondeath") > -1 ? 1 : 0),
+                health: newBoard[i].clone.damage + (newBoard[i].sigils.indexOf("buffondeath") > -1 ? 1 : 0)
+              }
+              undeadCard.clone = structuredClone(undeadCard);
+              newRoom.hands[newRoom.player0 === socket.id ? 0 : 1].push(undeadCard) 
+              if (newBoard[i].index !== undefined) {
                 let matchingCard = newRoom.decks[newRoom.player0 === socket.id ? 0 : 1].findIndex((c) => c.index === newBoard[i].index);
                 if (newBoard[i].sigils.indexOf("buffondeath") > -1) {
-                  newRoom.decks[newRoom.player0 === socket.id ? 0 : 1][matchingCard].damage += 1;
-                  newRoom.decks[newRoom.player0 === socket.id ? 0 : 1][matchingCard].health += 1;
+                  newRoom.decks[newRoom.player0 === socket.id ? 0 : 1][matchingCard].damage = Math.max(newRoom.decks[newRoom.player0 === socket.id ? 0 : 1][matchingCard].damage, undeadCard.damage);
+                  newRoom.decks[newRoom.player0 === socket.id ? 0 : 1][matchingCard].health = Math.max(newRoom.decks[newRoom.player0 === socket.id ? 0 : 1][matchingCard].health, undeadCard.health);
                 }
-                newRoom.hands[newRoom.player0 === socket.id ? 0 : 1].push(newRoom.decks[newRoom.player0 === socket.id ? 0 : 1][matchingCard]) 
               }
             }
             newBoard[i] = null; //kill sacrificial cards
@@ -151,20 +151,11 @@ function App() {
     if (placedCard.sigils.indexOf("drawcopy") > -1) {//SIGILS - drawcopy
       let newSigils = Array.from(placedCard.sigils);
       newSigils.splice(newSigils.indexOf("drawcopy"), 1);
-      if (placedCard.clone) {
-        newHands[newRoom.player0 === socket.id ? 0 : 1].push({
-          ...placedCard.clone, 
-          clone: {...placedCard.clone, sigils: newSigils},
-          sigils: newSigils
-        })
-      } else {
-        let cardIndex = placedCard.index;
-        newHands[newRoom.player0 === socket.id ? 0 : 1].push({
-          ...newRoom.decks[newRoom.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex),
-          clone: {...newRoom.decks[newRoom.player0 === socket.id ? 0 : 1].find((c) => c.index === cardIndex), sigils: newSigils}, //create a clone for any card not exactly in deck
-          sigils: newSigils
-        })
-      }
+      newHands[newRoom.player0 === socket.id ? 0 : 1].push({
+        ...placedCard.clone, 
+        clone: {...placedCard.clone, sigils: newSigils},
+        sigils: newSigils
+      })
     }
 
     //chimes get the "loud" sigil, which they can pass on to derived cards
@@ -429,11 +420,21 @@ function App() {
           if (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1))) { //SIGILS - deathtouch, gainattackkonkill
             newBones[target < 4 ? 1 : 0] += newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1; //SIGILS - quadruplebones
 
-            if (newBoard[target].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath
-              if (newBoard[target].clone) {
-                newRoom.hands[target < 4 ? 1 : 0].push({...newBoard[target].clone, clone: newBoard[target].clone}) //screw it, just gonna change stuff straight through newRoom
-              } else {
-                newRoom.hands[target < 4 ? 1 : 0].push(newRoom.decks[target < 4 ? 1 : 0].find((c) => c.index === newBoard[target].index)) 
+            //FIXME - somehow this is coded so that the permanent buffs set in until a round ends, not when a card is redrawn from the deck. But I think I like that?
+            if (newBoard[target].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath, buffondeath
+              let undeadCard = {
+                ...newBoard[target].clone, 
+                damage: newBoard[target].clone.damage + (newBoard[target].sigils.indexOf("buffondeath") > -1 ? 1 : 0),
+                health: newBoard[target].clone.damage + (newBoard[target].sigils.indexOf("buffondeath") > -1 ? 1 : 0)
+              }
+              undeadCard.clone = structuredClone(undeadCard);
+              newRoom.hands[target < 4 ? 1 : 0].push(undeadCard) 
+              if (newBoard[target].index !== undefined) {
+                let matchingCard = newRoom.decks[target < 4 ? 1 : 0].findIndex((c) => c.index === newBoard[target].index);
+                if (newBoard[target].sigils.indexOf("buffondeath") > -1) {
+                  newRoom.decks[target < 4 ? 1 : 0][matchingCard].damage = Math.max(newRoom.decks[target < 4 ? 1 : 0][matchingCard].damage, undeadCard.damage);
+                  newRoom.decks[target < 4 ? 1 : 0][matchingCard].health = Math.max(newRoom.decks[target < 4 ? 1 : 0][matchingCard].health, undeadCard.health);
+                }
               }
             }
             let scavenging = 0; //SIGILS - opponentbones (stacks)
@@ -1050,12 +1051,13 @@ function App() {
             <div className='cardContainer' onClick={() => {
               if (draw.length <= 0) {return}
               let newHands = room.hands;
-              let drawnCard = draw[0];
+              let drawnCard = structuredClone(draw[0]);
               let randomIndex = drawnCard.sigils.indexOf("randomability"); //SIGILS - randomability
               if (randomIndex >= 0) {
                 drawnCard.sigils.splice(randomIndex, 1, allSigils[Math.floor(Math.random() * allSigils.length)])
               }
-              newHands[room.player0 === socket.id ? 0 : 1].push(draw[0]);
+              drawnCard.clone = structuredClone(drawnCard); //FIXME? - all cards now have clones. Corresponding else statements / use of card "indexes" are redundant
+              newHands[room.player0 === socket.id ? 0 : 1].push(drawnCard);
               let newDraw = draw;
               newDraw.splice(0, 1);
               if (newDraw.length === 0) { //when the draw pile runs dry, reshuffle the deck in

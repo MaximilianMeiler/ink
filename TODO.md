@@ -33,14 +33,14 @@
 - strafepush
 - strafeswap
 
-- secrets: daus ("loud" sigil)
+- secrets: daus ("loud"), ouro ("buffondeath")
 
 ### Sigils skipped:
 - tutor (will be done post-deck editing)
 
 - randomconsumable ???
 
-Cards with secret effects: ouro, hodag, child 13, terrain, long elk???, ant dmg, bell squid dmg, card squid dmg, mirror squid dmg, red hart damage, lammergeier damage
+Cards with secret effects: hodag, child 13, terrain, long elk???, ant dmg, bell squid dmg, card squid dmg, mirror squid dmg, red hart damage, lammergeier damage
 https://inscryption.fandom.com/wiki/Traits
 
 ### TODO

@@ -366,8 +366,8 @@ let allCards = {
     card: "ouroboros",
     costType:"blood",
     cost: 2,
-    sigils: ["drawcopyondeath"],
-    defaultSigils: 1,
+    sigils: ["drawcopyondeath", "buffondeath"],
+    defaultSigils: 2,
     damage: 1,
     health: 1,
     tribe: "reptile",
@@ -778,4 +778,4 @@ let allSigils = [
 
 module.exports = {allCards: allCards, allSigils: allSigils}
 
-//custom sigils for secrets - "loud"
+//custom sigils for secrets - "loud", "buffondeath"
