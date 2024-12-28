@@ -663,7 +663,7 @@ let allCards = {
     card: "hodag",
     costType:"blood",
     cost: 2,
-    sigils: ["gainattackonkill"],
+    sigils: ["gainattackonkillpermanent"],
     defaultSigils: 1,
     damage: 1,
     health: 5,

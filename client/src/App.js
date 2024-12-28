@@ -446,9 +446,16 @@ function App() {
             }
             newBones[target < 4 ? 0 : 1] += scavenging * (newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1);
 
-            newBoard[target] = null;
+            newBoard[target] = null; //SIGILS - gainattackonkill, gainattackonkillpermanent
             if (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {
               newBoard[entry.index].damage++;
+            }
+            if (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("gainattackonkillpermanent") > -1) {
+              newBoard[entry.index].damage++;
+              if (newBoard[entry.index].index !== undefined) {
+                let matchingCard = newRoom.decks[entry.index < 4 ? 1 : 0].findIndex((c) => c.index === newBoard[entry.index].index);
+                newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage = Math.max(newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage, newBoard[entry.index].damage);
+              }
             }
 
             let corpseIndex = -1;
