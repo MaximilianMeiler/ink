@@ -72,6 +72,24 @@ function App() {
               }
             }
             newBoard[i] = null; //kill sacrificial cards
+          } else if (newBoard[i].sigils.indexOf("sacrificialswap") > -1) {
+            if (newBoard[i].awakened) {
+              if (newBoard[i].card === "jerseydevil") {
+                newBoard[i].card = "jerseydevil_sleeping";
+              }
+              newBoard[i].awakened = false;
+              newBoard[i].sigils.splice(0, 1)
+              newBoard[i].damage -= 2;
+              newBoard[i].defaultSigils -= 1;
+            } else {
+              if (newBoard[i].card === "jerseydevil_sleeping") {
+                newBoard[i].card = "jerseydevil";
+              }
+              newBoard[i].awakened = true;
+              newBoard[i].sigils.splice(0, 0, "flying")
+              newBoard[i].damage += 2;
+              newBoard[i].defaultSigils += 1;
+            }
           }
         });
       }

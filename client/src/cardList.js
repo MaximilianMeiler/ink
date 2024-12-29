@@ -234,8 +234,8 @@ let allCards = {
     card: "jerseydevil_sleeping",
     costType:"blood",
     cost: 1,
-    sigils: ["sacrificial"],
-    defaultSigils: 1,
+    sigils: ["sacrificial", "sacrificialswap"],
+    defaultSigils: 2,
     damage: 0,
     health: 1,
     tribe: "hooved",
@@ -778,4 +778,4 @@ let allSigils = [
 
 module.exports = {allCards: allCards, allSigils: allSigils}
 
-//custom sigils for secrets - "loud", "buffondeath"
+//custom sigils for secrets - "loud", "buffondeath", "gainattackonkillpermanent", "sacrificialswap"
