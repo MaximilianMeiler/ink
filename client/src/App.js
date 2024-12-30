@@ -12,6 +12,20 @@ function App() {
   const [handSelection, setHandSelection] = useState(-1);
   const [draw, setDraw] = useState([]);
 
+  const calcTrueDamage = (board, index, bones, hands, recur = false) => {
+    return Math.max(board[index].damage, //SIGILS - antdamage, belldamage, carddamage, mirrordamage, bonedamage
+      board[index].sigils.indexOf("antdamage") > -1 ? [...Array(4)].reduce((acc, v, i) => acc + (board[i+(Math.floor(index / 4) * 4)] && ["ant","antqueen","antflying","amalgam"].indexOf(board[i+(Math.floor(index / 4) * 4)].name) > -1 ? 1 : 0), 0) : 0, 
+      board[index].sigils.indexOf("belldamage") > -1 ? 4 - index % 4 + (Math.floor(index/4) === Math.floor((index-1)/4) && board[index-1] && board[index-1].sigils.indexOf("loud") > -1 ? 1 : 0) + (Math.floor(index/4) === Math.floor((index+1)/4) && board[index+1] && board[index+1].sigils.indexOf("loud") > -1 ? 1 : 0) : 0, 
+      board[index].sigils.indexOf("carddamage") > -1 ? hands[index < 4 ? 1 : 0].length : 0, 
+      board[index].sigils.indexOf("mirrordamage") > -1 && board[(index + 4) % 8] && !recur ? calcTrueDamage(board, (index + 4) % 8, bones, true) : 0, 
+      board[index].sigils.indexOf("bonedamage") > -1 ? Math.floor(bones[index < 4 ? 1 : 0] / 2) : 0 
+    )
+    //SIGILS - buffneighbours, debuffenemy
+    + (index % 4 !== 0 && board[index-1] && board[index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
+    + (index % 4 !== 3 && board[index+1] && board[index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
+    + (board[(index + 4) % 8] && board[(index + 4) % 8].sigils.indexOf("debuffenemy") > -1 ? -1 : 0)
+  }
+
   const placeSelectedCard = (index, placedCard = null, newRoom = null) => {
 
     if (!newRoom) {
@@ -315,11 +329,8 @@ function App() {
             continue;
           }
         }
-        let trueDamage = entry.action.length > 6 ? 1 :
-          newBoard[entry.index].damage //SIGILS - buffneighbours, debuffenemy
-          + (entry.index % 4 !== 0 && newBoard[entry.index-1] && newBoard[entry.index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
-          + (entry.index % 4 !== 3 && newBoard[entry.index+1] && newBoard[entry.index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
-          + (newBoard[(entry.index + 4) % 8] && newBoard[(entry.index + 4) % 8].sigils.indexOf("debuffenemy") > -1 ? -1 : 0)
+        let trueDamage = entry.action.length > 6 ? 1 : //sharp attack
+          calcTrueDamage(newBoard, entry.index, newBones, newHands);
 
         if (trueDamage < 1) {
           //do nothing
@@ -517,13 +528,14 @@ function App() {
 
         if (entry.rand < .333) {
           newSigils.splice(0, 0, "loud")
+          newSigils.splice(0, 0, "belldamage")
           newBoard[entry.index] = {
             card: "squidbell",
             costType:"blood",
             cost: 2,
             sigils: newSigils,
-            defaultSigils: 1,
-            damage: -6,
+            defaultSigils: 2,
+            damage: 0,
             health: 3,
             tribe: "none",
             rare: false,
@@ -532,21 +544,22 @@ function App() {
               costType:"blood",
               cost: 2,
               sigils: newSigils,
-              defaultSigils: 1,
-              damage: -6,
+              defaultSigils: 2,
+              damage: 0,
               health: 3,
               tribe: "none",
               rare: false
             }
           }
         } else if (entry.rand < .667) {
+          newSigils.splice(0, 0, "carddamage")
           newBoard[entry.index] = {
             card: "squidcards",
             costType:"blood",
             cost: 1,
             sigils: newSigils,
-            defaultSigils: 0,
-            damage: -7,
+            defaultSigils: 1,
+            damage: 0,
             health: 1,
             tribe: "none",
             rare: false,
@@ -555,21 +568,22 @@ function App() {
               costType:"blood",
               cost: 1,
               sigils: newSigils,
-              defaultSigils: 0,
-              damage: -7,
+              defaultSigils: 1,
+              damage: 0,
               health: 1,
               tribe: "none",
               rare: false
             }
           }
         } else {
+          newSigils.splice(0, 0, "mirrordamage")
           newBoard[entry.index] = {
             card: "squidmirror",
             costType:"blood",
             cost: 1,
             sigils: newSigils,
-            defaultSigils: 0,
-            damage: -8,
+            defaultSigils: 1,
+            damage: 0,
             health: 1,
             tribe: "none",
             rare: false, 
@@ -982,11 +996,8 @@ function App() {
                   <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
                   {val && val.card ? 
                     <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-                      <Card val={{...val, //SIGILS - buffneighbours, debuffenemy
-                        damage: val.damage 
-                          + (index % 4 !== 0 && room.board[index-1] && room.board[index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
-                          + (index % 4 !== 3 && room.board[index+1] && room.board[index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
-                          + (room.board[(index + 4) % 8] && room.board[(index + 4) % 8].sigils.indexOf("debuffenemy") > -1 ? -1 : 0)
+                      <Card val={{...val,
+                        damage: calcTrueDamage(room.board, index, room.bones, room.hands)
                       }}/>
                     </div>
                   : <></>

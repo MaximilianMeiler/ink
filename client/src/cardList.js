@@ -47,9 +47,9 @@ let allCards = {
     card: "ant",
     costType:"blood",
     cost: 1,
-    sigils: [],
-    defaultSigils: 0,
-    damage: -5,
+    sigils: ["antdamage"],
+    defaultSigils: 1,
+    damage: 0,
     health: 2,
     tribe: "insect",
     rare: false
@@ -58,9 +58,9 @@ let allCards = {
     card: "antqueen",
     costType:"blood",
     cost: 2,
-    sigils: ["drawant"],
-    defaultSigils: 1,
-    damage: -5,
+    sigils: ["drawant", "antdamage"],
+    defaultSigils: 2,
+    damage: 0,
     health: 3,
     tribe: "insect",
     rare: false
@@ -509,9 +509,9 @@ let allCards = {
     card: "squidbell",
     costType:"blood",
     cost: 2,
-    sigils: ["loud"],
-    defaultSigils: 1,
-    damage: -6,
+    sigils: ["loud", "belldamage"],
+    defaultSigils: 2,
+    damage: 0,
     health: 3,
     tribe: "none",
     rare: false
@@ -520,9 +520,9 @@ let allCards = {
     card: "squidcards",
     costType:"blood",
     cost: 1,
-    sigils: [],
-    defaultSigils: 0,
-    damage: -7,
+    sigils: ["carddamage"],
+    defaultSigils: 1,
+    damage: 0,
     health: 1,
     tribe: "none",
     rare: false
@@ -531,9 +531,9 @@ let allCards = {
     card: "squidmirror",
     costType:"blood",
     cost: 1,
-    sigils: [],
-    defaultSigils: 0,
-    damage: -8,
+    sigils: ["mirrordamage"],
+    defaultSigils: 1,
+    damage: 0,
     health: 1,
     tribe: "none",
     rare: false
@@ -641,9 +641,9 @@ let allCards = {
     card: "antflying",
     costType:"blood",
     cost: 1,
-    sigils: ["flying"],
-    defaultSigils: 1,
-    damage: -5,
+    sigils: ["flying", "antdamage"],
+    defaultSigils: 2,
+    damage: 0,
     health: 1,
     tribe: "insect",
     rare: false
@@ -674,9 +674,9 @@ let allCards = {
     card: "lammergeier",
     costType:"blood",
     cost: 3,
-    sigils: ["flying"],
-    defaultSigils: 1,
-    damage: -9,
+    sigils: ["flying", "bonedamage"],
+    defaultSigils: 2,
+    damage: 0,
     health: 4,
     tribe: "avian",
     rare: false
@@ -778,4 +778,5 @@ let allSigils = [
 
 module.exports = {allCards: allCards, allSigils: allSigils}
 
-//custom sigils for secrets - "loud", "buffondeath", "gainattackonkillpermanent", "sacrificialswap"
+//custom sigils for traits - "loud", "buffondeath", "gainattackonkillpermanent", "sacrificialswap", "belldamage", "carddamage", "mirrordamage", "sacdamage", "bonedamage"
+//FIXME - add in long elk? dont have the files for it atm
