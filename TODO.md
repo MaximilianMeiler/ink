@@ -33,14 +33,14 @@
 - strafepush
 - strafeswap
 
-- traits: daus ("loud"), ouro ("buffondeath"), hodag ("gainattackonkillpermanent"), child 13 ("sacrificialswap"), terrain, 
+- traits: daus ("loud"), ouro ("buffondeath"), hodag ("gainattackonkillpermanent"), child 13 ("sacrificialswap"), terrain, damage ("antdamage", "carddamage", "belldamage", "mirrordamage", "bonedamage", "sacdamage")
 
 ### Sigils skipped:
 - tutor (will be done post-deck editing)
 
 - randomconsumable ???
 
-Cards with secret effects: long elk???, ant dmg, bell squid dmg, card squid dmg, mirror squid dmg, red hart damage, lammergeier damage
+Cards with secret effects: long elk???
 https://inscryption.fandom.com/wiki/Traits
 
 ### TODO

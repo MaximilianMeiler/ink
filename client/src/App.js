@@ -24,6 +24,7 @@ function App() {
     + (index % 4 !== 0 && board[index-1] && board[index-1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
     + (index % 4 !== 3 && board[index+1] && board[index+1].sigils.indexOf("buffneighbours") >= 0 ? 1 : 0)
     + (board[(index + 4) % 8] && board[(index + 4) % 8].sigils.indexOf("debuffenemy") > -1 ? -1 : 0)
+    + (board[index].sigils.indexOf("sacdamage") > -1 ? board[index].sacBonus : 0)
   }
 
   const placeSelectedCard = (index, placedCard = null, newRoom = null) => {
@@ -257,6 +258,14 @@ function App() {
         newRoom = placeSelectedCard(index-1, damCard, newRoom);
       }
     }
+
+    //SIGILS - sacdamage
+    [...Array(4)].forEach((val, i) => {
+      if (newBoard[i + 4-offset]) {
+        if (!newBoard[i + 4-offset].sacBonus) {newBoard[i + 4-offset].sacBonus = 0}
+        newBoard[i + 4-offset].sacBonus += newRoom.sacrifices.length
+      }
+    })
 
     return {...newRoom, sacrifices: [], bones: newBones, board: newBoard, hands: newHands}
   }
@@ -833,6 +842,13 @@ function App() {
         }
       }
     }
+
+    [...Array(4)].forEach((val, i) => {
+      let offset = newRoom.gameState === "simulating0" ? 4 : 0;
+      if (newBoard[i+offset]) {
+        newBoard[i + offset].sacBonus = 0;
+      }
+    })
 
     if (newScale * (newRoom.gameState === "simulating0" ? 1 : -1) <= -5) {
       //restart game if scale is tipped at end of turn

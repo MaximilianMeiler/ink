@@ -718,9 +718,9 @@ let allCards = {
     card: "redhart",
     costType:"blood",
     cost: 2,
-    sigils: ["strafe"],
-    defaultSigils: 1,
-    damage: -10,
+    sigils: ["strafe", "sacdamage"],
+    defaultSigils: 2,
+    damage: 0,
     health: 2,
     tribe: "hooved",
     rare: false
