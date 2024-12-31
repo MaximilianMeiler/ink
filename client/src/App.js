@@ -987,7 +987,7 @@ function App() {
           </div>
         : <></>}
 
-        {(room.gameState !== "drafting" && room.gameState !== "awaitingPlayers") ? <div>
+        {(["draw0", "draw1", "play0", "play1", "roundStart0", "roundStart1", "simulating0", "simulating1"].indexOf(room.gameState) > -1) ? <div>
           <div onClick={() => {
             // setSendRoom({...room, gameState: (room.player0 === socket.id ? "draw1" : "draw0"), sacrifices: []}); //swap turns
             if (room.gameState === (room.player0 === socket.id ? "play0" : "play1")) {
@@ -1067,84 +1067,82 @@ function App() {
               )
             }) : <></>}
           </div>
-        </div>
-        : <></>}
         
+          {((room.player0 === socket.id && room.player0) || room.player1) && room.hands[room.player0 === socket.id ? 0 : 1] ? 
+            <div style={{position: 'relative', marginBottom: "190px"}}> 
+              {room.hands[room.player0 === socket.id ? 0 : 1].map((card, index) => {
+                let s = room.hands[room.player0 === socket.id ? 0 : 1].length
+                let l = 295 - (index * 295/(s - 1));
+                let m;
 
-        
+                handHover !== s-1 && index <= handHover ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
+                handSelection !== s-1 && index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * s - 420)/(s - 1) : m = m;
 
-        {((room.player0 === socket.id && room.player0) || room.player1) && room.hands[room.player0 === socket.id ? 0 : 1] ? 
-          <div style={{position: 'relative', marginBottom: "190px"}}> 
-            {room.hands[room.player0 === socket.id ? 0 : 1].map((card, index) => {
-              let s = room.hands[room.player0 === socket.id ? 0 : 1].length
-              let l = 295 - (index * 295/(s - 1));
-              let m;
-
-              handHover !== s-1 && index <= handHover ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
-              handSelection !== s-1 && index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * s - 420)/(s - 1) : m = m;
-
-              return <div 
-                style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
-                onMouseEnter={() => setHandHover(index)}
-                onMouseLeave={() => setHandHover(-1)}
-                onClick={() => {
-                  index === handSelection ? setHandSelection(-1) : setHandSelection(index)
-                  setSendRoom({...room, sacrifices: []});
-                }}
-              >
-                <Card val={card}/>
-              </div>
-            })}
-          </div>
-        : <></>
-        }
-
-        {room.gameState === (room.player0 === socket.id ? "draw0" : "draw1") ? 
-          <div>
-            <div className='cardContainer' onClick={() => {
-              if (draw.length <= 0) {return}
-              let newHands = room.hands;
-              let drawnCard = structuredClone(draw[0]);
-              let randomIndex = drawnCard.sigils.indexOf("randomability"); //SIGILS - randomability
-              if (randomIndex >= 0) {
-                drawnCard.sigils.splice(randomIndex, 1, allSigils[Math.floor(Math.random() * allSigils.length)])
-              }
-              drawnCard.clone = structuredClone(drawnCard); //FIXME? - all cards now have clones. Corresponding else statements / use of card "indexes" are redundant
-              newHands[room.player0 === socket.id ? 0 : 1].push(drawnCard);
-              let newDraw = draw;
-              newDraw.splice(0, 1);
-              if (newDraw.length === 0) { //when the draw pile runs dry, reshuffle the deck in
-                setDraw(shuffleArray(room.decks[room.player0 === socket.id ? 0 : 1]));
-              } else {
-                setDraw(newDraw)
-              }
-              setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
-            }}>
-              {draw.map((card, index) => {
-                let s = draw.length
-                let t = 20 - index * 20 / (s-1);
-                return <img src='/card_back.png' alt='card back' className='card cardBacking' style={{top: t}}></img>
+                return <div 
+                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                  onMouseEnter={() => setHandHover(index)}
+                  onMouseLeave={() => setHandHover(-1)}
+                  onClick={() => {
+                    index === handSelection ? setHandSelection(-1) : setHandSelection(index)
+                    setSendRoom({...room, sacrifices: []});
+                  }}
+                >
+                  <Card val={card}/>
+                </div>
               })}
-            </div> 
-            <div className='cardContainer' onClick={(() => {
-              let newHands = room.hands;
-              newHands[room.player0 === socket.id ? 0 : 1].push({
-                card: "squirrel",
-                costType: "bone",
-                cost: 0,
-                sigils: [],
-                damage: 0,
-                health: 1
-              });
-              setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
-            })}>
-                {[...Array(8)].map((card, index) => {
-                  let s = 8
-                  let t = 20 - index * 20 / (s-1) - 190;
-                  return <img src='/card_back_squirrel.png' alt='card back' className='card cardBacking' style={{top: t, left:"125px"}}></img>
+            </div>
+          : <></>
+          }
+
+          {room.gameState === (room.player0 === socket.id ? "draw0" : "draw1") ? 
+            <div>
+              <div className='cardContainer' onClick={() => {
+                if (draw.length <= 0) {return}
+                let newHands = room.hands;
+                let drawnCard = structuredClone(draw[0]);
+                let randomIndex = drawnCard.sigils.indexOf("randomability"); //SIGILS - randomability
+                if (randomIndex >= 0) {
+                  drawnCard.sigils.splice(randomIndex, 1, allSigils[Math.floor(Math.random() * allSigils.length)])
+                }
+                drawnCard.clone = structuredClone(drawnCard); //FIXME? - all cards now have clones. Corresponding else statements / use of card "indexes" are redundant
+                newHands[room.player0 === socket.id ? 0 : 1].push(drawnCard);
+                let newDraw = draw;
+                newDraw.splice(0, 1);
+                if (newDraw.length === 0) { //when the draw pile runs dry, reshuffle the deck in
+                  setDraw(shuffleArray(room.decks[room.player0 === socket.id ? 0 : 1]));
+                } else {
+                  setDraw(newDraw)
+                }
+                setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
+              }}>
+                {draw.map((card, index) => {
+                  let s = draw.length
+                  let t = 20 - index * 20 / (s-1);
+                  return <img src='/card_back.png' alt='card back' className='card cardBacking' style={{top: t}}></img>
                 })}
-              </div>
-          </div>
+              </div> 
+              <div className='cardContainer' onClick={(() => {
+                let newHands = room.hands;
+                newHands[room.player0 === socket.id ? 0 : 1].push({
+                  card: "squirrel",
+                  costType: "bone",
+                  cost: 0,
+                  sigils: [],
+                  damage: 0,
+                  health: 1
+                });
+                setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
+              })}>
+                  {[...Array(8)].map((card, index) => {
+                    let s = 8
+                    let t = 20 - index * 20 / (s-1) - 190;
+                    return <img src='/card_back_squirrel.png' alt='card back' className='card cardBacking' style={{top: t, left:"125px"}}></img>
+                  })}
+                </div>
+            </div>
+          : <></>}
+        
+        </div>
         : <></>}
 
       </div> : <></>}
