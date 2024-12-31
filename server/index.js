@@ -32,9 +32,21 @@ const io = new Server(server, {
 */
 
 let rooms = {};
+let doubleConf = {}
 
 io.on("connection", (socket) => {
   console.log("New user:", socket.id)
+
+  socket.on("newDeck", (newRoom) => {
+    rooms[newRoom.id].decks[newRoom.player0 === socket.id ? 0 : 1] = newRoom.decks[newRoom.player0 === socket.id ? 0 : 1];
+    doubleConf[newRoom.id][newRoom.player0 === socket.id ? 0 : 1] = true;
+    if (doubleConf[newRoom.id][0] && doubleConf[newRoom.id][1]) {
+      doubleConf[newRoom.id] = [false, false];
+
+      rooms[newRoom.id].gameState = "roundStart0";
+      io.to(newRoom.id).emit("serverUpdate", rooms[newRoom.id]);
+    }
+  })
 
   socket.on("clientUpdate", (newRoom) => {
     console.log("update on room", newRoom)
@@ -46,7 +58,7 @@ io.on("connection", (socket) => {
     if (newRoom.draft.phase === 2) { //restart draft
       newRoom.draft.phase = 3;
       newRoom.draft.options = getCardsForDraft(6);
-    }
+    } 
 
     rooms[newRoom.id] = newRoom;
     io.to(newRoom.id).emit("serverUpdate", newRoom);
@@ -56,6 +68,7 @@ io.on("connection", (socket) => {
   socket.on("clientRoomJoin", (room) => {
     console.log(socket.id, "attempts to join room", room)
     if (!rooms[room]) { //first player joins room (room created)
+      doubleConf[room] = [false, false]
       rooms[room] = {
         id: room,
         gameState: "awaitingPlayers",
@@ -70,46 +83,92 @@ io.on("connection", (socket) => {
         decks: [
           [
             {
-              card: "opossum",
-              costType: "bone",
-              cost: 0,
+              card: "stoat",
+              costType:"blood",
+              cost: 1,
               sigils: [],
               defaultSigils: 0,
               damage: 1,
-              health: 1,
-              index: 0,
+              health: 2,
+              tribe: "none",
+              rare: false
             },
+            {
+              card: "bullfrog",
+              costType:"blood",
+              cost: 1,
+              sigils: ["reach"],
+              defaultSigils: 1,
+              damage: 1,
+              health: 2,
+              tribe: "reptile",
+              rare: false
+            },
+            {
+              card: "wolf",
+              costType:"blood",
+              cost: 2,
+              sigils: [],
+              defaultSigils: 0,
+              damage: 3,
+              health: 2,
+              tribe: "canine",
+              rare: false
+            },            {
+              card: "wolf",
+              costType:"blood",
+              cost: 2,
+              sigils: ["tripleblood"],
+              defaultSigils: 0,
+              damage: 3,
+              health: 2,
+              tribe: "canine",
+              rare: false
+            }
           ],
           [
             {
-              card: "opossum",
-              costType: "bone",
-              cost: 0,
-              sigils: ["tailonhit", "evolve"],
+              card: "stoat",
+              costType:"blood",
+              cost: 1,
+              sigils: [],
               defaultSigils: 0,
               damage: 1,
-              health: 1,
-              index: 0,
-            // },
-            // {
-            //   card: "bullfrog",
-            //   costType: "blood",
-            //   cost: 1,
-            //   sigils: ["reach", "beesonhit"],
-            //   defaultSigils: 1,
-            //   damage: 1,
-            //   health: 2,
-            //   index: 1,
-            // },
-            // {
-            //   card: "stoat",
-            //   costType: "bone",
-            //   cost: 0,
-            //   sigils: ["tripleblood"],
-            //   defaultSigils: 0,
-            //   damage: 1,
-            //   health: 2,
-            //   index: 2,
+              health: 2,
+              tribe: "none",
+              rare: false
+            },
+            {
+              card: "bullfrog",
+              costType:"blood",
+              cost: 1,
+              sigils: ["reach"],
+              defaultSigils: 1,
+              damage: 1,
+              health: 2,
+              tribe: "reptile",
+              rare: false
+            },
+            {
+              card: "wolf",
+              costType:"blood",
+              cost: 2,
+              sigils: [],
+              defaultSigils: 0,
+              damage: 3,
+              health: 2,
+              tribe: "canine",
+              rare: false
+            },            {
+              card: "wolf",
+              costType:"blood",
+              cost: 2,
+              sigils: ["tripleblood"],
+              defaultSigils: 0,
+              damage: 3,
+              health: 2,
+              tribe: "canine",
+              rare: false
             }
           ]
         ],
@@ -118,7 +177,8 @@ io.on("connection", (socket) => {
         draft: {
           phase: 0,
           options: []
-        }
+        },
+        round: 1,
       }
       socket.join(room);
       io.to(room).emit("serverUpdate", rooms[room]);

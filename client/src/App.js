@@ -11,7 +11,7 @@ function App() {
   const [hoverSection, setHoverSection] = useState(-1)
   const [handSelection, setHandSelection] = useState(-1);
   const [draw, setDraw] = useState([]);
-  const [scribes, setScribes] = useState([{open: false, index: -1}, {open: false, index: -1}])
+  const [scribes, setScribes] = useState([{open: false, index: -1}, {open: false, index: -1}, 0])
 
   const calcTrueDamage = (board, index, bones, hands, recur = false) => {
     return Math.max(board[index].damage, //SIGILS - antdamage, belldamage, carddamage, mirrordamage, bonedamage
@@ -970,7 +970,7 @@ function App() {
                           let newDraw = room.draft;
                           newDraw.options[index] = null;
                           if (newDraw.phase === 4) {
-                            setSendRoom({...room, decks: newDecks, draft: newDraw, gameState: "roundStart0"})
+                            setSendRoom({...room, decks: newDecks, gameState: "scribing"})
                           } else {
                             newDraw.phase++;
                             setSendRoom({...room, decks: newDecks, draft: newDraw})
@@ -989,7 +989,7 @@ function App() {
                 <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                   if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
                     if (room.draft.phase === 4) {
-                      setSendRoom({...room, gameState: "roundStart0"})
+                      setSendRoom({...room, gameState: "scribing"})
                     } else {
                       let newDraw = room.draft;
                       newDraw.phase++;
@@ -1196,7 +1196,7 @@ function App() {
                 {scribes[0].index !== -1 ? <Card val={room.decks[room.player0 === socket.id ? 0 : 1][scribes[0].index]}/> : <></>}
               </div>
               <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
-                setScribes([{open: !scribes[0].open, index: scribes[0].index}, {open: false, index: scribes[1].index}]);
+                setScribes([{open: !scribes[0].open, index: scribes[0].index}, {open: false, index: scribes[1].index}, scribes[2]]);
               }}></img>
             </div>
             <div className='gameSlot'>
@@ -1205,12 +1205,13 @@ function App() {
               {scribes[1].index !== -1 ? <Card val={room.decks[room.player0 === socket.id ? 0 : 1][scribes[1].index]}/> : <></>}
               </div>
               <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
-                setScribes([{open: false, index: scribes[0].index}, {open: !scribes[1].open, index: scribes[1].index}]);
+                setScribes([{open: false, index: scribes[0].index}, {open: !scribes[1].open, index: scribes[1].index}, scribes[2]]);
               }}></img>
             </div>
             <div className='gameSlot'>
               <img src='/card_slot_right.png' alt='continue button' className='card cardSlot'></img>
               <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
+                let newDecks = room.decks;
                 if (scribes[0].index !== -1) {
                   let newDeck = room.decks[room.player0 === socket.id ? 0 : 1];
                   if (scribes[1].index !== -1) {
@@ -1218,11 +1219,17 @@ function App() {
                   }
                   newDeck.splice(scribes[0].index, 1);
 
-                  let newDecks = room.decks;
                   newDecks[room.player0 === socket.id ? 0 : 1] = newDeck;
                   setRoom({...room, decks: newDecks})
                 }
-                setScribes([{open: false, index: -1}, {open: false, index: -1}]);
+                let inscribedCount = scribes[2]+1;
+                setScribes([{open: false, index: -1}, {open: false, index: -1}, scribes[2]+1]);
+                
+                console.log(inscribedCount , room.round)
+                if (inscribedCount === room.round) {
+                  socket.emit("newDeck", {...room, decks: newDecks});
+                  setRoom({...room, gameState: "awaitingPlayers"}) //this will never be sent to the backend
+                }
               }}></img>
             </div>
           </div>
@@ -1242,7 +1249,7 @@ function App() {
                 onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 onClick={() => {
                   setScribes([{open: false, index: scribes[0].open ? card.card === "blank" ? {} : room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[0].index}, 
-                              {open: false, index: scribes[1].open ? card.card === "blank" ? {} : room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[1].index}])
+                              {open: false, index: scribes[1].open ? card.card === "blank" ? {} : room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[1].index}, scribes[2]])
                 }}
               >
                 <Card val={card}/>
