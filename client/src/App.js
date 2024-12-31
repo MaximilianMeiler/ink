@@ -1188,6 +1188,70 @@ function App() {
         </div>
         : <></>}
 
+        {(room.gameState === "scribing") ? <div>
+          <div className='draftGrid'>
+            <div className='gameSlot'>
+              <img src='/card_slot_sacrifice.png' alt='empty sacrifice slot' className='card cardSlot'></img>
+              <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
+                {scribes[0].index !== -1 ? <Card val={room.decks[room.player0 === socket.id ? 0 : 1][scribes[0].index]}/> : <></>}
+              </div>
+              <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
+                setScribes([{open: !scribes[0].open, index: scribes[0].index}, {open: false, index: scribes[1].index}]);
+              }}></img>
+            </div>
+            <div className='gameSlot'>
+              <img src='/card_slot_host.png' alt='empty host slot' className='card cardSlot'></img>
+              <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
+              {scribes[1].index !== -1 ? <Card val={room.decks[room.player0 === socket.id ? 0 : 1][scribes[1].index]}/> : <></>}
+              </div>
+              <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
+                setScribes([{open: false, index: scribes[0].index}, {open: !scribes[1].open, index: scribes[1].index}]);
+              }}></img>
+            </div>
+            <div className='gameSlot'>
+              <img src='/card_slot_right.png' alt='continue button' className='card cardSlot'></img>
+              <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
+                if (scribes[0].index !== -1) {
+                  let newDeck = room.decks[room.player0 === socket.id ? 0 : 1];
+                  if (scribes[1].index !== -1) {
+                    newDeck[scribes[1].index].sigils = newDeck[scribes[1].index].sigils.concat(newDeck[scribes[0].index].sigils)
+                  }
+                  newDeck.splice(scribes[0].index, 1);
+
+                  let newDecks = room.decks;
+                  newDecks[room.player0 === socket.id ? 0 : 1] = newDeck;
+                  setRoom({...room, decks: newDecks})
+                }
+                setScribes([{open: false, index: -1}, {open: false, index: -1}]);
+              }}></img>
+            </div>
+          </div>
+
+          {scribes[0].open || scribes[1].open ? 
+          <div style={{position: 'relative', paddingTop: "190px"}}> 
+            <div>{scribes[0].open ? "Select card to sacrifice" : "Select host card"}</div>
+            {room.decks[room.player0 === socket.id ? 0 : 1].filter((card,i) => card.sigils.length === card.defaultSigils && i !== scribes[0].index && i !== scribes[1].index).concat({...blankCard, name: "None"}).map((card, index) => {
+              let s = room.decks[room.player0 === socket.id ? 0 : 1].filter((card,i) => card.sigils.length === card.defaultSigils && i !== scribes[0].index && i !== scribes[1].index).length + 1
+              let l = 295 - (index * 295/(s - 1));
+              let m;
+              handHover !== s-1 && index <= handHover && hoverSection === 0 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
+
+              return <div 
+                style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                onMouseEnter={() => {setHandHover(index); setHoverSection(0);}}
+                onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
+                onClick={() => {
+                  setScribes([{open: false, index: scribes[0].open ? card.card === "blank" ? {} : room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[0].index}, 
+                              {open: false, index: scribes[1].open ? card.card === "blank" ? {} : room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[1].index}])
+                }}
+              >
+                <Card val={card}/>
+              </div>
+            })}
+          </div> : <></>}
+
+        </div> : <></>}
+
       </div> : <></>}
     </div>
   );
