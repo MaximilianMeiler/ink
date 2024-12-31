@@ -11,6 +11,7 @@ function App() {
   const [hoverSection, setHoverSection] = useState(-1)
   const [handSelection, setHandSelection] = useState(-1);
   const [draw, setDraw] = useState([]);
+  const [scribes, setScribes] = useState([{open: false, index: -1}, {open: false, index: -1}])
 
   const calcTrueDamage = (board, index, bones, hands, recur = false) => {
     return Math.max(board[index].damage, //SIGILS - antdamage, belldamage, carddamage, mirrordamage, bonedamage
@@ -134,6 +135,7 @@ function App() {
       newSigils.splice(newSigils.indexOf("drawrabbits"), 1);
       newHands[newRoom.player0 === socket.id ? 0 : 1].push({
         card: "rabbit",
+        name: "Rabbit",
         costType:"bone",
         cost: 0,
         sigils: newSigils,
@@ -144,6 +146,7 @@ function App() {
         rare: false,
         clone: {
           card: "rabbit",
+          name: "Rabbit",
           costType:"bone",
           cost: 0,
           sigils: newSigils,
@@ -160,6 +163,7 @@ function App() {
       newSigils.splice(newSigils.indexOf("drawant"), 1);
       newHands[newRoom.player0 === socket.id ? 0 : 1].push({
         card: "ant",
+        name: "Worker Ant",
         costType:"blood",
         cost: 1,
         sigils: newSigils,
@@ -170,6 +174,7 @@ function App() {
         rare: false,
         clone: {
           card: "ant",
+          name: "Worker Ant",
           costType:"blood",
           cost: 1,
           sigils: newSigils,
@@ -198,6 +203,7 @@ function App() {
       newSigils.splice(0, 0, "loud");
       let chimeCard = {
         card: "dausbell",
+        name: "Chime",
         costType:"bone",
         cost: 0,
         sigils: newSigils,
@@ -208,6 +214,7 @@ function App() {
         rare: false,
         clone: {
           card: "dausbell",
+          name: "Chime",
           costType:"bone",
           cost: 0,
           sigils: newSigils,
@@ -231,6 +238,7 @@ function App() {
       newSigils.splice(newSigils.indexOf("createdams"), 1);
       let damCard = {
         card: "dam",
+        name: "Dam",
         costType:"bone",
         cost: 0,
         sigils: newSigils,
@@ -241,6 +249,7 @@ function App() {
         rare: false,
         clone: {
           card: "dam",
+          name: "Dam",
           costType:"bone",
           cost: 0,
           sigils: newSigils,
@@ -360,6 +369,7 @@ function App() {
               newSigils.splice(newSigils.indexOf("tailonhit"), 1);
               let tailCard = {
                 card: newBoard[target].tribe === "insect" ? "insect_tail" : newBoard[target].tribe === "canine" ? "canine_tail" : newBoard[target].tribe === "avian" ? "bird_tail" : "skink_tail",
+                name: newBoard[target].tribe === "insect" ? "Wriggling Leg" : newBoard[target].tribe === "canine" ? "Furry Tail" : newBoard[target].tribe === "avian" ? "Tail Feathers" : "Wriggling Tail",
                 costType:"bone",
                 cost: 0,
                 sigils: newSigils,
@@ -370,6 +380,7 @@ function App() {
                 rare: false,
                 clone: {
                   card: newBoard[target].tribe === "insect" ? "insect_tail" : newBoard[target].tribe === "canine" ? "canine_tail" : newBoard[target].tribe === "avian" ? "bird_tail" : "skink_tail",
+                  name: newBoard[target].tribe === "insect" ? "Wriggling Leg" : newBoard[target].tribe === "canine" ? "Furry Tail" : newBoard[target].tribe === "avian" ? "Tail Feathers" : "Wriggling Tail",
                   costType:"bone",
                   cost: 0,
                   sigils: newSigils,
@@ -409,6 +420,7 @@ function App() {
             newSigils.splice(0, 0, "flying");
             newHands[target < 4 ? 1 : 0].push({ //newHands is never applied - is this all unnecessary and passed by reference????
               card: "bee",
+              name: "Bee",
               costType:"bone",
               cost: 0,
               sigils: newSigils,
@@ -419,6 +431,7 @@ function App() {
               rare: false,
               clone: {
                 card: "bee",
+                name: "Bee",
                 costType:"bone",
                 cost: 0,
                 sigils: newSigils,
@@ -540,6 +553,7 @@ function App() {
           newSigils.splice(0, 0, "belldamage")
           newBoard[entry.index] = {
             card: "squidbell",
+            name: "Bell Tentacle",
             costType:"blood",
             cost: 2,
             sigils: newSigils,
@@ -550,6 +564,7 @@ function App() {
             rare: false,
             clone: {
               card: "squidbell",
+              name: "Bell Tentacle",
               costType:"blood",
               cost: 2,
               sigils: newSigils,
@@ -564,6 +579,7 @@ function App() {
           newSigils.splice(0, 0, "carddamage")
           newBoard[entry.index] = {
             card: "squidcards",
+            name: "Card Tentacle",
             costType:"blood",
             cost: 1,
             sigils: newSigils,
@@ -574,6 +590,7 @@ function App() {
             rare: false,
             clone: {
               card: "squidcards",
+              name: "Card Tentacle",
               costType:"blood",
               cost: 1,
               sigils: newSigils,
@@ -588,6 +605,7 @@ function App() {
           newSigils.splice(0, 0, "mirrordamage")
           newBoard[entry.index] = {
             card: "squidmirror",
+            name: "Mirror Tentacle",
             costType:"blood",
             cost: 1,
             sigils: newSigils,
@@ -598,6 +616,7 @@ function App() {
             rare: false, 
             clone: {
               card: "squidmirror",
+              name: "Mirror Tentacle",
               costType:"blood",
               cost: 1,
               sigils: newSigils,
@@ -664,6 +683,7 @@ function App() {
           //SIGILS - drawant
           newRoom.hands[entry.index < 4 ? 1 : 0].push({ //modifies newRoom directly?
             card: "ant",
+            name: "Worker Ant",
             costType:"blood",
             cost: 1,
             sigils: newSigils,
@@ -671,7 +691,19 @@ function App() {
             damage: -5,
             health: 2,
             tribe: "insect",
-            rare: false
+            rare: false,
+            clone: {
+              card: "ant",
+              name: "Worker Ant",
+              costType:"blood",
+              cost: 1,
+              sigils: newSigils,
+              defaultSigils: 0,
+              damage: -5,
+              health: 2,
+              tribe: "insect",
+              rare: false
+            }
           })
         } else if (newBoard[entry.index].card === "deer") {
           newBoard[entry.index].card = "moose";
@@ -874,6 +906,7 @@ function App() {
 
   let blankCard = {
     card: "blank",
+    name: "Skip draw",
     costType: "bone",
     cost: 0,
     sigils: [],
@@ -1125,11 +1158,21 @@ function App() {
                 let newHands = room.hands;
                 newHands[room.player0 === socket.id ? 0 : 1].push({
                   card: "squirrel",
+                  name: "Squirrel",
                   costType: "bone",
                   cost: 0,
                   sigils: [],
                   damage: 0,
-                  health: 1
+                  health: 1,
+                  clone: {
+                    card: "squirrel",
+                    name: "Squirrel",
+                    costType: "bone",
+                    cost: 0,
+                    sigils: [],
+                    damage: 0,
+                    health: 1,
+                  }
                 });
                 setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
               })}>

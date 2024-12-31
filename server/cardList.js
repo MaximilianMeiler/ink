@@ -1,6 +1,7 @@
 let allCards = {
   "adder": {
     card: "adder",
+    name: "Adder",
     costType:"blood",
     cost: 2,
     sigils: ["deathtouch"],
@@ -12,6 +13,7 @@ let allCards = {
   },
   "alpha": {
     card: "alpha",
+    name: "Alpha",
     costType:"bone",
     cost: 4,
     sigils: ["buffneighbours"],
@@ -23,6 +25,7 @@ let allCards = {
   },
   "amalgam": {
     card: "amalgam",
+    name: "Amalgam",
     costType:"blood",
     cost: 2,
     sigils: [],
@@ -34,6 +37,7 @@ let allCards = {
   },
   "amoeba": {
     card: "amoeba",
+    name: "Ameoba",
     costType:"bone",
     cost: 2,
     sigils: ["randomability"],
@@ -45,6 +49,7 @@ let allCards = {
   },
   "ant": {
     card: "ant",
+    name: "Worker Ant",
     costType:"blood",
     cost: 1,
     sigils: ["antdamage"],
@@ -56,6 +61,7 @@ let allCards = {
   },
   "antqueen": {
     card: "antqueen",
+    name: "Ant Queen",
     costType:"blood",
     cost: 2,
     sigils: ["drawant", "antdamage"],
@@ -67,6 +73,7 @@ let allCards = {
   },
   "bat": {
     card: "bat",
+    name: "Bat",
     costType:"bone",
     cost: 4,
     sigils: ["flying"],
@@ -78,6 +85,7 @@ let allCards = {
   },
   "beaver": {
     card: "beaver",
+    name: "Beaver",
     costType:"blood",
     cost: 2,
     sigils: ["createdams"],
@@ -89,6 +97,7 @@ let allCards = {
   },
   "beehive": {
     card: "beehive",
+    name: "Beehive",
     costType:"blood",
     cost: 1,
     sigils: ["beesonhit"],
@@ -100,6 +109,7 @@ let allCards = {
   },
   "bloodhound": {
     card: "bloodhound",
+    name: "Bloodhound",
     costType:"blood",
     cost: 2,
     sigils: ["guarddog"],
@@ -111,6 +121,7 @@ let allCards = {
   },
   "bullfrog": {
     card: "bullfrog",
+    name: "Bullfrog",
     costType:"blood",
     cost: 1,
     sigils: ["reach"],
@@ -122,6 +133,7 @@ let allCards = {
   },
   "cat": {
     card: "cat",
+    name: "Cat",
     costType:"blood",
     cost: 1,
     sigils: ["sacrificial"],
@@ -133,6 +145,7 @@ let allCards = {
   },
   "cockroach": {
     card: "cockroach",
+    name: "Cockroach",
     costType:"bone",
     cost: 4,
     sigils: ["drawcopyondeath"],
@@ -144,6 +157,7 @@ let allCards = {
   },
   "coyote": {
     card: "coyote",
+    name: "Coyote",
     costType:"bone",
     cost: 4,
     sigils: [],
@@ -155,6 +169,7 @@ let allCards = {
   },
   "daus": {
     card: "daus",
+    name: "The Daus",
     costType:"blood",
     cost: 2,
     sigils: ["createbells"],
@@ -166,6 +181,7 @@ let allCards = {
   },
   "deer": {
     card: "deer",
+    name: "Elk",
     costType:"blood",
     cost: 2,
     sigils: ["strafe"],
@@ -177,6 +193,7 @@ let allCards = {
   },
   "deercub": {
     card: "deercub",
+    name: "Elk Fawn",
     costType:"blood",
     cost: 1,
     sigils: ["strafe", "evolve"],
@@ -188,6 +205,7 @@ let allCards = {
   },
   "fieldmice": {
     card: "fieldmice",
+    name: "Field Mice",
     costType:"blood",
     cost: 2,
     sigils: ["drawcopy"],
@@ -199,6 +217,7 @@ let allCards = {
   },
   "geck": {
     card: "geck",
+    name: "Geck",
     costType:"bone",
     cost: 0,
     sigils: [],
@@ -210,6 +229,7 @@ let allCards = {
   },
   "goat": {
     card: "goat",
+    name: "Black Goat",
     costType:"blood",
     cost: 1,
     sigils: ["tripleblood"],
@@ -221,6 +241,7 @@ let allCards = {
   },
   "grizzly": {
     card: "grizzly",
+    name: "Grizzly",
     costType:"blood",
     cost: 3,
     sigils: [],
@@ -232,6 +253,7 @@ let allCards = {
   },
   "jerseydevil_sleeping": {
     card: "jerseydevil_sleeping",
+    name: "Child 13",
     costType:"blood",
     cost: 1,
     sigils: ["sacrificial", "sacrificialswap"],
@@ -243,6 +265,7 @@ let allCards = {
   },
   "kingfisher": {
     card: "kingfisher",
+    name: "Kingfisher",
     costType:"blood",
     cost: 1,
     sigils: ["flying", "submerge"],
@@ -254,6 +277,7 @@ let allCards = {
   },
   "maggots": {
     card: "maggots",
+    name: "Corpse Maggots",
     costType:"bone",
     cost: 5,
     sigils: ["corpseeater"],
@@ -265,6 +289,7 @@ let allCards = {
   },
   "magpie": {
     card: "magpie",
+    name: "Magpie",
     costType:"blood",
     cost: 2,
     sigils: ["flying", "tutor"],
@@ -276,6 +301,7 @@ let allCards = {
   },
   "mantis": {
     card: "mantis",
+    name: "Mantis",
     costType:"blood",
     cost: 1,
     sigils: ["splitstrike"],
@@ -287,6 +313,7 @@ let allCards = {
   },
   "mantisgod": {
     card: "mantisgod",
+    name: "Mantis God",
     costType:"blood",
     cost: 1,
     sigils: ["tristrike"],
@@ -298,6 +325,7 @@ let allCards = {
   },
   "mole": {
     card: "mole",
+    name: "Mole",
     costType:"blood",
     cost: 1,
     sigils: ["whackamole"],
@@ -309,6 +337,7 @@ let allCards = {
   },
   "moleman": {
     card: "moleman",
+    name: "Mole Man",
     costType:"blood",
     cost: 1,
     sigils: ["reach", "whackamole"],
@@ -320,6 +349,7 @@ let allCards = {
   },
   "moose": {
     card: "moose",
+    name: "Moose Buck",
     costType:"blood",
     cost: 3,
     sigils: ["strafepush"],
@@ -331,6 +361,7 @@ let allCards = {
   },
   "mothman_1": {
     card: "mothman_1",
+    name: "Strange Larva",
     costType:"blood",
     cost: 1,
     sigils: ["evolve"],
@@ -342,6 +373,7 @@ let allCards = {
   },
   "opossum": {
     card: "opossum",
+    name: "Opossum",
     costType:"bone",
     cost: 2,
     sigils: [],
@@ -353,6 +385,7 @@ let allCards = {
   },
   "otter": {
     card: "otter",
+    name: "River Otter",
     costType:"blood",
     cost: 1,
     sigils: ["submerge"],
@@ -364,6 +397,7 @@ let allCards = {
   },
   "ouroboros": {
     card: "ouroboros",
+    name: "Ouroboros",
     costType:"blood",
     cost: 2,
     sigils: ["drawcopyondeath", "buffondeath"],
@@ -375,6 +409,7 @@ let allCards = {
   },
   "packrat": {
     card: "packrat",
+    name: "Pack Rat",
     costType:"blood",
     cost: 2,
     sigils: ["randomconsumable"],
@@ -386,6 +421,7 @@ let allCards = {
   },
   "porcupine": {
     card: "porcupine",
+    name: "Porcupine",
     costType:"blood",
     cost: 1,
     sigils: ["sharp"],
@@ -397,6 +433,7 @@ let allCards = {
   },
   "pronghorn": {
     card: "pronghorn",
+    name: "Pronghorn",
     costType:"blood",
     cost: 2,
     sigils: ["strafe", "splitstrike"],
@@ -408,6 +445,7 @@ let allCards = {
   },
   "ratking": {
     card: "ratking",
+    name: "Rat King",
     costType:"blood",
     cost: 2,
     sigils: ["quadruplebones"],
@@ -419,6 +457,7 @@ let allCards = {
   },
   "rattler": {
     card: "rattler",
+    name: "Rattler",
     costType:"bone",
     cost: 6,
     sigils: [],
@@ -430,6 +469,7 @@ let allCards = {
   },
   "raven": {
     card: "raven",
+    name: "Raven",
     costType:"blood",
     cost: 2,
     sigils: ["flying"],
@@ -441,6 +481,7 @@ let allCards = {
   },
   "ravenegg": {
     card: "ravenegg",
+    name: "Raven Egg",
     costType:"blood",
     cost: 1,
     sigils: ["evolve"],
@@ -463,6 +504,7 @@ let allCards = {
   // },
   "shark": {
     card: "shark",
+    name: "Great White",
     costType:"blood",
     cost: 3,
     sigils: ["submerge"],
@@ -474,6 +516,7 @@ let allCards = {
   },
   "skink": {
     card: "skink",
+    name: "Skink",
     costType:"blood",
     cost: 1,
     sigils: ["tailonhit"],
@@ -485,6 +528,7 @@ let allCards = {
   },
   "skunk": {
     card: "skunk",
+    name: "Skunk",
     costType:"blood",
     cost: 1,
     sigils: ["debuffenemy"],
@@ -496,6 +540,7 @@ let allCards = {
   },
   "sparrow": {
     card: "sparrow",
+    name: "Sparrow",
     costType:"blood",
     cost: 1,
     sigils: ["flying"],
@@ -507,6 +552,7 @@ let allCards = {
   },
   "squidbell": {
     card: "squidbell",
+    name: "Bell Tentacle",
     costType:"blood",
     cost: 2,
     sigils: ["loud", "belldamage"],
@@ -518,6 +564,7 @@ let allCards = {
   },
   "squidcards": {
     card: "squidcards",
+    name: "Card Tentacle",
     costType:"blood",
     cost: 1,
     sigils: ["carddamage"],
@@ -529,6 +576,7 @@ let allCards = {
   },
   "squidmirror": {
     card: "squidmirror",
+    name: "Mirror Tentacle",
     costType:"blood",
     cost: 1,
     sigils: ["mirrordamage"],
@@ -540,6 +588,7 @@ let allCards = {
   },
   "stoat": {
     card: "stoat",
+    name: "Stoat",
     costType:"blood",
     cost: 1,
     sigils: [],
@@ -551,6 +600,7 @@ let allCards = {
   },
   "turtle": {
     card: "turtle",
+    name: "River Snapper",
     costType:"blood",
     cost: 2,
     sigils: [],
@@ -562,6 +612,7 @@ let allCards = {
   },
   "urayuli": {
     card: "urayuli",
+    name: "Urayuli",
     costType:"blood",
     cost: 4,
     sigils: [],
@@ -573,6 +624,7 @@ let allCards = {
   },
   "vulture": {
     card: "vulture",
+    name: "Turkey Vulture",
     costType:"bone",
     cost: 8,
     sigils: ["flying"],
@@ -584,6 +636,7 @@ let allCards = {
   },
   "warren": {
     card: "warren",
+    name: "Warren",
     costType:"blood",
     cost: 1,
     sigils: ["drawrabbits"],
@@ -595,6 +648,7 @@ let allCards = {
   },
   "wolf": {
     card: "wolf",
+    name: "Wolf",
     costType:"blood",
     cost: 2,
     sigils: [],
@@ -606,6 +660,7 @@ let allCards = {
   },
   "wolfcub": {
     card: "wolfcub",
+    name: "Wolf Cub",
     costType:"blood",
     cost: 1,
     sigils: ["evolve"],
@@ -617,6 +672,7 @@ let allCards = {
   },
   "direwolf": {
     card: "direwolf",
+    name: "Dire Wolf",
     costType:"blood",
     cost: 3,
     sigils: ["doublestrike"],
@@ -628,6 +684,7 @@ let allCards = {
   },
   "direwolfcub": {
     card: "direwolfcub",
+    name: "Dire Wolf Pup",
     costType:"blood",
     cost: 2,
     sigils: ["bonedigger", "evolve"],
@@ -639,6 +696,7 @@ let allCards = {
   },
   "antflying": {
     card: "antflying",
+    name: "Flying Ant",
     costType:"blood",
     cost: 1,
     sigils: ["flying", "antdamage"],
@@ -650,6 +708,7 @@ let allCards = {
   },
   "kraken": {
     card: "kraken",
+    name: "Great Kraken",
     costType:"blood",
     cost: 1,
     sigils: ["submergesquid"],
@@ -661,6 +720,7 @@ let allCards = {
   },
   "hodag": {
     card: "hodag",
+    name: "Hodag",
     costType:"blood",
     cost: 2,
     sigils: ["gainattackonkillpermanent"],
@@ -672,6 +732,7 @@ let allCards = {
   },
   "lammergeier": {
     card: "lammergeier",
+    name: "Lammergeier", 
     costType:"blood",
     cost: 3,
     sigils: ["flying", "bonedamage"],
@@ -683,6 +744,7 @@ let allCards = {
   },
   "mealworm": {
     card: "mealworm",
+    name: "Mealworm",
     costType:"bone",
     cost: 2,
     sigils: ["morsel"],
@@ -694,6 +756,7 @@ let allCards = {
   },
   "mudturtle": {
     card: "mudturtle",
+    name: "Mud Turtle",
     costType:"blood",
     cost: 2,
     sigils: ["deathshield"],
@@ -705,6 +768,7 @@ let allCards = {
   },
   "raccoon": {
     card: "raccoon",
+    name: "Raccoon",
     costType:"blood",
     cost: 1,
     sigils: ["opponentbones"],
@@ -716,6 +780,7 @@ let allCards = {
   },
   "redhart": {
     card: "redhart",
+    name: "Red Hart",
     costType:"blood",
     cost: 2,
     sigils: ["strafe", "sacdamage"],
@@ -727,6 +792,7 @@ let allCards = {
   },
   "tadpole": {
     card: "tadpole",
+    name: "Tadpole",
     costType:"bone",
     cost: 0,
     sigils: ["submerge", "evolve"],
@@ -738,6 +804,7 @@ let allCards = {
   },
   "bull": {
     card: "bull",
+    name: "Wild Bull",
     costType:"blood",
     cost: 2,
     sigils: ["strafeswap"],
@@ -749,6 +816,7 @@ let allCards = {
   },
   "wolverine": {
     card: "wolverine",
+    name: "Wolverine",
     costType:"bone",
     cost: 5,
     sigils: ["gainattackonkill"],

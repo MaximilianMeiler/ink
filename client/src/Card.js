@@ -8,7 +8,7 @@ function Card({val}) {
         <div className='cardContainer'>
           {val.card === "blank" ? <img src='/card_empty_nostats.png' alt='blank card' className='card cardBacking'></img>
           : <img src='/card_empty_sprite.png' alt='blank card' className='card cardBacking'></img>}
-          <div className='card cardHeader'>{val.card === "blank" ? "Skip draw" : val.card}</div>
+          <div className='card cardHeader'>{val.name ? val.name : val.card}</div>
           <img src={`/portrait_${val.card}.png`} alt={`${val.card} portrait`} className='card cardPortrait'></img>
           <img src={`/cost_${val.cost}${val.costType}.png`} alt={`${val.card} cost`} className='card cardCost'></img>
           <div className='card cardDamage'>{val.card === "blank" ? "" : Math.max(val.damage, 0)}</div>
