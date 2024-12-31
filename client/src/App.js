@@ -910,7 +910,7 @@ function App() {
                 let s = room.decks[room.player0 === socket.id ? 1 : 0].length
                 let l = 295 - (index * 295/(s - 1));
                 let m;
-                index <= handHover && hoverSection === 0 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
+                handHover !== s-1 && index <= handHover && hoverSection === 0 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
 
                 return <div 
                   style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
@@ -973,7 +973,7 @@ function App() {
                 let s = room.decks[room.player0 === socket.id ? 0 : 1].length
                 let l = 295 - (index * 295/(s - 1));
                 let m;
-                index <= handHover && hoverSection === 1 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
+                handHover !== s-1 && index <= handHover && hoverSection === 1 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
 
                 return <div 
                   style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
@@ -1079,8 +1079,9 @@ function App() {
               let s = room.hands[room.player0 === socket.id ? 0 : 1].length
               let l = 295 - (index * 295/(s - 1));
               let m;
-              index <= handHover ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
-              index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * s - 420)/(s - 1) : m = m;
+
+              handHover !== s-1 && index <= handHover ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
+              handSelection !== s-1 && index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * s - 420)/(s - 1) : m = m;
 
               return <div 
                 style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
