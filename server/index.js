@@ -44,6 +44,7 @@ io.on("connection", (socket) => {
       doubleConf[newRoom.id] = [false, false];
 
       rooms[newRoom.id].gameState = "roundStart0";
+      rooms[newRoom.id].round = min(rooms[newRoom.id].round+1, 4); //cap at 4 scribes / 8 drafts for now?
       io.to(newRoom.id).emit("serverUpdate", rooms[newRoom.id]);
     }
   })
@@ -52,11 +53,11 @@ io.on("connection", (socket) => {
     console.log("update on room", newRoom)
 
     if (newRoom.draft.phase === -1) { //start new draft
-      newRoom.draft.phase = 0;
+      newRoom.draft.phase++;
       newRoom.draft.options = getCardsForDraft(6)
     }
-    if (newRoom.draft.phase === 2) { //restart draft
-      newRoom.draft.phase = 3;
+    if (newRoom.draft.phase % 3 === 2) { //restart draft
+      newRoom.draft.phase++;
       newRoom.draft.options = getCardsForDraft(6);
     } 
 
@@ -114,16 +115,6 @@ io.on("connection", (socket) => {
               health: 2,
               tribe: "canine",
               rare: false
-            },            {
-              card: "wolf",
-              costType:"blood",
-              cost: 2,
-              sigils: ["tripleblood"],
-              defaultSigils: 0,
-              damage: 3,
-              health: 2,
-              tribe: "canine",
-              rare: false
             }
           ],
           [
@@ -154,16 +145,6 @@ io.on("connection", (socket) => {
               costType:"blood",
               cost: 2,
               sigils: [],
-              defaultSigils: 0,
-              damage: 3,
-              health: 2,
-              tribe: "canine",
-              rare: false
-            },            {
-              card: "wolf",
-              costType:"blood",
-              cost: 2,
-              sigils: ["tripleblood"],
               defaultSigils: 0,
               damage: 3,
               health: 2,

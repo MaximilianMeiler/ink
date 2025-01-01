@@ -942,6 +942,7 @@ function App() {
 
         {(room.gameState === "drafting") ? 
           <div>
+            <div>Drafts remaining: {2*room.round - Math.floor(room.draft.phase / 3)}</div>
             <div style={{position: 'relative', paddingTop: "190px"}}> 
               {room.decks[room.player0 === socket.id ? 1 : 0].map((card, index) => {
                 let s = room.decks[room.player0 === socket.id ? 1 : 0].length
@@ -973,7 +974,7 @@ function App() {
                           newDecks[room.player0 === socket.id ? 0 : 1].push({...card, index: newDecks[room.player0 === socket.id ? 0 : 1].length});
                           let newDraw = room.draft;
                           newDraw.options[index] = null;
-                          if (newDraw.phase === 4) {
+                          if (newDraw.phase === (2 * room.round * 3 - 2)) { //4, 10, etc
                             setSendRoom({...room, decks: newDecks, gameState: "scribing"})
                           } else {
                             newDraw.phase++;
@@ -992,7 +993,7 @@ function App() {
                 </div>
                 <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                   if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
-                    if (room.draft.phase === 4) {
+                    if (room.draft.phase === (2 * room.round * 3 - 2)) {
                       setSendRoom({...room, gameState: "scribing"})
                     } else {
                       let newDraw = room.draft;
@@ -1234,6 +1235,7 @@ function App() {
                 if (inscribedCount === room.round) {
                   socket.emit("newDeck", {...room, decks: newDecks});
                   setRoom({...room, gameState: "awaitingPlayers"}) //this will never be sent to the backend
+                  setScribes([{open: false, index: -1}, {open: false, index: -1}, 0]);
                 }
               }}></img>
             </div>
