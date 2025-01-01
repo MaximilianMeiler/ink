@@ -51,6 +51,7 @@
   position:relative;
   width: 125px;
   height: 190px;
+  cursor: pointer;
 }
 
 .card {
@@ -159,4 +160,8 @@
   display: grid;
   grid-template-columns: repeat(7, 154px);
   grid-template-rows: repeat(1, 226px)
+}
+
+.cardSlot {
+  cursor: pointer;
 }

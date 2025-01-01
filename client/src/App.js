@@ -936,6 +936,10 @@ function App() {
 
       {room ? <div>
 
+        {(room.gameState === "awaitingPlayers") ? <div>
+          Waiting for other players...
+        </div> : <></>}
+
         {(room.gameState === "drafting") ? 
           <div>
             <div style={{position: 'relative', paddingTop: "190px"}}> 
@@ -1021,14 +1025,14 @@ function App() {
         : <></>}
 
         {(["draw0", "draw1", "play0", "play1", "roundStart0", "roundStart1", "simulating0", "simulating1"].indexOf(room.gameState) > -1) ? <div>
-          <div onClick={() => {
+          <div style={{cursor:"pointer", fontWeight:"bold"}} onClick={() => {
             // setSendRoom({...room, gameState: (room.player0 === socket.id ? "draw1" : "draw0"), sacrifices: []}); //swap turns
             if (room.gameState === (room.player0 === socket.id ? "play0" : "play1")) {
               socket.emit("bellRung", room.id);
             }
-          }}>Ring Bell</div>
-          <div style={room.scale * (room.player0 === socket.id ? 1 : -1) <= -5 ? {color: "red"} : {}}>{room.scale}</div>
-          <div>Bones: P0-{room.bones[0]} P1-{room.bones[1]}</div>
+          }}>[Ring Bell]</div>
+          <div style={room.scale * (room.player0 === socket.id ? 1 : -1) <= -5 ? {color: "red"} : room.scale * (room.player0 === socket.id ? 1 : -1) >= 5 ? {color: "green"} : {}}>Your score: {room.scale * (room.player0 === socket.id ? 1 : -1)}</div>
+          <div>Your bones: {room.bones[room.player0 === socket.id ? 0 : 1]}</div>
 
           <div className='gameGrid'>
             {room.board ? room.board.map((val, index) => {
@@ -1189,6 +1193,7 @@ function App() {
         : <></>}
 
         {(room.gameState === "scribing") ? <div>
+          <div>Inscriptions remaining: {room.round - scribes[2]}</div>
           <div className='draftGrid'>
             <div className='gameSlot'>
               <img src='/card_slot_sacrifice.png' alt='empty sacrifice slot' className='card cardSlot'></img>
