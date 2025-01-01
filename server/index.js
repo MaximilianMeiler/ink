@@ -34,6 +34,17 @@ const io = new Server(server, {
 let rooms = {};
 let doubleConf = {}
 
+function shuffleArray(input) {
+  let array = input.slice(0);
+  for (var i = array.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+  }
+  return array;
+}
+
 io.on("connection", (socket) => {
   console.log("New user:", socket.id)
 
@@ -85,6 +96,7 @@ io.on("connection", (socket) => {
           [
             {
               card: "stoat",
+              name: "Stoat",
               costType:"blood",
               cost: 1,
               sigils: [],
@@ -92,10 +104,12 @@ io.on("connection", (socket) => {
               damage: 1,
               health: 2,
               tribe: "none",
-              rare: false
+              rare: false,
+              index: 0
             },
             {
               card: "bullfrog",
+              name: "Bullfrog",
               costType:"blood",
               cost: 1,
               sigils: ["reach"],
@@ -103,10 +117,12 @@ io.on("connection", (socket) => {
               damage: 1,
               health: 2,
               tribe: "reptile",
-              rare: false
+              rare: false,
+              index: 1
             },
             {
               card: "wolf",
+              name: "Wolf",
               costType:"blood",
               cost: 2,
               sigils: [],
@@ -114,12 +130,14 @@ io.on("connection", (socket) => {
               damage: 3,
               health: 2,
               tribe: "canine",
-              rare: false
+              rare: false,
+              index: 3
             }
           ],
           [
             {
               card: "stoat",
+              name: "Stoat",
               costType:"blood",
               cost: 1,
               sigils: [],
@@ -127,10 +145,12 @@ io.on("connection", (socket) => {
               damage: 1,
               health: 2,
               tribe: "none",
-              rare: false
+              rare: false,
+              index: 0
             },
             {
               card: "bullfrog",
+              name: "Bullfrog",
               costType:"blood",
               cost: 1,
               sigils: ["reach"],
@@ -138,10 +158,12 @@ io.on("connection", (socket) => {
               damage: 1,
               health: 2,
               tribe: "reptile",
-              rare: false
+              rare: false,
+              index: 1
             },
             {
               card: "wolf",
+              name: "Wolf",
               costType:"blood",
               cost: 2,
               sigils: [],
@@ -149,7 +171,8 @@ io.on("connection", (socket) => {
               damage: 3,
               health: 2,
               tribe: "canine",
-              rare: false
+              rare: false,
+              index: 3
             }
           ]
         ],
@@ -342,11 +365,7 @@ io.on("connection", (socket) => {
 })
 
 function getCardsForDraft(n) {
-  let cards = [];
-  for (let x = 0; x < n; x++) {
-    cards.push(Object.values(allCards)[Math.floor(Math.random() * Object.values(allCards).length)])
-  }
-  return cards;
+  return shuffleArray(Object.values(allCards)).slice(0,n);
 }
 
 server.listen(4000, () => {
