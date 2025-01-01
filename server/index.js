@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
       doubleConf[newRoom.id] = [false, false];
 
       rooms[newRoom.id].gameState = "roundStart0";
-      rooms[newRoom.id].round = min(rooms[newRoom.id].round+1, 4); //cap at 4 scribes / 8 drafts for now?
+      rooms[newRoom.id].round = Math.min(rooms[newRoom.id].round+1, 4); //cap at 4 scribes / 8 drafts for now?
       io.to(newRoom.id).emit("serverUpdate", rooms[newRoom.id]);
     }
   })
