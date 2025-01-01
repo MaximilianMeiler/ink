@@ -511,7 +511,7 @@ function App() {
 
             let corpseIndex = -1;
             newHands[target < 4 ? 1 : 0].forEach((card, j) => {
-              if (card.sigils.indexOf("corpseeater") > -1 && corpseIndex > 0) { //SIGILS - corpseeater
+              if (card.sigils.indexOf("corpseeater") > -1 && corpseIndex < 0) { //SIGILS - corpseeater
                 corpseIndex = j; //first in hand always used
               }
             })
