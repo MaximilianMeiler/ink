@@ -3,7 +3,7 @@ import './App.css';
 import io from "socket.io-client";
 import Card from './Card';
 import {allCards, allSigils} from './cardList';
-const socket = io.connect("http://localhost:4000"); //socket.socket.sessionid
+const socket = io.connect("https://isolated-cris-mmeiler-73d53aab.koyeb.app/"); //socket.socket.sessionid
 
 function App() {
   const [room, setRoom] = useState(null)
