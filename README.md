@@ -1,5 +1,5 @@
 # Inscryption Online
-A remake of (parts of) Daniel Mullens' game *[Inscryption](https://store.steampowered.com/app/1092790/Inscryption/)* for a player-vs-player setting. Players build up decks of cards to face off using increasingly ridiculous strategies and combos.
+A remake of (parts of) Daniel Mullins' game *[Inscryption](https://store.steampowered.com/app/1092790/Inscryption/)* for a player-vs-player setting. Players build up decks of cards to face off using increasingly ridiculous strategies and combos.
 
 ## Playing 
 A hosted version of the game can currently be found at [https://ink-seven.vercel.app/](https://ink-seven.vercel.app/) (url subject to change). This should have full functionality. If you want to instead run the code locally for development purposes, follow the following steps:
