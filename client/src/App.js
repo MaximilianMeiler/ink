@@ -1210,7 +1210,10 @@ function App() {
 
         {(room.gameState === "scribing") ? <div>
           <div>Inscriptions remaining: {room.round - scribes[2]}</div>
-          <div className='draftGrid'>
+          <div className='inscGrid'>
+            <div>Select Sacrifice</div>
+            <div>Select Host</div>
+            <div style={{color: "darkred"}}>{scribes[0].index === -1 ? "Skip" : scribes[1].index === -1 ? "Remove" : "Inscribe"}</div>
             <div className='gameSlot'>
               <img src='/card_slot_sacrifice.png' alt='empty sacrifice slot' className='card cardSlot'></img>
               <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
@@ -1257,8 +1260,7 @@ function App() {
           </div>
 
           {scribes[0].open || scribes[1].open ? 
-          <div style={{position: 'relative', paddingTop: "190px"}}> 
-            <div>{scribes[0].open ? "Select card to sacrifice" : "Select host card"}</div>
+          <div style={{position: 'relative', paddingTop: "190px", marginLeft: "calc(50% - 231px + 14.5px)"}}> 
             {room.decks[room.player0 === socket.id ? 0 : 1].filter((card,i) => card.sigils.length === card.defaultSigils && i !== scribes[0].index && i !== scribes[1].index).concat({...blankCard, name: "None"}).map((card, index) => {
               let s = room.decks[room.player0 === socket.id ? 0 : 1].filter((card,i) => card.sigils.length === card.defaultSigils && i !== scribes[0].index && i !== scribes[1].index).length + 1
               let l = 295 - (index * 295/(s - 1));
@@ -1270,8 +1272,8 @@ function App() {
                 onMouseEnter={() => {setHandHover(index); setHoverSection(0);}}
                 onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 onClick={() => {
-                  setScribes([{open: false, index: scribes[0].open ? card.card === "blank" ? {} : room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[0].index}, 
-                              {open: false, index: scribes[1].open ? card.card === "blank" ? {} : room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[1].index}, scribes[2]])
+                  setScribes([{open: false, index: scribes[0].open ? room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[0].index}, 
+                              {open: false, index: scribes[1].open ? room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[1].index}, scribes[2]])
                 }}
               >
                 <Card val={card}/>

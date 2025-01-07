@@ -237,12 +237,23 @@ button {
 
 .gameSlot {
   position: relative;
+  width: 154px;
+  height: 226px;
 }
 
 .draftGrid {
   display: grid;
   grid-template-columns: repeat(7, 154px);
   grid-template-rows: repeat(1, 226px)
+}
+
+.inscGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 154px);
+  grid-template-rows: repeat(1, 20px);
+
+  margin-left: calc(50% - 231px);
+  margin-top: 20px;
 }
 
 .cardSlot {
