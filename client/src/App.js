@@ -636,30 +636,36 @@ function App() {
 
         if (newBoard[entry.index].card === "wolfcub") {
           newBoard[entry.index].card = "wolf";
+          newBoard[entry.index].name = "Wolf";
           newBoard[entry.index].damage += 2;
           newBoard[entry.index].health += 1;
           newBoard[entry.index].sigils = newSigils;
           newBoard[entry.index].defaultSigils = 0;
         } else if (newBoard[entry.index].card === "deercub") {
           newBoard[entry.index].card = "deer";
+          newBoard[entry.index].name = "Elk";
           newBoard[entry.index].damage += 1;
           newBoard[entry.index].health += 3;
           newBoard[entry.index].sigils = newSigils;
           newBoard[entry.index].defaultSigils = 1;
         } else if (newBoard[entry.index].card === "ravenegg") {
           newBoard[entry.index].card = "raven";
+          newBoard[entry.index].name = "Raven";
           newBoard[entry.index].damage += 2;
           newBoard[entry.index].health += 1;
           newBoard[entry.index].sigils = ["flying", ...newSigils];
         } else if (newBoard[entry.index].card === "mothman_1") {
-          newBoard[entry.index].card = "mothman_2";
+          newBoard[entry.index].card = "mothman_2"; //FIXME - is it actually called this? I dont have internet rn lol
+          newBoard[entry.index].name = "Strange Pupa";
           newBoard[entry.index].sigils = ["evolve", ...newSigils];
         } else if (newBoard[entry.index].card === "mothman_2") {
           newBoard[entry.index].card = "mothman_3";
+          newBoard[entry.index].name = "Mothman";
           newBoard[entry.index].damage += 7;
           newBoard[entry.index].sigils = ["flying", ...newSigils];
         } else if (newBoard[entry.index].card === "direwolfcub") {
           newBoard[entry.index].card = "direwolf";
+          newBoard[entry.index].name = "Dire Wolf";
           newBoard[entry.index].damage += 1;
           newBoard[entry.index].health += 4;
           newSigils.splice(newSigils.indexOf("bonedigger"), 1);
@@ -667,6 +673,7 @@ function App() {
           newBoard[entry.index].sigils = ["doublestrike", ...newSigils];
         } else if (newBoard[entry.index].card === "tadpole") {
           newBoard[entry.index].card = "bullfrog";
+          newBoard[entry.index].name = "Bullfrog";
           newBoard[entry.index].damage += 1;
           newBoard[entry.index].health += 1;
           newBoard[entry.index].defaultSigils = 1;
@@ -677,6 +684,7 @@ function App() {
             newSigils.splice(newSigils.indexOf("flying"), 1);
           }
           newBoard[entry.index].card = "antqueen";
+          newBoard[entry.index].name = "Ant Queen";
           newBoard[entry.index].health += 2;
           newBoard[entry.index].defaultSigils = 1;
           newBoard[entry.index].sigils = ["drawant", ...newSigils];
