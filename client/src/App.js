@@ -316,7 +316,7 @@ function App() {
         array[j] = temp;
     }
     return array;
-}
+  }
 
   function simulateActivityLog(newRoom) {
     let newBones = newRoom.bones;
@@ -917,7 +917,7 @@ function App() {
   return (
     <div className="App">
       <div style={{display: "flex"}}>
-        <p>Join room: </p>
+        <p>&nbsp;Join room:&nbsp;</p>
         <input type='text' id="roomInput"></input>
         <button onClick={() => {
           if (room) {
@@ -932,7 +932,7 @@ function App() {
           setRoom(null);
         }}>Leave room</button>
       </div>
-      <div>Room: {room ? room.id : ""}</div>
+      <div style={{marginBottom: "20px"}}>Room: {room ? room.id : ""}</div>
 
       {room ? <div>
 
@@ -1026,150 +1026,156 @@ function App() {
         : <></>}
 
         {(["draw0", "draw1", "play0", "play1", "roundStart0", "roundStart1", "simulating0", "simulating1"].indexOf(room.gameState) > -1) ? <div>
-          <div style={{cursor:"pointer", fontWeight:"bold"}} onClick={() => {
-            // setSendRoom({...room, gameState: (room.player0 === socket.id ? "draw1" : "draw0"), sacrifices: []}); //swap turns
-            if (room.gameState === (room.player0 === socket.id ? "play0" : "play1")) {
-              socket.emit("bellRung", room.id);
-            }
-          }}>[Ring Bell]</div>
-          <div style={room.scale * (room.player0 === socket.id ? 1 : -1) <= -5 ? {color: "red"} : room.scale * (room.player0 === socket.id ? 1 : -1) >= 5 ? {color: "green"} : {}}>Your score: {room.scale * (room.player0 === socket.id ? 1 : -1)}</div>
-          <div>Your bones: {room.bones[room.player0 === socket.id ? 0 : 1]}</div>
 
-          <div className='gameGrid'>
-            {room.board ? room.board.map((val, index) => {
-              let trueIndex = index;
-              if (room.player0 !== socket.id) { //if player B, flip board
-                index = (index + 4) % 8;
-                val = room.board[index]
+          <div className='gameBoard'>
+            <div className='bellArea'>
+              <div className='scaleBack'></div>
+              {[...Array(11)].map((v,i) => <div className='scaleSlot' style={{top: i*44, backgroundColor: i === 0 ? 'darkgreen' : i === 10 ? 'darkred' : 'black'}}></div>)}
+              <div className='bellHead' onClick={() => {
+              // setSendRoom({...room, gameState: (room.player0 === socket.id ? "draw1" : "draw0"), sacrifices: []}); //swap turns
+              if (room.gameState === (room.player0 === socket.id ? "play0" : "play1")) {
+                socket.emit("bellRung", room.id);
               }
+              }}>
+                <img src='/ability_belldamage.png' alt='bell icon'/>
+              </div>
+              <div className='scaleArrow' style={{top: -22+6 + (5-Math.min(Math.max((room.scale * (room.player0 === socket.id ? 1 : -1)), -5), 5))*(44)}}>{Math.abs(room.scale) > 5 ? `+${Math.abs(room.scale)-5}` : ""}</div>
+            </div>
 
-              console.log(index, room.board, room.board[index-1])
+            <div className='gameGrid'>
+              {room.board ? room.board.map((val, index) => {
+                let trueIndex = index;
+                if (room.player0 !== socket.id) { //if player B, flip board
+                  index = (index + 4) % 8;
+                  val = room.board[index]
+                }
 
-              return (
-                <div className='gameSlot'>
-                  <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
-                  {val && val.card ? 
-                    <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-                      <Card val={{...val,
-                        damage: calcTrueDamage(room.board, index, room.bones, room.hands)
-                      }}/>
-                    </div>
-                  : <></>
-                  }
-                  {room.sacrifices.indexOf(index) > -1 ?
-                    <img src='./sacrifice_mark.png' alt='sacrifice mark' className='card sacrificeMark'></img>
-                  : <></>
-                  }
-                  <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
-                    if (trueIndex > 3 && handSelection > -1 && room.gameState === (room.player0 === socket.id ? "play0" : "play1")) { //interactable slots
-                      if ((!val || (room.sacrifices.indexOf(index) > -1 && val.sigils.indexOf("sacrificial") < 0)) &&
-                        (
-                          (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone" && 
-                          room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.bones[room.player0 === socket.id ? 0 : 1])
-                        || 
-                          (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "blood" && 
-                          room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.sacrifices.reduce((acc, val) => { //SIGILS - tripleblood
-                            if (room.board[val].sigils.indexOf("tripleblood") > -1) {
-                              return acc + 3;
-                            } else {
-                              return acc + 1;
-                            }
-                          }, 0))
-                        )) 
-                      { //empty slot - place selected card
-                        placeSelectedCard(index);
-                      } else if (val && val.card && ((val.card !== "dam" && val.card !== "chime") || val.sigils.indexOf("tripleblood") > -1 || val.sigils.indexOf("sacrificial") > -1)) { //toggle sacrifices for selected card, terrain cant be sacrificed
-                        let newSac = room.sacrifices;
-                        let dying = room.sacrifices.indexOf(index) > -1 
-                        if (dying) {
-                          newSac.splice(newSac.indexOf(index), 1);
-                          setSendRoom({...room, sacrifices: newSac});
-                        } else if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone" || 
-                          room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.sacrifices.reduce((acc, val) => { //SIGILS - tripleblood
-                            if (room.board[val].sigils.indexOf("tripleblood") > -1) {
-                              return acc + 3;
-                            } else {
-                              return acc + 1;
-                            }
-                          }, 0)
-                        ) { 
-                          //stop unecessary killing
-                        } else {
-                          newSac.push(index);
-                          setSendRoom({...room, sacrifices: newSac});
+                console.log(index, room.board, room.board[index-1])
+
+                return (
+                  <div className='gameSlot'>
+                    <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
+                    {val && val.card ? 
+                      <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
+                        <Card val={{...val,
+                          damage: calcTrueDamage(room.board, index, room.bones, room.hands)
+                        }}/>
+                      </div>
+                    : <></>
+                    }
+                    {room.sacrifices.indexOf(index) > -1 ?
+                      <img src='./sacrifice_mark.png' alt='sacrifice mark' className='card sacrificeMark'></img>
+                    : <></>
+                    }
+                    <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
+                      if (trueIndex > 3 && handSelection > -1 && room.gameState === (room.player0 === socket.id ? "play0" : "play1")) { //interactable slots
+                        if ((!val || (room.sacrifices.indexOf(index) > -1 && val.sigils.indexOf("sacrificial") < 0)) &&
+                          (
+                            (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone" && 
+                            room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.bones[room.player0 === socket.id ? 0 : 1])
+                          || 
+                            (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "blood" && 
+                            room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.sacrifices.reduce((acc, val) => { //SIGILS - tripleblood
+                              if (room.board[val].sigils.indexOf("tripleblood") > -1) {
+                                return acc + 3;
+                              } else {
+                                return acc + 1;
+                              }
+                            }, 0))
+                          )) 
+                        { //empty slot - place selected card
+                          placeSelectedCard(index);
+                        } else if (val && val.card && ((val.card !== "dam" && val.card !== "chime") || val.sigils.indexOf("tripleblood") > -1 || val.sigils.indexOf("sacrificial") > -1)) { //toggle sacrifices for selected card, terrain cant be sacrificed
+                          let newSac = room.sacrifices;
+                          let dying = room.sacrifices.indexOf(index) > -1 
+                          if (dying) {
+                            newSac.splice(newSac.indexOf(index), 1);
+                            setSendRoom({...room, sacrifices: newSac});
+                          } else if (room.hands[room.player0 === socket.id ? 0 : 1][handSelection].costType === "bone" || 
+                            room.hands[room.player0 === socket.id ? 0 : 1][handSelection].cost <= room.sacrifices.reduce((acc, val) => { //SIGILS - tripleblood
+                              if (room.board[val].sigils.indexOf("tripleblood") > -1) {
+                                return acc + 3;
+                              } else {
+                                return acc + 1;
+                              }
+                            }, 0)
+                          ) { 
+                            //stop unecessary killing
+                          } else {
+                            newSac.push(index);
+                            setSendRoom({...room, sacrifices: newSac});
+                          }
                         }
                       }
-                    }
-                  }}></img>
-                </div>
-              )
-            }) : <></>}
+                    }}></img>
+                  </div>
+                )
+              }) : <></>}
+            </div>
+
+            <div className='boneDisplay'>
+              <img src='/starterdeck_icon_bones.png' style={{filter: "brightness(0%)"}} alt='Bone count'/>
+              &nbsp;x {room.bones[room.player0 === socket.id ? 0 : 1]}
+            </div>
           </div>
         
-          {((room.player0 === socket.id && room.player0) || room.player1) && room.hands[room.player0 === socket.id ? 0 : 1] ? 
-            <div style={{position: 'relative', marginBottom: "190px"}}> 
-              {room.hands[room.player0 === socket.id ? 0 : 1].map((card, index) => {
-                let s = room.hands[room.player0 === socket.id ? 0 : 1].length
-                let l = 295 - (index * 295/(s - 1));
-                let m;
+          <div style={{height: "0px"}}>
+            {((room.player0 === socket.id && room.player0) || room.player1) && room.hands[room.player0 === socket.id ? 0 : 1] ? 
+              <div className='handContainer'> 
+                {room.hands[room.player0 === socket.id ? 0 : 1].map((card, index) => {
+                  let s = room.hands[room.player0 === socket.id ? 0 : 1].length
+                  let l = 295 - (index * 295/(s - 1));
+                  let m;
 
-                handHover !== s-1 && index <= handHover ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
-                handSelection !== s-1 && index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * s - 420)/(s - 1) : m = m;
+                  handHover !== s-1 && index <= handHover ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
+                  handSelection !== s-1 && index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * s - 420)/(s - 1) : m = m;
 
-                return <div 
-                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
-                  onMouseEnter={() => setHandHover(index)}
-                  onMouseLeave={() => setHandHover(-1)}
-                  onClick={() => {
-                    index === handSelection ? setHandSelection(-1) : setHandSelection(index)
-                    setSendRoom({...room, sacrifices: []});
-                  }}
-                >
-                  <Card val={card}/>
-                </div>
-              })}
-            </div>
-          : <></>
-          }
-
-          {room.gameState === (room.player0 === socket.id ? "draw0" : "draw1") ? 
-            <div>
-              <div className='cardContainer' onClick={() => {
-                if (draw.length <= 0) {return}
-                let newHands = room.hands;
-                let drawnCard = structuredClone(draw[0]);
-                let randomIndex = drawnCard.sigils.indexOf("randomability"); //SIGILS - randomability
-                if (randomIndex >= 0) {
-                  drawnCard.sigils.splice(randomIndex, 1, allSigils[Math.floor(Math.random() * allSigils.length)])
-                }
-                drawnCard.clone = structuredClone(drawnCard); //FIXME? - all cards now have clones. Corresponding else statements / use of card "indexes" are redundant
-                newHands[room.player0 === socket.id ? 0 : 1].push(drawnCard);
-                let newDraw = draw;
-                newDraw.splice(0, 1);
-                if (newDraw.length === 0) { //when the draw pile runs dry, reshuffle the deck in
-                  setDraw(shuffleArray(room.decks[room.player0 === socket.id ? 0 : 1]));
-                } else {
-                  setDraw(newDraw)
-                }
-                setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
-              }}>
-                {draw.map((card, index) => {
-                  let s = draw.length
-                  let t = 20 - index * 20 / (s-1);
-                  return <img src='/card_back.png' alt='card back' className='card cardBacking' style={{top: t}}></img>
+                  return <div 
+                    style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                    onMouseEnter={() => setHandHover(index)}
+                    onMouseLeave={() => setHandHover(-1)}
+                    onClick={() => {
+                      index === handSelection ? setHandSelection(-1) : setHandSelection(index)
+                      setSendRoom({...room, sacrifices: []});
+                    }}
+                  >
+                    <Card val={card}/>
+                  </div>
                 })}
-              </div> 
-              <div className='cardContainer' onClick={(() => {
-                let newHands = room.hands;
-                newHands[room.player0 === socket.id ? 0 : 1].push({
-                  card: "squirrel",
-                  name: "Squirrel",
-                  costType: "bone",
-                  cost: 0,
-                  sigils: [],
-                  damage: 0,
-                  health: 1,
-                  clone: {
+              </div>
+            : <></>
+            }
+
+            {room.gameState === (room.player0 === socket.id ? "draw0" : "draw1") ? 
+              <div className='drawContainer'>
+                <div className='cardContainer' onClick={() => {
+                  if (draw.length <= 0) {return}
+                  let newHands = room.hands;
+                  let drawnCard = structuredClone(draw[0]);
+                  let randomIndex = drawnCard.sigils.indexOf("randomability"); //SIGILS - randomability
+                  if (randomIndex >= 0) {
+                    drawnCard.sigils.splice(randomIndex, 1, allSigils[Math.floor(Math.random() * allSigils.length)])
+                  }
+                  drawnCard.clone = structuredClone(drawnCard); //FIXME? - all cards now have clones. Corresponding else statements / use of card "indexes" are redundant
+                  newHands[room.player0 === socket.id ? 0 : 1].push(drawnCard);
+                  let newDraw = draw;
+                  newDraw.splice(0, 1);
+                  if (newDraw.length === 0) { //when the draw pile runs dry, reshuffle the deck in
+                    setDraw(shuffleArray(room.decks[room.player0 === socket.id ? 0 : 1]));
+                  } else {
+                    setDraw(newDraw)
+                  }
+                  setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
+                }}>
+                  {draw.map((card, index) => {
+                    let s = draw.length
+                    let t = 20 - index * 20 / (s-1);
+                    return <img src='/card_back.png' alt='card back' className='card cardBacking' style={{top: t}}></img>
+                  })}
+                </div> 
+                <div className='cardContainer' onClick={(() => {
+                  let newHands = room.hands;
+                  newHands[room.player0 === socket.id ? 0 : 1].push({
                     card: "squirrel",
                     name: "Squirrel",
                     costType: "bone",
@@ -1177,18 +1183,27 @@ function App() {
                     sigils: [],
                     damage: 0,
                     health: 1,
-                  }
-                });
-                setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
-              })}>
-                  {[...Array(8)].map((card, index) => {
-                    let s = 8
-                    let t = 20 - index * 20 / (s-1) - 190;
-                    return <img src='/card_back_squirrel.png' alt='card back' className='card cardBacking' style={{top: t, left:"125px"}}></img>
-                  })}
-                </div>
-            </div>
-          : <></>}
+                    clone: {
+                      card: "squirrel",
+                      name: "Squirrel",
+                      costType: "bone",
+                      cost: 0,
+                      sigils: [],
+                      damage: 0,
+                      health: 1,
+                    }
+                  });
+                  setSendRoom({...room, hands: newHands, gameState: (room.player0 === socket.id ? "play0" : "play1")})
+                })}>
+                    {[...Array(8)].map((card, index) => {
+                      let s = 8
+                      let t = 20 - index * 20 / (s-1);
+                      return <img src='/card_back_squirrel.png' alt='card back' className='card cardBacking' style={{top: t, left:"0px"}}></img>
+                    })}
+                  </div>
+              </div>
+            : <></>}
+          </div>
         
         </div>
         : <></>}
