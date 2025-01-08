@@ -1,5 +1,12 @@
 .App {
   text-align: center;
+  font-family: Heavyweight;
+  font-size: 20px;
+}
+
+button {
+  font-family: Heavyweight;
+  font-size: 20px;
 }
 
 .App-logo {
@@ -39,12 +46,88 @@
 
 
 
+.gameBoard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.bellArea {
+  background-color: white;
+  height: 452px;
+  width: 154px;
+  position: relative;
+}
+
+.scaleBack {
+  position: absolute;
+  background-color: black;
+  width: 14px;
+  left: 70px;
+  height: 452px;
+}
+
+.scaleSlot {
+  position: absolute;
+  background-color: black;
+  height: 12px;
+  left:60px;
+  width: 34px;
+}
+
+.scaleArrow {
+  position: absolute;
+  width: 0; 
+  height: 0; 
+  border-top: 22px solid transparent;
+  border-bottom: 22px solid transparent;
+  border-left: 22px solid darkgray;
+  left: 27px;
+
+  text-indent: -90px;
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.bellHead {
+  position: absolute;
+  height: 56px;
+  width: 56px;
+  background-color: darkgray;
+  top: 198px;
+  left: 49px;
+  border-radius: 56px;
+  cursor: pointer;
+}
 
 .gameGrid {
   display: grid;
   grid-template-columns: repeat(4, 154px);
-  grid-template-rows: repeat(2, 226px)
+  grid-template-rows: repeat(2, 226px);
+}
+
+.boneDisplay {
+  width: 154px;
+  padding-top:calc(339px/1.2);
+  font-size: 30px;
+  scale: 1.2;
+}
+
+.handContainer {
+  position: relative;
+  margin-left: calc(50% - 308px + 14.5px);
+  margin-top: 14.5px;
+}
+
+.drawContainer {
+  position: relative;
+  height: 0px;
+  margin-left: calc(50% - 308px + 14.5px + 616px);
+  margin-top: 14.5px;
+
+  display: flex;
+  flex-direction: row;
 }
 
 .cardContainer {
@@ -154,12 +237,23 @@
 
 .gameSlot {
   position: relative;
+  width: 154px;
+  height: 226px;
 }
 
 .draftGrid {
   display: grid;
   grid-template-columns: repeat(7, 154px);
   grid-template-rows: repeat(1, 226px)
+}
+
+.inscGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 154px);
+  grid-template-rows: repeat(1, 20px);
+
+  margin-left: calc(50% - 231px);
+  margin-top: 20px;
 }
 
 .cardSlot {
