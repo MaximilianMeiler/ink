@@ -1,5 +1,4 @@
 ### TODO
-- bell/bone ui
 - room login ui -> room customization -> starter decks
 - tutor sigil
 - items -> pack rat
