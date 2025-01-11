@@ -247,6 +247,8 @@ function simulateActivityLog(roomIndex, activityLog) {
   let newBoard = newRoom.board;
   let newHands = newRoom.hands;
   let indexMapping = [0, 1, 2, 3, 4, 5, 6, 7];
+  rooms[roomIndex].animationLog = []
+  animationLog = [] //shake, *updateCard*, flip, shift, lunge, place, remove, updateScale
 
   for (let logIndex = 0; logIndex < activityLog.length; logIndex++) {
     let entry = activityLog[logIndex];
@@ -258,7 +260,6 @@ function simulateActivityLog(roomIndex, activityLog) {
       continue;
     }
 
-    //TODO: add animations
     if (entry.action.substr(0,6) === "attack") { //covers "attack", "attacksharp", "attacksharplethal"
       let target;
       if (entry.target) {
@@ -270,7 +271,7 @@ function simulateActivityLog(roomIndex, activityLog) {
         }
       }
       let trueDamage = entry.action.length > 6 ? 1 : //sharp attack
-        calcTrueDamage(newBoard, entry.index, newBones, newHands);
+      calcTrueDamage(newBoard, entry.index, newBones, newHands);
 
       if (trueDamage < 1) {
         //do nothing
@@ -278,13 +279,20 @@ function simulateActivityLog(roomIndex, activityLog) {
         ((newBoard[entry.index].sigils.indexOf("flying") < 0 || newBoard[target].sigils.indexOf("reach") > -1) &&
          (newBoard[target].sigils.indexOf("submerge") < 0 && newBoard[target].sigils.indexOf("submergesquid") < 0))))
       { //SIGILS - flying, reach, submerge
-        
+
         let shieldIndex = newBoard[target].sigils.indexOf("deathshield"); //SIGILS - deathshield
+        if (entry.action === "attack") {
+          animationLog.push({action: "lunge", index: entry.index, aim: entry.aim})
+        } else {
+          animationLog.push({action: "shake",  index: target})
+        }
+
         if (shieldIndex > -1) {
           if (shieldIndex < newBoard[target].defaultSigils) {
             newBoard[target].defaultSigils--;
           }
           newBoard[target].sigils.splice(shieldIndex, 1);
+          animationLog.push({action: "updateCard", index: target, card: structuredClone(newBoard[target])})
         } else {
           if (newBoard[target].sigils.indexOf("tailonhit") > -1) { //SIGILS - tailonhit
             let newSigils = Array.from(newBoard[target].sigils);
@@ -322,6 +330,11 @@ function simulateActivityLog(roomIndex, activityLog) {
                   indexMapping[j] += 1;
                 }
               } //make any actions by the target actually occur at the new location
+              animationLog.push({action: "shift", index: target, target: target+1})
+              animationLog.push({action: "updateCard", index: target+1, card: structuredClone(newBoard[target+1])})
+              animationLog.push({action: "updateCard", index: target, card: null})
+              animationLog.push({action: "place", index: target, card: structuredClone(tailCard)})
+              animationLog.push({action: "updateCard", index: target, card: structuredClone(tailCard)})
             } else if (Math.floor(target / 4) === Math.floor((target-1) / 4) && !newBoard[target-1]) {
               newBoard[target-1] = {...newBoard[target], sigils: newSigils};
               newBoard[target] = tailCard;
@@ -330,10 +343,21 @@ function simulateActivityLog(roomIndex, activityLog) {
                   indexMapping[j] -= 1;
                 }
               }
+              animationLog.push({action: "shift", index: target, target: target-1})
+              animationLog.push({action: "updateCard", index: target-1, card: structuredClone(newBoard[target-1])})
+              animationLog.push({action: "updateCard", index: target, card: null})
+              animationLog.push({action: "place", index: target, card: structuredClone(tailCard)})
+              animationLog.push({action: "updateCard", index: target, card: structuredClone(tailCard)})
             }
           }
 
+          if (entry.action === "attack") {
+            animationLog.push({action: "lunge", index: entry.index, aim: entry.aim})
+          } else {
+            animationLog.push({action: "shake",  index: target}) //now the new tail target
+          }
           newBoard[target].health -= trueDamage; //FIXME - should deathtouch not kill a deathshield?
+          animationLog.push({action: "updateCard", index: target, card: structuredClone(newBoard[target])})
         }
 
         if (newBoard[target].sigils.indexOf("beesonhit") > -1) { //SIGILS - beesonhit
@@ -373,7 +397,7 @@ function simulateActivityLog(roomIndex, activityLog) {
             action: newBoard[target].sigils.indexOf("deathtouch") > -1 ? "attacksharplethal" : "attacksharp", //deathtouch + sharp synergy
             target: entry.index
           })
-        }
+        } //FIXME - is it the sharper or the sharp target that shakes?
 
         if (newBoard[entry.index] && newBoard[target].sigils.indexOf("loud") > -1) { //SIGILS - loud/createbells
           let offset = Math.floor(target / 4) * 4; //check for createbells on all cards of the side attacked
@@ -393,7 +417,7 @@ function simulateActivityLog(roomIndex, activityLog) {
         if (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1))) { //SIGILS - deathtouch, gainattackkonkill
           newBones[target < 4 ? 1 : 0] += newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1; //SIGILS - quadruplebones
 
-          //FIXME - somehow this is coded so that the permanent buffs set in until a round ends, not when a card is redrawn from the deck. But I think I like that?
+          //FIXME - somehow this is coded so that the permanent buffs are not set in until a round ends, not when a card is redrawn from the deck. But I think I like that?
           if (newBoard[target].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath, buffondeath
             let undeadCard = {
               ...newBoard[target].clone, 
@@ -422,9 +446,11 @@ function simulateActivityLog(roomIndex, activityLog) {
           newBoard[target] = null; //SIGILS - gainattackonkill, gainattackonkillpermanent
           if (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {
             newBoard[entry.index].damage++;
+            animationLog.push({action: "updateCard", index: entry.index, card: structuredClone(newBoard[entry.index])})
           }
           if (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("gainattackonkillpermanent") > -1) {
             newBoard[entry.index].damage++;
+            animationLog.push({action: "updateCard", index: entry.index, card: structuredClone(newBoard[entry.index])})
             if (newBoard[entry.index].index !== undefined) {
               let matchingCard = newRoom.decks[entry.index < 4 ? 1 : 0].findIndex((c) => c.index === newBoard[entry.index].index);
               newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage = Math.max(newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage, newBoard[entry.index].damage);
@@ -439,6 +465,8 @@ function simulateActivityLog(roomIndex, activityLog) {
           })
           if (corpseIndex > -1) {
             newRoom = placeSelectedCard(target, newHands[target < 4 ? 1 : 0][corpseIndex], newRoom);
+            animationLog.push({action: "place", index: target, card: structuredClone(newHands[target < 4 ? 1 : 0][corpseIndex])})
+            animationLog.push({action: "updateCard", index: target, card: structuredClone(newHands[target < 4 ? 1 : 0][corpseIndex])})
             //FIXME - hand selection is managed clientside tho????
             newHands[target < 4 ? 1 : 0].splice(corpseIndex, 1); //remove selected card from hand
           } 
@@ -457,10 +485,17 @@ function simulateActivityLog(roomIndex, activityLog) {
           let temp = newBoard[target]
           newBoard[target] = newBoard[moleIndex];
           newBoard[moleIndex] = null;
-          newBoard[moleIndex] = temp;
+          newBoard[moleIndex] = temp; //FIXME - what is this line doing?? shouldn't target always be null?
           logIndex--;
+          animationLog.push({action: "shift", index: moleIndex, target: target})
+          animationLog.push({action: "updateCard", index: moleIndex, card: null})
+          animationLog.push({action: "updateCard", index: target, card: structuredClone(newBoard[target])})
         } else {
+          if (entry.action === "attack") {
+            animationLog.push({action: "lunge", index: entry.index, aim: entry.aim})
+          }
           newScale += trueDamage * (target < 4 ? 1 : -1);
+          animationLog.push({action: "updateScale", scale: newScale})
         }
       }
     } else if (entry.action === "transform") { 
@@ -817,7 +852,7 @@ function simulateActivityLog(roomIndex, activityLog) {
       scale: 0,
       lit0: true,
       lit1: true,
-      activityLog: [], //FIXME - this is currently unused. Change it to the animation log in the future (as in the else-clause below)
+      animationLog: [],
       hands: [[],[]],
       bones: [0, 0],
       sacrifices: [],
@@ -826,7 +861,7 @@ function simulateActivityLog(roomIndex, activityLog) {
         options: []
       }}
   } else {
-    rooms[roomIndex] = {...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0"), activityLog: []} //TEMP
+    rooms[roomIndex] = {...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0"), animationLog: []} //TEMP
   }
 }
 
@@ -873,7 +908,7 @@ io.on("connection", (socket) => {
         scale: 0,
         lit0: true,
         lit1: true,
-        activityLog: [],
+        animationLog: [],
         player0: socket.id,
         player1: null,
         hands: [[],[]],
@@ -1026,6 +1061,7 @@ io.on("connection", (socket) => {
   //FIXME - activity log should reflect all things that require an animation. move simulation logic here from frontend
   socket.on("bellRung", (room) => { //generate activity log once bell is rung?
     let offset = rooms[room].gameState == "play1" ? 0 : 4;
+    rooms[room].animationLog = []
     activityLog = [];
 
     //attacks
