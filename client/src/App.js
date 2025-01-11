@@ -362,7 +362,7 @@ function App() {
                 handHover !== s-1 && index <= handHover && hoverSection === 0 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
 
                 return <div 
-                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`, transition: "padding .1s ease-in-out"}}
                   onMouseEnter={() => {setHandHover(index); setHoverSection(0);}}
                   onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 >
@@ -425,7 +425,7 @@ function App() {
                 handHover !== s-1 && index <= handHover && hoverSection === 1 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
 
                 return <div 
-                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`, transition: "padding .1s ease-in-out"}}
                   onMouseEnter={() => {setHandHover(index); setHoverSection(1);}}
                   onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 >
@@ -542,7 +542,7 @@ function App() {
                   handSelection !== s-1 && index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * s - 420)/(s - 1) : m = m;
 
                   return <div 
-                    style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                    style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`, transition: "padding .1s ease-in-out, top .05s ease-in-out"}}
                     onMouseEnter={() => setHandHover(index)}
                     onMouseLeave={() => setHandHover(-1)}
                     onClick={() => {
@@ -679,7 +679,7 @@ function App() {
               handHover !== s-1 && index <= handHover && hoverSection === 0 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
 
               return <div 
-                style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`, transition: "padding .1s ease-in-out, top .05s ease-in-out"}}
                 onMouseEnter={() => {setHandHover(index); setHoverSection(0);}}
                 onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 onClick={() => {
