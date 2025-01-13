@@ -298,6 +298,60 @@ function App() {
     })
   }, [socket])
 
+  useEffect(() => {
+    if (room && (room.gameState === "simulating0" || room.gameState === "simulating1")) {
+      if (room.animationLog.length > 0) {
+        let anim = room.animationLog[0];
+        let flip = (room.player1 === socket.id)
+        if (anim.action === "lunge") {
+          let trueIndex = (anim.index + (flip ? 4 : 0)) % 8
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-top", `${18 + (trueIndex<4 ? 113 : -113)}px`)
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `10`)
+          setTimeout(() => {
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-top", `18px`)
+            setTimeout(() => {
+              document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `0`) 
+
+              let newLog = room.animationLog;
+              newLog.splice(0, 1);
+              setRoom({...room, animationLog: newLog})
+            }, 250)
+          }, 250)
+        } else if (anim.action === "updateScale") {
+          document.querySelector(".scaleArrow").style.setProperty("top", -22+6 + (5-Math.min(Math.max((anim.scale * (room.player0 === socket.id ? 1 : -1)), -5), 5))*(44))
+          setTimeout(() => {
+            let temp = anim.scale
+            let newLog = room.animationLog;
+            newLog.splice(0, 1);
+            setRoom({...room, animationLog: newLog, scale: temp});
+          }, 200)
+        } else if (anim.action === "updateCard") { //todo: create death/place animations
+          let newBoard = room.board;
+          newBoard[anim.index] = anim.card;
+
+          let newLog = room.animationLog;
+          newLog.splice(0, 1);
+          setRoom({...room, animationLog: newLog, board: newBoard})
+        } else if (anim.action === "updateHand") { //todo: create add/remove animations
+          let newHands = room.hands;
+          if (anim.index) {
+            newHands[anim.player].splice(anim.index, 1); 
+          } else {
+            newHands[anim.player].push(anim.card)
+          }
+
+          let newLog = room.animationLog;
+          newLog.splice(0, 1);
+          setRoom({...room, animationLog: newLog, hands: newHands})
+        }
+
+      } else {
+        //check if the round ends
+        setRoom({...room, gameState: (room.gameState === "simulating0" ? "draw1" : "draw0")})
+      }
+    }
+  }, [room])
+
 
   function setSendRoom(newRoom) {
     socket.emit("clientUpdate", newRoom);
@@ -461,13 +515,11 @@ function App() {
                   val = room.board[index]
                 }
 
-                console.log(index, room.board, room.board[index-1])
-
                 return (
                   <div className='gameSlot'>
                     <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
                     {val && val.card ? 
-                      <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
+                      <div style={{position: "relative", marginTop:"18px", marginLeft:"14.5px", transition: "margin-top .025s ease-out, margin-left .025s ease-out"}}>
                         <Card val={{...val,
                           damage: calcTrueDamage(room.board, index, room.bones, room.hands)
                         }}/>
@@ -660,7 +712,6 @@ function App() {
                 let inscribedCount = scribes[2]+1;
                 setScribes([{open: false, index: -1}, {open: false, index: -1}, scribes[2]+1]);
                 
-                console.log(inscribedCount , room.round)
                 if (inscribedCount === room.round) {
                   socket.emit("newDeck", {...room, decks: newDecks});
                   setRoom({...room, gameState: "awaitingPlayers"}) //this will never be sent to the backend
