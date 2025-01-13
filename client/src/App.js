@@ -122,12 +122,12 @@ function App() {
 
     let guarding = -1; //SIGILS - guardog
     for (let i = 0; i < 4; i++) {
-      if (newRoom.board[i + offset] && newRoom.board[i + offset].sigils.indexOf("guarddog") > -1 && guarding < 0) {
+      if (newRoom.board[i + offset] && newRoom.board[i + offset].sigils.indexOf("guarddog") > -1 && guarding < 0) { 
         guarding = i + offset;
       }
     }
     if (!newBoard[(index + 4) % 8] && guarding > -1) { //rush over guarding cards to opposing spot
-      newBoard[(index + 4) % 8] = newBoard[guarding];
+      newBoard[(index + 4) % 8] = newBoard[guarding]; //FIXME - this has to be animated manually
       newBoard[guarding] = null;
     }
     if (placedCard.sigils.indexOf("drawrabbits") > -1) { //SIGILS - drawrabbits
@@ -300,6 +300,7 @@ function App() {
 
   useEffect(() => {
     if (room && (room.gameState === "simulating0" || room.gameState === "simulating1")) {
+      console.log("simulating...", structuredClone(room.animationLog))
       if (room.animationLog.length > 0) {
         let anim = room.animationLog[0];
         let flip = (room.player1 === socket.id)
@@ -343,6 +344,26 @@ function App() {
           let newLog = room.animationLog;
           newLog.splice(0, 1);
           setRoom({...room, animationLog: newLog, hands: newHands})
+        } else if (anim.action === "shift") {
+          let trueIndex = (anim.index + (flip ? 4 : 0)) % 8
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-left", `${14.5 + (anim.target - anim.index)*154}px`)
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `10`)
+          setTimeout(() => {
+            let newBoard = room.board;
+            newBoard[anim.target] = structuredClone(newBoard[anim.index])
+            newBoard[anim.index] = null;
+
+            
+            let temp = document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.getPropertyValue("transition");
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("transition", ``)
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-left", `14.5px`)
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("transition", temp)
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `0`) 
+
+            let newLog = room.animationLog;
+            newLog.splice(0, 1);
+            setRoom({...room, animationLog: newLog})
+          }, 250)
         }
 
       } else {

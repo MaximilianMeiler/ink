@@ -329,6 +329,7 @@ io.on("connection", (socket) => {
                   }
                 } //make any actions by the target actually occur at the new location
                 animationLog.push({action: "shift", index: target, target: target+1})
+                animationLog.push({action: "updateCard", index: target+1, card: structuredClone(newBoard[target+1])})
                 animationLog.push({action: "updateCard", index: target, card: structuredClone(tailCard)})
               } else if (Math.floor(target / 4) === Math.floor((target-1) / 4) && !newBoard[target-1]) {
                 newBoard[target-1] = {...newBoard[target], sigils: newSigils};
@@ -339,6 +340,7 @@ io.on("connection", (socket) => {
                   }
                 }
                 animationLog.push({action: "shift", index: target, target: target-1})
+                animationLog.push({action: "updateCard", index: target-1, card: structuredClone(newBoard[target-1])})
                 animationLog.push({action: "updateCard", index: target, card: structuredClone(tailCard)})
               }
             }
@@ -942,7 +944,7 @@ io.on("connection", (socket) => {
               health: 2,
               tribe: "canine",
               rare: false,
-              index: 3
+              index: 2
             }
           ],
           [
@@ -983,7 +985,7 @@ io.on("connection", (socket) => {
               health: 2,
               tribe: "canine",
               rare: false,
-              index: 3
+              index: 2
             }
           ]
         ],
