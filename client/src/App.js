@@ -335,7 +335,7 @@ function App() {
           setRoom({...room, animationLog: newLog, board: newBoard})
         } else if (anim.action === "updateHand") { //todo: create add/remove animations
           let newHands = room.hands;
-          if (anim.index) {
+          if (anim.index !== undefined) {
             newHands[anim.player].splice(anim.index, 1); 
           } else {
             newHands[anim.player].push(anim.card)

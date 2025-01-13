@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
   }
   
   
-  const placeSelectedCard = (index, placedCard = null, newRoom = null) => {
+  const placeSelectedCard = (index, placedCard = null, newRoom = null, animationLog) => {
   
     //try not to use this, but it's here in case
     if (index < 0 || index > 7) {return;}
@@ -75,13 +75,15 @@ io.on("connection", (socket) => {
     
     let damageBonus = 0;
     let healthBonus = 0;
-    let offset = newRoom.player0 === socket.id ? 0 : 4;
+    let offset = index > 3 ? 0 : 4; //corresponds to opposing cards for some reason
   
     newBoard[index] = {
                         ...placedCard, 
                         damage: placedCard.damage + damageBonus,
                         health: placedCard.health + healthBonus
                       }; //place selected card
+    
+    animationLog.push({action: "updateCard", index: index, card: structuredClone(placedCard)})
   
     let guarding = -1; //SIGILS - guardog
     for (let i = 0; i < 4; i++) {
@@ -92,11 +94,12 @@ io.on("connection", (socket) => {
     if (!newBoard[(index + 4) % 8] && guarding > -1) { //rush over guarding cards to opposing spot
       newBoard[(index + 4) % 8] = newBoard[guarding];
       newBoard[guarding] = null;
+      animationLog.push({action: "shift", index: guarding, target: ((index + 4) % 8)})
     }
     if (placedCard.sigils.indexOf("drawrabbits") > -1) { //SIGILS - drawrabbits
       let newSigils = Array.from(placedCard.sigils);
       newSigils.splice(newSigils.indexOf("drawrabbits"), 1);
-      newHands[newRoom.player0 === socket.id ? 0 : 1].push({
+      let rabbitCard = {
         card: "rabbit",
         name: "Rabbit",
         costType:"bone",
@@ -119,13 +122,15 @@ io.on("connection", (socket) => {
           tribe: "none",
           rare: false,
         }
-      })
+      }
+      newHands[index > 3 ? 0 : 1].push(rabbitCard)
+      animationLog.push({action: 'updateHand', player: (index > 3 ? 0 : 1), card: structuredClone(rabbitCard)})
     }
     if (placedCard.sigils.indexOf("drawant") > -1) { //SIGILS - drawant
       let newSigils = Array.from(placedCard.sigils);
       newSigils.splice(newSigils.indexOf("drawant"), 1);
       if (newSigils.indexOf("antdamage") > 0) {newSigils.splice(0, 0, "antdamage")};
-      newHands[newRoom.player0 === socket.id ? 0 : 1].push({
+      let antCard = {
         card: "ant",
         name: "Worker Ant",
         costType:"blood",
@@ -148,16 +153,20 @@ io.on("connection", (socket) => {
           tribe: "insect",
           rare: false,
         }
-      })
+      }
+      newHands[index > 3 ? 0 : 1].push(antCard)
+      animationLog.push({action: "updateHand", player: (index > 3 ? 0 : 1), card: structuredClone(antCard)})
     }
     if (placedCard.sigils.indexOf("drawcopy") > -1) {//SIGILS - drawcopy
       let newSigils = Array.from(placedCard.sigils);
       newSigils.splice(newSigils.indexOf("drawcopy"), 1);
-      newHands[newRoom.player0 === socket.id ? 0 : 1].push({
+      let copy = {
         ...placedCard.clone, 
         clone: {...placedCard.clone, sigils: newSigils},
         sigils: newSigils
-      })
+      }
+      newHands[index > 3 ? 0 : 1].push(copy)
+      animationLog.push({action: "updateHand", player: (index > 3 ? 0 : 1), card: structuredClone(copy)})
     }
   
     //chimes get the "loud" sigil, which they can pass on to derived cards
@@ -190,10 +199,10 @@ io.on("connection", (socket) => {
         }
       }
       if (Math.floor(index / 4) === Math.floor((index+1) / 4) && !newBoard[index+1]) {
-        newRoom = placeSelectedCard(index+1, chimeCard, newRoom);
+        newRoom = placeSelectedCard(index+1, chimeCard, newRoom, animationLog);
       }
       if (Math.floor(index / 4) === Math.floor((index-1) / 4) && !newBoard[index-1]) {
-        newRoom = placeSelectedCard(index-1, chimeCard, newRoom);
+        newRoom = placeSelectedCard(index-1, chimeCard, newRoom, animationLog);
       }
     }
   
@@ -225,15 +234,15 @@ io.on("connection", (socket) => {
         }
       }
       if (Math.floor(index / 4) === Math.floor((index+1) / 4) && !newBoard[index+1]) {
-        newRoom = placeSelectedCard(index+1, damCard, newRoom);
+        newRoom = placeSelectedCard(index+1, damCard, newRoom, animationLog);
       }
       if (Math.floor(index / 4) === Math.floor((index-1) / 4) && !newBoard[index-1]) {
-        newRoom = placeSelectedCard(index-1, damCard, newRoom);
+        newRoom = placeSelectedCard(index-1, damCard, newRoom, animationLog);
       }
     }
   
     //SIGILS - sacdamage
-    [...Array(4)].forEach((val, i) => {
+    [...Array(4)].forEach((val, i) => { //FIXME - this code shouldn't be needed for simulation, or?
       if (newBoard[i + 4-offset]) {
         if (!newBoard[i + 4-offset].sacBonus) {newBoard[i + 4-offset].sacBonus = 0}
         newBoard[i + 4-offset].sacBonus += newRoom.sacrifices.length
@@ -461,8 +470,8 @@ io.on("connection", (socket) => {
               }
             })
             if (corpseIndex > -1) {
-              newRoom = placeSelectedCard(target, newHands[target < 4 ? 1 : 0][corpseIndex], newRoom);
-              animationLog.push({action: "updateCard", index: target, card: structuredClone(newHands[target < 4 ? 1 : 0][corpseIndex])})
+              newRoom = placeSelectedCard(target, newHands[target < 4 ? 1 : 0][corpseIndex], newRoom, animationLog);
+                //updateCard call is made inside of placeSelectedCard
               //FIXME - hand selection is managed clientside tho????
               newHands[target < 4 ? 1 : 0].splice(corpseIndex, 1); //remove selected card from hand
               animationLog.push({action: "updateHand", player: (target < 4 ? 1 : 0), index: corpseIndex})
