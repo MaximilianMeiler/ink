@@ -260,7 +260,7 @@ io.on("connection", (socket) => {
     let newHands = newRoom.hands;
     let indexMapping = [0, 1, 2, 3, 4, 5, 6, 7];
     rooms[roomIndex].animationLog = []
-    animationLog = [] //shake, *updateCard*, flip, shift, lunge, updateScale, updateHand, updateBones
+    animationLog = [] //shake, *updateCard*, flip, shift, lunge, updateScale, updateHand, updateBones, newDeck
   
     for (let logIndex = 0; logIndex < activityLog.length; logIndex++) {
       let entry = activityLog[logIndex];
@@ -421,6 +421,7 @@ io.on("connection", (socket) => {
   
           if (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1))) { //SIGILS - deathtouch, gainattackkonkill
             newBones[target < 4 ? 1 : 0] += newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1; //SIGILS - quadruplebones
+            animationLog.push({action: "updateBones", player: (target < 4 ? 1 : 0), count: newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1})
   
             //FIXME - somehow this is coded so that the permanent buffs are not set in until a round ends, not when a card is redrawn from the deck. But I think I like that?
             if (newBoard[target].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath, buffondeath
@@ -431,11 +432,13 @@ io.on("connection", (socket) => {
               }
               undeadCard.clone = structuredClone(undeadCard);
               newRoom.hands[target < 4 ? 1 : 0].push(undeadCard) 
+              animationLog.push({action: "updateHand", player: target < 4 ? 1 : 0, card: undeadCard})
               if (newBoard[target].index !== undefined) {
                 let matchingCard = newRoom.decks[target < 4 ? 1 : 0].findIndex((c) => c.index === newBoard[target].index);
                 if (newBoard[target].sigils.indexOf("buffondeath") > -1) {
                   newRoom.decks[target < 4 ? 1 : 0][matchingCard].damage = Math.max(newRoom.decks[target < 4 ? 1 : 0][matchingCard].damage, undeadCard.damage);
                   newRoom.decks[target < 4 ? 1 : 0][matchingCard].health = Math.max(newRoom.decks[target < 4 ? 1 : 0][matchingCard].health, undeadCard.health);
+                  animationLog.push({action: "newDeck", player: target < 4 ? 1 : 0, deck: structuredClone(newRoom.decks[target < 4 ? 1 : 0])})
                 }
               }
             }
@@ -447,6 +450,7 @@ io.on("connection", (socket) => {
               }
             }
             newBones[target < 4 ? 0 : 1] += scavenging * (newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1);
+            animationLog.push({action: "updateBones", player: (target < 4 ? 0 : 1), count: scavenging * (newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1)})
   
             newBoard[target] = null; //SIGILS - gainattackonkill, gainattackonkillpermanent
             animationLog.push({action: "updateCard", index:target, card: null})
@@ -460,6 +464,7 @@ io.on("connection", (socket) => {
               if (newBoard[entry.index].index !== undefined) {
                 let matchingCard = newRoom.decks[entry.index < 4 ? 1 : 0].findIndex((c) => c.index === newBoard[entry.index].index);
                 newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage = Math.max(newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage, newBoard[entry.index].damage);
+                animationLog.push({action: "newDeck", player: target < 4 ? 1 : 0, deck: structuredClone(newRoom.decks[target < 4 ? 1 : 0])})
               }
             }
   
@@ -647,7 +652,7 @@ io.on("connection", (socket) => {
           newBoard[entry.index].sigils = ["drawant", ...newSigils];
           //deviation - draw ant for fun?
           //SIGILS - drawant
-          newRoom.hands[entry.index < 4 ? 1 : 0].push({ //modifies newRoom directly?
+          let antCard = {
             card: "ant",
             name: "Worker Ant",
             costType:"blood",
@@ -670,7 +675,9 @@ io.on("connection", (socket) => {
               tribe: "insect",
               rare: false
             }
-          })
+          }
+          newRoom.hands[entry.index < 4 ? 1 : 0].push(antCard)
+          animationLog.push({action: "updateHand", player: (entry.index < 4 ? 1 : 0), card: antCard})
         } else if (newBoard[entry.index].card === "deer") {
           newBoard[entry.index].card = "moose";
           newBoard[entry.index].damage += 1;
@@ -696,12 +703,16 @@ io.on("connection", (socket) => {
           }
           newBoard[entry.index].sigils = newSigils;
         }
+
+        animationLog.push({action: "flip", index: entry.index, card: structuredClone(newBoard[entry.index])})
+
       } else if (entry.action === "strafe") {
         if (newBoard[entry.index].sigils.indexOf("strafeleft") > -1) {
           if (entry.index % 4 !== 0 && !newBoard[entry.index-1]) { //move
             newBoard[entry.index-1] = newBoard[entry.index];
             newBoard[entry.index] = null;
             indexMapping[originalIndex] -= 1;
+            animationLog.push({action: "shift", index: entry.index, target: entry.index-1})
           } else if (!entry.swapped) {
             newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
               return val === "strafeleft" ? "strafe" : 
@@ -712,12 +723,14 @@ io.on("connection", (socket) => {
               index: originalIndex,
               swapped: true
             })
+            animationLog.push({action: "updateCard", index: entry.index, card: structuredClone(newBoard[entry.index])})
           }
         } else {
           if (entry.index % 4 !== 3 && !newBoard[entry.index+1]) { //move
             newBoard[entry.index+1] = newBoard[entry.index];
             newBoard[entry.index] = null;
             indexMapping[originalIndex] += 1;
+            animationLog.push({action: "shift", index: entry.index, target: entry.index+1})
           } else if (!entry.swapped) {
             newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
               return val === "strafe" ? "strafeleft" : 
@@ -728,6 +741,7 @@ io.on("connection", (socket) => {
               index: originalIndex,
               swapped: true
             })
+            animationLog.push({action: "updateCard", index: entry.index, card: structuredClone(newBoard[entry.index])})
           }
         }
       } else if (entry.action === "strafepush") {
@@ -749,6 +763,7 @@ io.on("connection", (socket) => {
                   indexMapping[j] -= 1
                 } 
               }
+              animationLog.push({action: "shift", index: i, target: i-1})
             }
           } else if (!entry.swapped) {
             newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
@@ -760,6 +775,7 @@ io.on("connection", (socket) => {
               index: originalIndex,
               swapped: true
             })
+            animationLog.push({action: "updateCard", index: entry.index, card: structuredClone(newBoard[entry.index])})
           }
         } else {
           let searchIndex = entry.index;
@@ -779,6 +795,7 @@ io.on("connection", (socket) => {
                   indexMapping[j] += 1
                 } 
               }
+              animationLog.push({action: "shift", index: i, target: i+1})
             }
           } else if (!entry.swapped) {
             newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
@@ -790,6 +807,7 @@ io.on("connection", (socket) => {
               index: originalIndex,
               swapped: true
             })
+            animationLog.push({action: "updateCard", index: entry.index, card: structuredClone(newBoard[entry.index])})
           }
         }
       } else if (entry.action === "strafeswap") {
@@ -804,6 +822,8 @@ io.on("connection", (socket) => {
               }
             }
             indexMapping[originalIndex] -= 1;
+            animationLog.push({action: "shift", index: entry.index, target: entry.index-1})
+            animationLog.push({action: "updateCard", index: entry.index-1, card: structuredClone(temp)}) //FIXME - yeah...
           } else if (!entry.swapped) {
             newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
               return val === "strafeleft" ? "strafe" : 
@@ -814,6 +834,7 @@ io.on("connection", (socket) => {
               index: originalIndex,
               swapped: true
             })
+            animationLog.push({action: "updateCard", index: entry.index, card: structuredClone(newBoard[entry.index])})
           }
         } else {
           if (entry.index % 4 !== 3) {
@@ -826,6 +847,8 @@ io.on("connection", (socket) => {
               }
             }
             indexMapping[originalIndex] += 1;
+            animationLog.push({action: "shift", index: entry.index, target: entry.index+1})
+            animationLog.push({action: "updateCard", index: entry.index+1, card: structuredClone(temp)})
           } else if (!entry.swapped) {
             newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
               return val === "strafe" ? "strafeleft" : 
@@ -836,6 +859,7 @@ io.on("connection", (socket) => {
               index: originalIndex,
               swapped: true
             })
+            animationLog.push({action: "updateCard", index: entry.index, card: structuredClone(newBoard[entry.index])})
           }
         }
       }
@@ -845,6 +869,7 @@ io.on("connection", (socket) => {
       let offset = newRoom.gameState === "simulating0" ? 4 : 0;
       if (newBoard[i+offset]) {
         newBoard[i + offset].sacBonus = 0;
+        animationLog.push({action: "updateCard", index: i+offset, card: structuredClone(newBoard[i + offset])})
       }
     })
   
