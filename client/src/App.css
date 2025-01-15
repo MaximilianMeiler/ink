@@ -88,6 +88,8 @@ button {
   font-size: 30px;
   display: flex;
   align-items: center;
+
+  transition: top .2s ease-out
 }
 
 .bellHead {

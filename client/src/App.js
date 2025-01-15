@@ -122,12 +122,12 @@ function App() {
 
     let guarding = -1; //SIGILS - guardog
     for (let i = 0; i < 4; i++) {
-      if (newRoom.board[i + offset] && newRoom.board[i + offset].sigils.indexOf("guarddog") > -1 && guarding < 0) {
+      if (newRoom.board[i + offset] && newRoom.board[i + offset].sigils.indexOf("guarddog") > -1 && guarding < 0) { 
         guarding = i + offset;
       }
     }
     if (!newBoard[(index + 4) % 8] && guarding > -1) { //rush over guarding cards to opposing spot
-      newBoard[(index + 4) % 8] = newBoard[guarding];
+      newBoard[(index + 4) % 8] = newBoard[guarding]; //FIXME - this has to be animated manually
       newBoard[guarding] = null;
     }
     if (placedCard.sigils.indexOf("drawrabbits") > -1) { //SIGILS - drawrabbits
@@ -288,19 +288,131 @@ function App() {
         setDraw(shuffleArray(newRoom.decks[0]));
         newRoom.gameState = "roundStart1";
         setSendRoom(newRoom);
-      } else
-      if (newRoom.gameState === "roundStart1" && newRoom.player1 === socket.id) {
+      } else if (newRoom.gameState === "roundStart1" && newRoom.player1 === socket.id) {
         setDraw(shuffleArray(newRoom.decks[1]));
         newRoom.gameState = "draw0";
         setSendRoom(newRoom);
-      } else
-      if (newRoom.gameState === "simulating0" || newRoom.gameState === "simulating1") {
-        simulateActivityLog(structuredClone(newRoom));
       } else {
         setRoom(newRoom);
       }
     })
   }, [socket])
+
+  useEffect(() => {
+    if (room && (room.gameState === "simulating0" || room.gameState === "simulating1")) {
+      console.log("simulating...", structuredClone(room.animationLog))
+      if (room.animationLog.length > 0) {
+        let anim = room.animationLog[0];
+        let flip = (room.player1 === socket.id)
+        let trueIndex = (anim.index + (flip ? 4 : 0)) % 8
+        if (anim.action === "lunge") {
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-top", `${18 + (trueIndex<4 ? 113 : -113)}px`)
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-left", `${14.5 + (anim.aim)*154}px`) 
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `10`)
+          setTimeout(() => {
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-top", `18px`)
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-left", `14.5px`)
+            setTimeout(() => {
+              document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `0`) 
+
+              let newLog = room.animationLog;
+              newLog.splice(0, 1);
+              setRoom({...room, animationLog: newLog})
+            }, 100)
+          }, 100)
+        } else if (anim.action === "updateScale") {
+          document.querySelector(".scaleArrow").style.setProperty("top", -22+6 + (5-Math.min(Math.max((anim.scale * (room.player0 === socket.id ? 1 : -1)), -5), 5))*(44))
+          setTimeout(() => {
+            let temp = anim.scale
+            let newLog = room.animationLog;
+            newLog.splice(0, 1);
+            setRoom({...room, animationLog: newLog, scale: temp});
+          }, 200)
+        } else if (anim.action === "updateCard") { //todo: create death/place animations
+          let newBoard = room.board;
+          newBoard[anim.index] = anim.card;
+
+          let newLog = room.animationLog;
+          newLog.splice(0, 1);
+          setRoom({...room, animationLog: newLog, board: newBoard})
+        } else if (anim.action === "updateHand") { //todo: create add/remove animations
+          let newHands = room.hands;
+          if (anim.index !== undefined) {
+            newHands[anim.player].splice(anim.index, 1); 
+          } else {
+            newHands[anim.player].push(anim.card)
+          }
+
+          let newLog = room.animationLog;
+          newLog.splice(0, 1);
+          setRoom({...room, animationLog: newLog, hands: newHands})
+        } else if (anim.action === "shift") {
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-left", `${14.5 + (anim.target - anim.index)*154}px`)
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `10`)
+          setTimeout(() => {
+            let newBoard = room.board;
+            newBoard[anim.target] = structuredClone(newBoard[anim.index])
+            newBoard[anim.index] = null;
+
+            
+            let temp = document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.getPropertyValue("transition");
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("transition", ``)
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-left", `14.5px`)
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("transition", temp)
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `0`) 
+
+            let newLog = room.animationLog;
+            newLog.splice(0, 1);
+            setRoom({...room, animationLog: newLog})
+          }, 100)
+        } else if (anim.action === "updateBones") {
+          let newBones = room.bones;
+          newBones[anim.player] += anim.count;
+
+          let newLog = room.animationLog;
+          newLog.splice(0, 1);
+          setRoom({...room, animationLog: newLog, bones: newBones})
+        } else if (anim.action === "flip") {
+          
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("transform", `rotateY(90deg)`)
+          setTimeout(() => {
+
+            let newBoard = room.board;
+            newBoard[anim.index] = anim.card;
+
+            let newLog = room.animationLog;
+            newLog.splice(0, 1);
+            setRoom({...room, animationLog: newLog, board: newBoard})
+
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("transform", `rotateY(0deg)`)
+          }, 200)
+          
+        }
+
+      } else {
+        //check if the round ends
+        if (room.scale * (room.gameState === "simulating0" ? 1 : -1) <= -5) {
+          //restart game if scale is tipped at end of turn
+          setSendRoom({...room, 
+            gameState:"drafting", 
+            board: [null, null, null, null, null, null, null, null], 
+            scale: 0,
+            lit0: true,
+            lit1: true,
+            animationLog: [],
+            hands: [[],[]],
+            bones: [0, 0],
+            sacrifices: [],
+            draft: {
+              phase: -1, //we need to use setRoom here so the backend gives us cards
+              options: []
+          }})
+        } else {
+          setRoom({...room, gameState: (room.gameState === "simulating0" ? "draw1" : "draw0"), animationLog: []}) //TEMP
+        }
+      }
+    }
+  }, [room])
 
 
   function setSendRoom(newRoom) {
@@ -317,600 +429,6 @@ function App() {
         array[j] = temp;
     }
     return array;
-  }
-
-  function simulateActivityLog(newRoom) {
-    let newBones = newRoom.bones;
-    let newScale = newRoom.scale;
-    let newBoard = newRoom.board;
-    let newHands = newRoom.hands;
-    console.log("simulating room", newRoom)
-    let indexMapping = [0, 1, 2, 3, 4, 5, 6, 7];
-
-    for (let logIndex = 0; logIndex < newRoom.activityLog.length; logIndex++) {
-      let entry = newRoom.activityLog[logIndex];
-      let originalIndex = entry.index;
-      if (!entry.target) { //sharp attack
-        entry.index = indexMapping[entry.index] //adjust for card movements
-      }
-      if (!newBoard[entry.index] && !entry.target) { //no card left to act
-        continue;
-      }
-
-      //TODO: add animations
-      if (entry.action.substr(0,6) === "attack") { //covers "attack", "attacksharp", "attacksharplethal"
-        let target;
-        if (entry.target) {
-          target = entry.target; //erm should this mapping be applied
-        } else {
-          target = (entry.index + 4) % 8 + entry.aim;
-          if (Math.floor(target / 4) !== Math.floor(((entry.index + 4) % 8) / 4)) { //null atk if it goes off of board
-            continue;
-          }
-        }
-        let trueDamage = entry.action.length > 6 ? 1 : //sharp attack
-          calcTrueDamage(newBoard, entry.index, newBones, newHands);
-
-        if (trueDamage < 1) {
-          //do nothing
-        } else if (newBoard[target] && (entry.action.length > 6 || 
-          ((newBoard[entry.index].sigils.indexOf("flying") < 0 || newBoard[target].sigils.indexOf("reach") > -1) &&
-           (newBoard[target].sigils.indexOf("submerge") < 0 && newBoard[target].sigils.indexOf("submergesquid") < 0))))
-        { //SIGILS - flying, reach, submerge
-          
-          let shieldIndex = newBoard[target].sigils.indexOf("deathshield"); //SIGILS - deathshield
-          if (shieldIndex > -1) {
-            if (shieldIndex < newBoard[target].defaultSigils) {
-              newBoard[target].defaultSigils--;
-            }
-            newBoard[target].sigils.splice(shieldIndex, 1);
-          } else {
-            if (newBoard[target].sigils.indexOf("tailonhit") > -1) { //SIGILS - tailonhit
-              let newSigils = Array.from(newBoard[target].sigils);
-              newSigils.splice(newSigils.indexOf("tailonhit"), 1);
-              let tailCard = {
-                card: newBoard[target].tribe === "insect" ? "insect_tail" : newBoard[target].tribe === "canine" ? "canine_tail" : newBoard[target].tribe === "avian" ? "bird_tail" : "skink_tail",
-                name: newBoard[target].tribe === "insect" ? "Wriggling Leg" : newBoard[target].tribe === "canine" ? "Furry Tail" : newBoard[target].tribe === "avian" ? "Tail Feathers" : "Wriggling Tail",
-                costType:"bone",
-                cost: 0,
-                sigils: newSigils,
-                defaultSigils: 0,
-                damage: 0,
-                health: 2,
-                tribe: newBoard[target].tribe,
-                rare: false,
-                clone: {
-                  card: newBoard[target].tribe === "insect" ? "insect_tail" : newBoard[target].tribe === "canine" ? "canine_tail" : newBoard[target].tribe === "avian" ? "bird_tail" : "skink_tail",
-                  name: newBoard[target].tribe === "insect" ? "Wriggling Leg" : newBoard[target].tribe === "canine" ? "Furry Tail" : newBoard[target].tribe === "avian" ? "Tail Feathers" : "Wriggling Tail",
-                  costType:"bone",
-                  cost: 0,
-                  sigils: newSigils,
-                  defaultSigils: 0,
-                  damage: 0,
-                  health: 2,
-                  tribe: newBoard[target].tribe,
-                  rare: false
-                }
-              }
-
-              if (Math.floor(target / 4) === Math.floor((target+1) / 4) && !newBoard[target+1]) { //empty slot
-                newBoard[target+1] = {...newBoard[target], sigils: newSigils}; //does a copy need to be made?
-                newBoard[target] = tailCard;
-                for (let j = 0; j < indexMapping.length; j++) {
-                  if (indexMapping[j] === target) {
-                    indexMapping[j] += 1;
-                  }
-                } //make any actions by the target actually occur at the new location
-              } else if (Math.floor(target / 4) === Math.floor((target-1) / 4) && !newBoard[target-1]) {
-                newBoard[target-1] = {...newBoard[target], sigils: newSigils};
-                newBoard[target] = tailCard;
-                for (let j = 0; j < indexMapping.length; j++) {
-                  if (indexMapping[j] === target) {
-                    indexMapping[j] -= 1;
-                  }
-                }
-              }
-            }
-
-            newBoard[target].health -= trueDamage; //FIXME - should deathtouch not kill a deathshield?
-          }
-
-          if (newBoard[target].sigils.indexOf("beesonhit") > -1) { //SIGILS - beesonhit
-            let newSigils = Array.from(newBoard[target].sigils);
-            newSigils.splice(newSigils.indexOf("beesonhit"), 1);
-            newSigils.splice(0, 0, "flying");
-            newHands[target < 4 ? 1 : 0].push({ //newHands is never applied - is this all unnecessary and passed by reference????
-              card: "bee",
-              name: "Bee",
-              costType:"bone",
-              cost: 0,
-              sigils: newSigils,
-              defaultSigils: 1,
-              damage: 1,
-              health: 1,
-              tribe: "insect",
-              rare: false,
-              clone: {
-                card: "bee",
-                name: "Bee",
-                costType:"bone",
-                cost: 0,
-                sigils: newSigils,
-                defaultSigils: 0,
-                damage: 1,
-                health: 1,
-                tribe: "insect",
-                rare: false,
-              }
-            })
-          }
-
-          
-          if (newBoard[entry.index] && newBoard[target].sigils.indexOf("sharp") > -1) { //SIGILS - sharp
-            newRoom.activityLog.splice(logIndex+1, 0, {
-              index: target, //careful - this may be null at next iteration
-              action: newBoard[target].sigils.indexOf("deathtouch") > -1 ? "attacksharplethal" : "attacksharp", //deathtouch + sharp synergy
-              target: entry.index
-            })
-          }
-
-          if (newBoard[entry.index] && newBoard[target].sigils.indexOf("loud") > -1) { //SIGILS - loud/createbells
-            let offset = Math.floor(target / 4) * 4; //check for createbells on all cards of the side attacked
-
-            // eslint-disable-next-line no-loop-func
-            [...Array(4)].forEach((val, index) => {
-              if (newBoard[(index + offset) % 8] && newBoard[index + offset].sigils.indexOf("createbells") > -1) {
-                newRoom.activityLog.splice(logIndex+1, 0, {
-                  index: index+offset,
-                  action: "attack",
-                  target: entry.index
-                })
-              }
-            });
-          }
-
-          if (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1))) { //SIGILS - deathtouch, gainattackkonkill
-            newBones[target < 4 ? 1 : 0] += newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1; //SIGILS - quadruplebones
-
-            //FIXME - somehow this is coded so that the permanent buffs set in until a round ends, not when a card is redrawn from the deck. But I think I like that?
-            if (newBoard[target].sigils.indexOf("drawcopyondeath") > -1) { //SIGILS - drawcopyondeath, buffondeath
-              let undeadCard = {
-                ...newBoard[target].clone, 
-                damage: newBoard[target].clone.damage + (newBoard[target].sigils.indexOf("buffondeath") > -1 ? 1 : 0),
-                health: newBoard[target].clone.damage + (newBoard[target].sigils.indexOf("buffondeath") > -1 ? 1 : 0)
-              }
-              undeadCard.clone = structuredClone(undeadCard);
-              newRoom.hands[target < 4 ? 1 : 0].push(undeadCard) 
-              if (newBoard[target].index !== undefined) {
-                let matchingCard = newRoom.decks[target < 4 ? 1 : 0].findIndex((c) => c.index === newBoard[target].index);
-                if (newBoard[target].sigils.indexOf("buffondeath") > -1) {
-                  newRoom.decks[target < 4 ? 1 : 0][matchingCard].damage = Math.max(newRoom.decks[target < 4 ? 1 : 0][matchingCard].damage, undeadCard.damage);
-                  newRoom.decks[target < 4 ? 1 : 0][matchingCard].health = Math.max(newRoom.decks[target < 4 ? 1 : 0][matchingCard].health, undeadCard.health);
-                }
-              }
-            }
-            let scavenging = 0; //SIGILS - opponentbones (stacks)
-            let offset = target < 4 ? 4 : 0;
-            for (let index = 0; index < 4; index++) {
-              if (newBoard[index + offset] && newBoard[index + offset].sigils.indexOf("opponentbones") > -1) {
-                scavenging++;
-              }
-            }
-            newBones[target < 4 ? 0 : 1] += scavenging * (newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1);
-
-            newBoard[target] = null; //SIGILS - gainattackonkill, gainattackonkillpermanent
-            if (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("gainattackonkill") > -1) {
-              newBoard[entry.index].damage++;
-            }
-            if (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("gainattackonkillpermanent") > -1) {
-              newBoard[entry.index].damage++;
-              if (newBoard[entry.index].index !== undefined) {
-                let matchingCard = newRoom.decks[entry.index < 4 ? 1 : 0].findIndex((c) => c.index === newBoard[entry.index].index);
-                newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage = Math.max(newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage, newBoard[entry.index].damage);
-              }
-            }
-
-            let corpseIndex = -1;
-            newHands[target < 4 ? 1 : 0].forEach((card, j) => {
-              if (card.sigils.indexOf("corpseeater") > -1 && corpseIndex < 0) { //SIGILS - corpseeater
-                corpseIndex = j; //first in hand always used
-              }
-            })
-            if (corpseIndex > -1) {
-              newRoom = placeSelectedCard(target, newHands[target < 4 ? 1 : 0][corpseIndex], newRoom);
-
-              if (handSelection === corpseIndex) {
-                setHandSelection(-1);
-              }
-              newHands[target < 4 ? 1 : 0].splice(corpseIndex, 1); //remove selected card from hand
-            } 
-
-          }
-        } else {
-          //SIGILS - whackamole
-          let offset = target < 4 ? 0 : 4;
-          let moleIndex = -1;
-          for (let i = 0; i < 4; i++) { //FIXME - add priority to submerge / reach moles?
-            if (newRoom.board[i + offset] && newRoom.board[i + offset].sigils.indexOf("whackamole") > -1 && moleIndex < 0) {
-              moleIndex = i + offset;
-            }
-          }
-          if (moleIndex > -1) {
-            let temp = newBoard[target]
-            newBoard[target] = newBoard[moleIndex];
-            newBoard[moleIndex] = null;
-            newBoard[moleIndex] = temp;
-            logIndex--;
-          } else {
-            newScale += trueDamage * (target < 4 ? 1 : -1);
-          }
-        }
-      } else if (entry.action === "transform") { 
-        let newSigils = Array.from(newBoard[entry.index].sigils);
-        newSigils.splice(newSigils.indexOf("submergesquid"), 1); //SIGILS - evolve
-
-        if (entry.rand < .333) {
-          newSigils.splice(0, 0, "loud")
-          newSigils.splice(0, 0, "belldamage")
-          newBoard[entry.index] = {
-            card: "squidbell",
-            name: "Bell Tentacle",
-            costType:"blood",
-            cost: 2,
-            sigils: newSigils,
-            defaultSigils: 2,
-            damage: 0,
-            health: 3,
-            tribe: "none",
-            rare: false,
-            clone: {
-              card: "squidbell",
-              name: "Bell Tentacle",
-              costType:"blood",
-              cost: 2,
-              sigils: newSigils,
-              defaultSigils: 2,
-              damage: 0,
-              health: 3,
-              tribe: "none",
-              rare: false
-            }
-          }
-        } else if (entry.rand < .667) {
-          newSigils.splice(0, 0, "carddamage")
-          newBoard[entry.index] = {
-            card: "squidcards",
-            name: "Card Tentacle",
-            costType:"blood",
-            cost: 1,
-            sigils: newSigils,
-            defaultSigils: 1,
-            damage: 0,
-            health: 1,
-            tribe: "none",
-            rare: false,
-            clone: {
-              card: "squidcards",
-              name: "Card Tentacle",
-              costType:"blood",
-              cost: 1,
-              sigils: newSigils,
-              defaultSigils: 1,
-              damage: 0,
-              health: 1,
-              tribe: "none",
-              rare: false
-            }
-          }
-        } else {
-          newSigils.splice(0, 0, "mirrordamage")
-          newBoard[entry.index] = {
-            card: "squidmirror",
-            name: "Mirror Tentacle",
-            costType:"blood",
-            cost: 1,
-            sigils: newSigils,
-            defaultSigils: 1,
-            damage: 0,
-            health: 1,
-            tribe: "none",
-            rare: false, 
-            clone: {
-              card: "squidmirror",
-              name: "Mirror Tentacle",
-              costType:"blood",
-              cost: 1,
-              sigils: newSigils,
-              defaultSigils: 0,
-              damage: 0,
-              health: 1,
-              tribe: "none",
-              rare: false, 
-            }
-          }
-        }
-
-      } else if (entry.action === "evolve") {
-        let newSigils = Array.from(newBoard[entry.index].sigils);
-        newSigils.splice(newSigils.indexOf("evolve"), 1); //SIGILS - evolve
-
-        if (newBoard[entry.index].card === "wolfcub") {
-          newBoard[entry.index].card = "wolf";
-          newBoard[entry.index].name = "Wolf";
-          newBoard[entry.index].damage += 2;
-          newBoard[entry.index].health += 1;
-          newBoard[entry.index].sigils = newSigils;
-          newBoard[entry.index].defaultSigils = 0;
-        } else if (newBoard[entry.index].card === "deercub") {
-          newBoard[entry.index].card = "deer";
-          newBoard[entry.index].name = "Elk";
-          newBoard[entry.index].damage += 1;
-          newBoard[entry.index].health += 3;
-          newBoard[entry.index].sigils = newSigils;
-          newBoard[entry.index].defaultSigils = 1;
-        } else if (newBoard[entry.index].card === "ravenegg") {
-          newBoard[entry.index].card = "raven";
-          newBoard[entry.index].name = "Raven";
-          newBoard[entry.index].damage += 2;
-          newBoard[entry.index].health += 1;
-          newBoard[entry.index].sigils = ["flying", ...newSigils];
-        } else if (newBoard[entry.index].card === "mothman_1") {
-          newBoard[entry.index].card = "mothman_2"; //FIXME - is it actually called this? I dont have internet rn lol
-          newBoard[entry.index].name = "Strange Pupa";
-          newBoard[entry.index].sigils = ["evolve", ...newSigils];
-        } else if (newBoard[entry.index].card === "mothman_2") {
-          newBoard[entry.index].card = "mothman_3";
-          newBoard[entry.index].name = "Mothman";
-          newBoard[entry.index].damage += 7;
-          newBoard[entry.index].sigils = ["flying", ...newSigils];
-        } else if (newBoard[entry.index].card === "direwolfcub") {
-          newBoard[entry.index].card = "direwolf";
-          newBoard[entry.index].name = "Dire Wolf";
-          newBoard[entry.index].damage += 1;
-          newBoard[entry.index].health += 4;
-          newSigils.splice(newSigils.indexOf("bonedigger"), 1);
-          newBoard[entry.index].defaultSigils = 1;
-          newBoard[entry.index].sigils = ["doublestrike", ...newSigils];
-        } else if (newBoard[entry.index].card === "tadpole") {
-          newBoard[entry.index].card = "bullfrog";
-          newBoard[entry.index].name = "Bullfrog";
-          newBoard[entry.index].damage += 1;
-          newBoard[entry.index].health += 1;
-          newBoard[entry.index].defaultSigils = 1;
-          newSigils.splice(newSigils.indexOf("submerge"), 1);
-          newBoard[entry.index].sigils = ["reach", ...newSigils];
-        } else if (newBoard[entry.index].card === "ant" || newBoard[entry.index].card === "antflying") {
-          if (newBoard[entry.index].card === "antflying") {
-            newSigils.splice(newSigils.indexOf("flying"), 1);
-          }
-          newBoard[entry.index].card = "antqueen";
-          newBoard[entry.index].name = "Ant Queen";
-          newBoard[entry.index].health += 2;
-          newBoard[entry.index].defaultSigils = 1;
-          newBoard[entry.index].sigils = ["drawant", ...newSigils];
-          //deviation - draw ant for fun?
-          //SIGILS - drawant
-          newRoom.hands[entry.index < 4 ? 1 : 0].push({ //modifies newRoom directly?
-            card: "ant",
-            name: "Worker Ant",
-            costType:"blood",
-            cost: 1,
-            sigils: newSigils,
-            defaultSigils: 1,
-            damage: 0,
-            health: 2,
-            tribe: "insect",
-            rare: false,
-            clone: {
-              card: "ant",
-              name: "Worker Ant",
-              costType:"blood",
-              cost: 1,
-              sigils: newSigils,
-              defaultSigils: 0,
-              damage: 0,
-              health: 2,
-              tribe: "insect",
-              rare: false
-            }
-          })
-        } else if (newBoard[entry.index].card === "deer") {
-          newBoard[entry.index].card = "moose";
-          newBoard[entry.index].damage += 1;
-          newBoard[entry.index].health += 3;
-          newSigils.splice(newSigils.indexOf("strafe"), 1);
-          newBoard[entry.index].sigils = [...newSigils, "strafepush"];
-        } else if (newBoard[entry.index].card === "mole") {
-          newBoard[entry.index].card = "moleman";
-          newBoard[entry.index].defaultSigils = 2;
-          newBoard[entry.index].health += 2;
-          newBoard[entry.index].sigils = [...newSigils, "reach"];
-        } else if (newBoard[entry.index].card === "mantis") {
-          newBoard[entry.index].card = "mantisgod";
-          newSigils.splice(newSigils.indexOf("splitstrike"), 1);
-          newBoard[entry.index].sigils = [...newSigils, "tristrike"];
-        } else {
-          newBoard[entry.index].health += 2;
-          if (newBoard[entry.index].damage > -3) { //fix: no special damage
-            newBoard[entry.index].damage += 1;
-          }
-          if (newBoard[entry.index].sigils.indexOf("evolve") < newBoard[entry.index].defaultSigils)  {
-            newBoard[entry.index].defaultSigils -= 1;
-          }
-          newBoard[entry.index].sigils = newSigils;
-        }
-      } else if (entry.action === "strafe") {
-        if (newBoard[entry.index].sigils.indexOf("strafeleft") > -1) {
-          if (entry.index % 4 !== 0 && !newBoard[entry.index-1]) { //move
-            newBoard[entry.index-1] = newBoard[entry.index];
-            newBoard[entry.index] = null;
-            indexMapping[originalIndex] -= 1;
-          } else if (!entry.swapped) {
-            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
-              return val === "strafeleft" ? "strafe" : 
-                     val === "strafepushleft" ? "strafepush" : 
-                     val === "strafeswapleft" ? "strafeswap" : val;
-            })
-            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
-              index: originalIndex,
-              swapped: true
-            })
-          }
-        } else {
-          if (entry.index % 4 !== 3 && !newBoard[entry.index+1]) { //move
-            newBoard[entry.index+1] = newBoard[entry.index];
-            newBoard[entry.index] = null;
-            indexMapping[originalIndex] += 1;
-          } else if (!entry.swapped) {
-            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
-              return val === "strafe" ? "strafeleft" : 
-                     val === "strafepush" ? "strafepushleft" : 
-                     val === "strafeswap" ? "strafeswapleft" : val;
-            })
-            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
-              index: originalIndex,
-              swapped: true
-            })
-          }
-        }
-      } else if (entry.action === "strafepush") {
-        if (newBoard[entry.index].sigils.indexOf("strafepushleft") > -1) {
-          let searchIndex = entry.index;
-          let stack = [];
-          while (Math.floor(searchIndex / 4) === Math.floor(entry.index / 4) && newBoard[searchIndex]) {
-            stack.push(searchIndex);
-            searchIndex--;
-          }
-          stack.reverse();
-          searchIndex++;
-          if (searchIndex % 4 !== 0) { //pushing possible
-            for (const i of stack) {
-              newBoard[i-1] = newBoard[i];
-              newBoard[i] = null;
-              for (let j = 0; j < indexMapping.length; j++) {
-                if (indexMapping[j] === i) {
-                  indexMapping[j] -= 1
-                } 
-              }
-            }
-          } else if (!entry.swapped) {
-            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
-              return val === "strafeleft" ? "strafe" : 
-                     val === "strafepushleft" ? "strafepush" : 
-                     val === "strafeswapleft" ? "strafeswap" : val;
-            })
-            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
-              index: originalIndex,
-              swapped: true
-            })
-          }
-        } else {
-          let searchIndex = entry.index;
-          let stack = [];
-          while (Math.floor(searchIndex / 4) === Math.floor(entry.index / 4) && newBoard[searchIndex]) {
-            stack.push(searchIndex);
-            searchIndex++;
-          }
-          stack.reverse();
-          searchIndex--;
-          if (searchIndex % 4 !== 3) { //pushing possible
-            for (const i of stack) {
-              newBoard[i+1] = newBoard[i];
-              newBoard[i] = null;
-              for (let j = 0; j < indexMapping.length; j++) {
-                if (indexMapping[j] === i) {
-                  indexMapping[j] += 1
-                } 
-              }
-            }
-          } else if (!entry.swapped) {
-            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
-              return val === "strafe" ? "strafeleft" : 
-                     val === "strafepush" ? "strafepushleft" : 
-                     val === "strafeswap" ? "strafeswapleft" : val;
-            })
-            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
-              index: originalIndex,
-              swapped: true
-            })
-          }
-        }
-      } else if (entry.action === "strafeswap") {
-        if (newBoard[entry.index].sigils.indexOf("strafeswapleft") > -1) {
-          if (entry.index % 4 !== 0) {
-            let temp = newBoard[entry.index-1];
-            newBoard[entry.index-1] = newBoard[entry.index];
-            newBoard[entry.index] = temp;
-            for (let j = 0; j < indexMapping.length; j++) {
-              if (indexMapping[j] === entry.index-1) {
-                indexMapping[j] += 1
-              }
-            }
-            indexMapping[originalIndex] -= 1;
-          } else if (!entry.swapped) {
-            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
-              return val === "strafeleft" ? "strafe" : 
-                     val === "strafepushleft" ? "strafepush" : 
-                     val === "strafeswapleft" ? "strafeswap" : val;
-            })
-            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
-              index: originalIndex,
-              swapped: true
-            })
-          }
-        } else {
-          if (entry.index % 4 !== 3) {
-            let temp = newBoard[entry.index+1];
-            newBoard[entry.index+1] = newBoard[entry.index];
-            newBoard[entry.index] = temp;
-            for (let j = 0; j < indexMapping.length; j++) {
-              if (indexMapping[j] === entry.index-1) {
-                indexMapping[j] -= 1
-              }
-            }
-            indexMapping[originalIndex] += 1;
-          } else if (!entry.swapped) {
-            newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
-              return val === "strafe" ? "strafeleft" : 
-                     val === "strafepush" ? "strafepushleft" : 
-                     val === "strafeswap" ? "strafeswapleft" : val;
-            })
-            newRoom.activityLog.splice(logIndex+1, 0, {...entry, 
-              index: originalIndex,
-              swapped: true
-            })
-          }
-        }
-      }
-    }
-
-    [...Array(4)].forEach((val, i) => {
-      let offset = newRoom.gameState === "simulating0" ? 4 : 0;
-      if (newBoard[i+offset]) {
-        newBoard[i + offset].sacBonus = 0;
-      }
-    })
-
-    if (newScale * (newRoom.gameState === "simulating0" ? 1 : -1) <= -5) {
-      //restart game if scale is tipped at end of turn
-      setSendRoom({...newRoom, 
-        gameState:"drafting", 
-        board: [null, null, null, null, null, null, null, null], 
-        scale: 0,
-        lit0: true,
-        lit1: true,
-        activityLog: [],
-        hands: [[],[]],
-        bones: [0, 0],
-        sacrifices: [],
-        draft: {
-          phase: -1, //draw new cards for draft
-          options: []
-        }})
-    } else {
-      console.log("new room after simulation",structuredClone({...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0")}))
-      setRoom({...newRoom, board: newBoard, scale: newScale, bones: newBones, gameState: (newRoom.gameState === "simulating0" ? "draw1" : "draw0"), activityLog: []}) //TEMP
-    }
   }
 
   let blankCard = {
@@ -960,7 +478,7 @@ function App() {
                 handHover !== s-1 && index <= handHover && hoverSection === 0 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
 
                 return <div 
-                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`, transition: "padding .1s ease-in-out"}}
                   onMouseEnter={() => {setHandHover(index); setHoverSection(0);}}
                   onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 >
@@ -980,7 +498,8 @@ function App() {
                       <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                         if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
                           let newDecks = room.decks;
-                          newDecks[room.player0 === socket.id ? 0 : 1].push({...card, index: newDecks[room.player0 === socket.id ? 0 : 1].length});
+                          let newIndex = newDecks[room.player0 === socket.id ? 0 : 1].reduce((acc, val) => {return Math.max(acc, val.index)}, -1) + 1
+                          newDecks[room.player0 === socket.id ? 0 : 1].push({...card, index: newIndex});
                           let newDraw = room.draft;
                           newDraw.options[index] = null;
                           if (newDraw.phase === (2 * room.round * 3 - 2)) { //4, 10, etc
@@ -1023,7 +542,7 @@ function App() {
                 handHover !== s-1 && index <= handHover && hoverSection === 1 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
 
                 return <div 
-                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                  style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`, transition: "padding .1s ease-in-out"}}
                   onMouseEnter={() => {setHandHover(index); setHoverSection(1);}}
                   onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 >
@@ -1059,13 +578,11 @@ function App() {
                   val = room.board[index]
                 }
 
-                console.log(index, room.board, room.board[index-1])
-
                 return (
                   <div className='gameSlot'>
                     <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
                     {val && val.card ? 
-                      <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
+                      <div style={{position: "relative", marginTop:"18px", marginLeft:"14.5px", transition: "margin-top .1s ease-out, margin-left .1s ease-out, transform .2s"}}>
                         <Card val={{...val,
                           damage: calcTrueDamage(room.board, index, room.bones, room.hands)
                         }}/>
@@ -1140,7 +657,7 @@ function App() {
                   handSelection !== s-1 && index <= handSelection && handHover !== handSelection ? m = m + 5 + (125 * s - 420)/(s - 1) : m = m;
 
                   return <div 
-                    style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                    style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`, transition: "padding .1s ease-in-out, top .05s ease-in-out"}}
                     onMouseEnter={() => setHandHover(index)}
                     onMouseLeave={() => setHandHover(-1)}
                     onClick={() => {
@@ -1258,7 +775,6 @@ function App() {
                 let inscribedCount = scribes[2]+1;
                 setScribes([{open: false, index: -1}, {open: false, index: -1}, scribes[2]+1]);
                 
-                console.log(inscribedCount , room.round)
                 if (inscribedCount === room.round) {
                   socket.emit("newDeck", {...room, decks: newDecks});
                   setRoom({...room, gameState: "awaitingPlayers"}) //this will never be sent to the backend
@@ -1277,7 +793,7 @@ function App() {
               handHover !== s-1 && index <= handHover && hoverSection === 0 ? m = 5 + (125 * s - 420)/(s - 1) : m = 0;
 
               return <div 
-                style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`}}
+                style={{position:"absolute", left: l, paddingLeft: m, top:`${index === handSelection ? "-10" : "0"}px`, transition: "padding .1s ease-in-out, top .05s ease-in-out"}}
                 onMouseEnter={() => {setHandHover(index); setHoverSection(0);}}
                 onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 onClick={() => {

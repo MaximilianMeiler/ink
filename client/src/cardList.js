@@ -287,18 +287,18 @@ let allCards = {
     tribe: "insect",
     rare: false
   },
-  "magpie": {
-    card: "magpie",
-    name: "Magpie",
-    costType:"blood",
-    cost: 2,
-    sigils: ["flying", "tutor"],
-    defaultSigils: 2,
-    damage: 1,
-    health: 1,
-    tribe: "avian",
-    rare: false
-  },
+  // "magpie": {
+  //   card: "magpie",
+  //   name: "Magpie",
+  //   costType:"blood",
+  //   cost: 2,
+  //   sigils: ["flying", "tutor"],
+  //   defaultSigils: 2,
+  //   damage: 1,
+  //   health: 1,
+  //   tribe: "avian",
+  //   rare: false
+  // },
   "mantis": {
     card: "mantis",
     name: "Mantis",
@@ -395,30 +395,30 @@ let allCards = {
     tribe: "none",
     rare: false
   },
-  "ouroboros": {
-    card: "ouroboros",
-    name: "Ouroboros",
-    costType:"blood",
-    cost: 2,
-    sigils: ["drawcopyondeath", "buffondeath"],
-    defaultSigils: 2,
-    damage: 1,
-    health: 1,
-    tribe: "reptile",
-    rare: false
-  },
-  "packrat": {
-    card: "packrat",
-    name: "Pack Rat",
-    costType:"blood",
-    cost: 2,
-    sigils: ["randomconsumable"],
-    defaultSigils: 1,
-    damage: 2,
-    health: 2,
-    tribe: "none",
-    rare: false
-  },
+  // "ouroboros": {
+  //   card: "ouroboros",
+  //   name: "Ouroboros",
+  //   costType:"blood",
+  //   cost: 2,
+  //   sigils: ["drawcopyondeath", "buffondeath"],
+  //   defaultSigils: 2,
+  //   damage: 1,
+  //   health: 1,
+  //   tribe: "reptile",
+  //   rare: false
+  // },
+  // "packrat": {
+  //   card: "packrat",
+  //   name: "Pack Rat",
+  //   costType:"blood",
+  //   cost: 2,
+  //   sigils: ["randomconsumable"],
+  //   defaultSigils: 1,
+  //   damage: 2,
+  //   health: 2,
+  //   tribe: "none",
+  //   rare: false
+  // },
   "porcupine": {
     card: "porcupine",
     name: "Porcupine",

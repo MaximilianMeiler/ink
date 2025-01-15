@@ -1,12 +1,12 @@
 # Inscryption Online
-A remake of (parts of) Daniel Mullins' game *[Inscryption](https://store.steampowered.com/app/1092790/Inscryption/)* for a player-vs-player setting. Players build up decks of cards to face off using increasingly ridiculous strategies and combos.
+A partial remake of the central card game in Daniel Mullins' game *[Inscryption](https://store.steampowered.com/app/1092790/Inscryption/)* for a player-vs-player setting. Players build up decks of cards to face off using increasingly ridiculous strategies and combos.
 
 ## Playing 
 A hosted version of the game can currently be found at [https://ink-seven.vercel.app/](https://ink-seven.vercel.app/) (url subject to change). This should have full functionality. If you want to instead run the code locally for development purposes, follow the following steps:
 
 - Clone the repo with `git clone https://github.com/MaximilianMeiler/ink`
-- In /client and /server, run `npm install` and `npm start` to run the frontend and the server respectively.
-- NOTE: Be sure to change the API url in */client/src/App.js* to "http://localhost:4000", and the CORS url in *server/index.js* to "http://localhost:3000"
+- In *./client* and *./server*, run `npm install` and `npm start` to run the frontend and the server respectively.
+- NOTE: Be sure to change the API url in *./client/src/App.js* to "http://localhost:4000", and the CORS url in *./server/index.js* to "http://localhost:3000"
 
 ## Roadmap
 
