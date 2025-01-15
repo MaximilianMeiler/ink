@@ -295,11 +295,18 @@ io.on("connection", (socket) => {
           let shieldIndex = newBoard[target].sigils.indexOf("deathshield"); //SIGILS - deathshield
   
           if (shieldIndex > -1) {
+            if (entry.action === "attack") {
+              animationLog.push({action: "lunge", index: entry.index, aim: entry.aim})
+            } else {
+              animationLog.push({action: "shake",  index: target}) 
+            }
+
             if (shieldIndex < newBoard[target].defaultSigils) {
               newBoard[target].defaultSigils--;
             }
             newBoard[target].sigils.splice(shieldIndex, 1);
             animationLog.push({action: "updateCard", index: target, card: structuredClone(newBoard[target])})
+            trueDamage = 0
           } else {
             if (newBoard[target].sigils.indexOf("tailonhit") > -1) { //SIGILS - tailonhit
               let newSigils = Array.from(newBoard[target].sigils);
@@ -359,7 +366,7 @@ io.on("connection", (socket) => {
             } else {
               animationLog.push({action: "shake",  index: target}) //now the new tail target
             }
-            newBoard[target].health -= trueDamage; //FIXME - should deathtouch not kill a deathshield?
+            newBoard[target].health -= trueDamage;
             animationLog.push({action: "updateCard", index: target, card: structuredClone(newBoard[target])})
           }
   
@@ -419,7 +426,7 @@ io.on("connection", (socket) => {
             });
           }
   
-          if (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1))) { //SIGILS - deathtouch, gainattackkonkill
+          if (trueDamage > 0 && (newBoard[target].health <= 0 || (entry.action === "attacksharplethal" || (newBoard[entry.index] && newBoard[entry.index].sigils.indexOf("deathtouch") > -1)))) { //SIGILS - deathtouch, gainattackkonkill
             newBones[target < 4 ? 1 : 0] += newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1; //SIGILS - quadruplebones
             animationLog.push({action: "updateBones", player: (target < 4 ? 1 : 0), count: newBoard[target].sigils.indexOf("quadruplebones") > -1 ? 4 : 1})
   
@@ -825,7 +832,7 @@ io.on("connection", (socket) => {
             }
             indexMapping[originalIndex] -= 1;
             animationLog.push({action: "shift", index: entry.index, target: entry.index-1})
-            animationLog.push({action: "updateCard", index: entry.index-1, card: structuredClone(temp)}) //FIXME - yeah...
+            animationLog.push({action: "updateCard", index: entry.index-1, card: structuredClone(temp)}) //FIXME - make an actual swap animm
           } else if (!entry.swapped) {
             newBoard[entry.index].sigils = newBoard[entry.index].sigils.map((val, i) => {
               return val === "strafeleft" ? "strafe" : 
@@ -1088,7 +1095,6 @@ io.on("connection", (socket) => {
     })
   })
 
-  //FIXME - activity log should reflect all things that require an animation. move simulation logic here from frontend
   socket.on("bellRung", (room) => { //generate activity log once bell is rung?
     let offset = rooms[room].gameState == "play1" ? 0 : 4;
     rooms[room].animationLog = []

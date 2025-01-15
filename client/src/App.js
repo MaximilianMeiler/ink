@@ -498,7 +498,8 @@ function App() {
                       <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                         if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
                           let newDecks = room.decks;
-                          newDecks[room.player0 === socket.id ? 0 : 1].push({...card, index: newDecks[room.player0 === socket.id ? 0 : 1].length}); //FIXME - account for deck removals
+                          let newIndex = newDecks[room.player0 === socket.id ? 0 : 1].reduce((acc, val) => {return Math.max(acc, val.index)}, -1) + 1
+                          newDecks[room.player0 === socket.id ? 0 : 1].push({...card, index: newIndex});
                           let newDraw = room.draft;
                           newDraw.options[index] = null;
                           if (newDraw.phase === (2 * room.round * 3 - 2)) { //4, 10, etc
