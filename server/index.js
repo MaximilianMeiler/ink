@@ -591,6 +591,8 @@ io.on("connection", (socket) => {
             }
           }
         }
+
+        animationLog.push({action: "flip", index: entry.index, card: structuredClone(newBoard[entry.index])})
   
       } else if (entry.action === "evolve") {
         let newSigils = Array.from(newBoard[entry.index].sigils);

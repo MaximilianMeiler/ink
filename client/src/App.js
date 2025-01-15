@@ -304,20 +304,22 @@ function App() {
       if (room.animationLog.length > 0) {
         let anim = room.animationLog[0];
         let flip = (room.player1 === socket.id)
+        let trueIndex = (anim.index + (flip ? 4 : 0)) % 8
         if (anim.action === "lunge") {
-          let trueIndex = (anim.index + (flip ? 4 : 0)) % 8
           document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-top", `${18 + (trueIndex<4 ? 113 : -113)}px`)
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-left", `${14.5 + (anim.aim)*154}px`) 
           document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `10`)
           setTimeout(() => {
             document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-top", `18px`)
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-left", `14.5px`)
             setTimeout(() => {
               document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `0`) 
 
               let newLog = room.animationLog;
               newLog.splice(0, 1);
               setRoom({...room, animationLog: newLog})
-            }, 250)
-          }, 250)
+            }, 100)
+          }, 100)
         } else if (anim.action === "updateScale") {
           document.querySelector(".scaleArrow").style.setProperty("top", -22+6 + (5-Math.min(Math.max((anim.scale * (room.player0 === socket.id ? 1 : -1)), -5), 5))*(44))
           setTimeout(() => {
@@ -345,7 +347,6 @@ function App() {
           newLog.splice(0, 1);
           setRoom({...room, animationLog: newLog, hands: newHands})
         } else if (anim.action === "shift") {
-          let trueIndex = (anim.index + (flip ? 4 : 0)) % 8
           document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("margin-left", `${14.5 + (anim.target - anim.index)*154}px`)
           document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("z-index", `10`)
           setTimeout(() => {
@@ -363,12 +364,52 @@ function App() {
             let newLog = room.animationLog;
             newLog.splice(0, 1);
             setRoom({...room, animationLog: newLog})
-          }, 250)
+          }, 100)
+        } else if (anim.action === "updateBones") {
+          let newBones = room.bones;
+          newBones[anim.player] += anim.count;
+
+          let newLog = room.animationLog;
+          newLog.splice(0, 1);
+          setRoom({...room, animationLog: newLog, bones: newBones})
+        } else if (anim.action === "flip") {
+          
+          document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("transform", `rotateY(90deg)`)
+          setTimeout(() => {
+
+            let newBoard = room.board;
+            newBoard[anim.index] = anim.card;
+
+            let newLog = room.animationLog;
+            newLog.splice(0, 1);
+            setRoom({...room, animationLog: newLog, board: newBoard})
+
+            document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("transform", `rotateY(0deg)`)
+          }, 200)
+          
         }
 
       } else {
         //check if the round ends
-        setRoom({...room, gameState: (room.gameState === "simulating0" ? "draw1" : "draw0")})
+        if (room.scale * (room.gameState === "simulating0" ? 1 : -1) <= -5) {
+          //restart game if scale is tipped at end of turn
+          setSendRoom({...room, 
+            gameState:"drafting", 
+            board: [null, null, null, null, null, null, null, null], 
+            scale: 0,
+            lit0: true,
+            lit1: true,
+            animationLog: [],
+            hands: [[],[]],
+            bones: [0, 0],
+            sacrifices: [],
+            draft: {
+              phase: -1, //we need to use setRoom here so the backend gives us cards
+              options: []
+          }})
+        } else {
+          setRoom({...room, gameState: (room.gameState === "simulating0" ? "draw1" : "draw0"), animationLog: []}) //TEMP
+        }
       }
     }
   }, [room])
@@ -457,7 +498,7 @@ function App() {
                       <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                         if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
                           let newDecks = room.decks;
-                          newDecks[room.player0 === socket.id ? 0 : 1].push({...card, index: newDecks[room.player0 === socket.id ? 0 : 1].length});
+                          newDecks[room.player0 === socket.id ? 0 : 1].push({...card, index: newDecks[room.player0 === socket.id ? 0 : 1].length}); //FIXME - account for deck removals
                           let newDraw = room.draft;
                           newDraw.options[index] = null;
                           if (newDraw.phase === (2 * room.round * 3 - 2)) { //4, 10, etc
@@ -540,7 +581,7 @@ function App() {
                   <div className='gameSlot'>
                     <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={trueIndex < 4 ? {transform: 'rotate(180deg)'} : {}}></img>
                     {val && val.card ? 
-                      <div style={{position: "relative", marginTop:"18px", marginLeft:"14.5px", transition: "margin-top .025s ease-out, margin-left .025s ease-out"}}>
+                      <div style={{position: "relative", marginTop:"18px", marginLeft:"14.5px", transition: "margin-top .1s ease-out, margin-left .1s ease-out, transform .2s"}}>
                         <Card val={{...val,
                           damage: calcTrueDamage(room.board, index, room.bones, room.hands)
                         }}/>
