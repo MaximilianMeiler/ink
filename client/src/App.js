@@ -604,7 +604,7 @@ function App() {
                           )) 
                         { //empty slot - place selected card
                           placeSelectedCard(index);
-                        } else if (val && val.card && ((val.card !== "dam" && val.card !== "chime") || val.sigils.indexOf("tripleblood") > -1 || val.sigils.indexOf("sacrificial") > -1)) { //toggle sacrifices for selected card, terrain cant be sacrificed
+                        } else if (val && val.card && ((val.card !== "dam" && val.card !== "dausbell") || val.sigils.indexOf("tripleblood") > -1 || val.sigils.indexOf("sacrificial") > -1 || val.sigils.indexOf("morsel") > -1)) { //toggle sacrifices for selected card, terrain cant be sacrificed
                           let newSac = room.sacrifices;
                           let dying = room.sacrifices.indexOf(index) > -1 
                           if (dying) {
