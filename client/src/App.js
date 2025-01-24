@@ -290,7 +290,7 @@ function App() {
         setSendRoom(newRoom);
       } else if (newRoom.gameState === "roundStart1" && newRoom.player1 === socket.id) {
         setDraw(shuffleArray(newRoom.decks[1]));
-        newRoom.gameState = "draw0";
+        newRoom.gameState = newRoom.round % 2 === 0 ? "draw0" : "draw1";
         setSendRoom(newRoom);
       } else {
         setRoom(newRoom);
@@ -443,25 +443,18 @@ function App() {
 
   return (
     <div className="App">
-      <div style={{display: "flex"}}>
-        <p>&nbsp;Join room:&nbsp;</p>
-        <input type='text' id="roomInput"></input>
-        <button onClick={() => {
-          if (room) {
-            socket.emit("clientRoomLeave", room.id)
-          }
-          socket.emit("clientRoomJoin", document.getElementById('roomInput').value)
-        }}>Join</button>
-        <button onClick={() => {
-          if (room) {
-            socket.emit("clientRoomLeave", room.id)
-          }
-          setRoom(null);
-        }}>Leave room</button>
-      </div>
-      <div style={{marginBottom: "20px"}}>Room: {room ? room.id : ""}</div>
 
       {room ? <div>
+        
+        <div style={{display: "flex", justifyContent: "end", alignItems: "center", padding:"10px", gap: "10px"}}>
+          <div>Room: {room ? room.id : ""}</div>
+          <button onClick={() => {
+            if (room) {
+              socket.emit("clientRoomLeave", room.id)
+            }
+            setRoom(null);
+          }}>Leave room</button>
+        </div>
 
         {(room.gameState === "awaitingPlayers") ? <div>
           Waiting for other players...
@@ -469,7 +462,7 @@ function App() {
 
         {(room.gameState === "drafting") ? 
           <div>
-            <div>Drafts remaining: {2*room.round - Math.floor(room.draft.phase / 3)}</div>
+            <div>Drafts remaining: {2*Math.min(room.round, 4) - Math.floor(room.draft.phase / 3)}</div>
             <div style={{position: 'relative', paddingTop: "190px"}}> 
               {room.decks[room.player0 === socket.id ? 1 : 0].map((card, index) => {
                 let s = room.decks[room.player0 === socket.id ? 1 : 0].length
@@ -502,7 +495,7 @@ function App() {
                           newDecks[room.player0 === socket.id ? 0 : 1].push({...card, index: newIndex});
                           let newDraw = room.draft;
                           newDraw.options[index] = null;
-                          if (newDraw.phase === (2 * room.round * 3 - 2)) { //4, 10, etc
+                          if (newDraw.phase === (2 * Math.min(room.round, 4) * 3 - 2)) { //4, 10, etc
                             setSendRoom({...room, decks: newDecks, gameState: "scribing"})
                           } else {
                             newDraw.phase++;
@@ -521,7 +514,7 @@ function App() {
                 </div>
                 <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                   if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
-                    if (room.draft.phase === (2 * room.round * 3 - 2)) {
+                    if (room.draft.phase === (2 * Math.min(room.round, 4) * 3 - 2)) {
                       setSendRoom({...room, gameState: "scribing"})
                     } else {
                       let newDraw = room.draft;
@@ -735,7 +728,7 @@ function App() {
         : <></>}
 
         {(room.gameState === "scribing") ? <div>
-          <div>Inscriptions remaining: {room.round - scribes[2]}</div>
+          <div>Inscriptions remaining: {Math.min(room.round, 4) - scribes[2]}</div>
           <div className='inscGrid'>
             <div>Select Sacrifice</div>
             <div>Select Host</div>
@@ -808,7 +801,22 @@ function App() {
 
         </div> : <></>}
 
-      </div> : <></>}
+      </div> : <div style={{display: "flex", alignItems: "center", justifyContent: "center", height:"100vh", flexDirection: "column"}}>
+        <img src='logo.png' alt='Inscryption Online logo' style={{scale: "2", marginBottom: "40px"}}></img>
+        <div>Welcome to Inscryption Online!</div>
+        <div>To get started, enter a room code to create/join a room:</div>
+
+        <div style={{display: "flex", alignItems: "center", marginTop: "20px"}}>
+          <div style={{fontSize: "30px"}}>&nbsp;Join room:&nbsp;</div>
+          <input type='text' id="roomInput" style={{fontSize: "30px"}}></input>
+          <button onClick={() => {
+            if (room) {
+              socket.emit("clientRoomLeave", room.id)
+            }
+            socket.emit("clientRoomJoin", document.getElementById('roomInput').value)
+          }} style={{fontSize: "30px"}}>Join</button>
+        </div>
+      </div>}
     </div>
   );
 }
