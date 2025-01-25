@@ -387,6 +387,17 @@ function App() {
             document.querySelector(".gameGrid").children.item(trueIndex).children.item(1).style.setProperty("transform", `rotateY(0deg)`)
           }, 200)
           
+        } else if (anim.action === "newDeck") {
+          let newDecks = room.decks;
+          newDecks[anim.player] = anim.deck;
+
+          let newLog = room.animationLog;
+          newLog.splice(0, 1);
+          setRoom({...room, animationLog: newLog, decks: newDecks})
+        } else { //this should never run but it prevents the game from hanging
+          let newLog = room.animationLog;
+          newLog.splice(0, 1);
+          setRoom({...room, animationLog: newLog})
         }
 
       } else {

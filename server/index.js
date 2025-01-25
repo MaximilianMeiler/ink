@@ -471,7 +471,7 @@ io.on("connection", (socket) => {
               if (newBoard[entry.index].index !== undefined) {
                 let matchingCard = newRoom.decks[entry.index < 4 ? 1 : 0].findIndex((c) => c.index === newBoard[entry.index].index);
                 newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage = Math.max(newRoom.decks[entry.index < 4 ? 1 : 0][matchingCard].damage, newBoard[entry.index].damage);
-                animationLog.push({action: "newDeck", player: target < 4 ? 1 : 0, deck: structuredClone(newRoom.decks[target < 4 ? 1 : 0])})
+                animationLog.push({action: "newDeck", player: entry.index < 4 ? 1 : 0, deck: structuredClone(newRoom.decks[entry.index < 4 ? 1 : 0])})
               }
             }
   
@@ -1065,16 +1065,18 @@ io.on("connection", (socket) => {
 
   socket.on("clientRoomLeave", (id) => {
     console.log(socket.id, "attempts to leave room", id)
-    if (!rooms[id].player0 || !rooms[id].player1) { //last person leaves room
-      //FIXME: this code is prone to fatal crashes. probably worth investigating
-      delete rooms[id];
-    } else {
-      if (rooms[id].player0 == socket.id) {
-        delete rooms[id].player0;
-      } else if (rooms[id].player1 == socket.id){
-        delete rooms[id].player1;
+    try {
+      if (!rooms[id].player0 || !rooms[id].player1) { //last person leaves room
+        //FIXME: this code is prone to fatal crashes. probably worth investigating
+        delete rooms[id];
+      } else {
+        if (rooms[id].player0 == socket.id) {
+          delete rooms[id].player0;
+        } else if (rooms[id].player1 == socket.id){
+          delete rooms[id].player1;
+        }
       }
-    }
+    } catch (err) {console.log("critical room leave error detected!")}
     socket.leave(id);
     io.to(id).emit("serverUpdate", {...rooms[id], gameState:"awaitingPlayers"});
   })
