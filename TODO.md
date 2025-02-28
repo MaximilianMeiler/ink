@@ -6,6 +6,7 @@
 - make sigils stackable?
 
 fix hodag inconsistencies? (anim updates states on draw, activity on game end)
+hodag is crashing the backend
 
 ### FIXME
 see code comments

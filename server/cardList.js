@@ -718,18 +718,18 @@ let allCards = {
     tribe: "none",
     rare: false
   },
-  "hodag": {
-    card: "hodag",
-    name: "Hodag",
-    costType:"blood",
-    cost: 2,
-    sigils: ["gainattackonkillpermanent"],
-    defaultSigils: 1,
-    damage: 1,
-    health: 5,
-    tribe: "none",
-    rare: false
-  },
+  // "hodag": {
+  //   card: "hodag",
+  //   name: "Hodag",
+  //   costType:"blood",
+  //   cost: 2,
+  //   sigils: ["gainattackonkillpermanent"],
+  //   defaultSigils: 1,
+  //   damage: 1,
+  //   health: 5,
+  //   tribe: "none",
+  //   rare: false
+  // },
   "lammergeier": {
     card: "lammergeier",
     name: "Lammergeier", 
@@ -828,23 +828,61 @@ let allCards = {
   }
 }
 
-let allSigils = [
-  'deathtouch',  'buffneighbours',
-  'drawant',     'flying',          'createdams',
-  'beesonhit',   'guarddog',        'reach',
-  'sacrificial', 'drawcopyondeath', 'createbells',
-  'strafe',      'evolve',          'drawcopy',
-  'tripleblood', 'submerge',        'corpseeater',
-  'tutor',       'splitstrike',     'tristrike',
-  'whackamole',  'strafepush',      'randomconsumable',
-  'sharp',       'quadruplebones',  'tailonhit',
-  'debuffenemy', 'drawrabbits',     'doublestrike',
-  'bonedigger',  'submergesquid',   'gainattackonkill',
-  'morsel',      'deathshield',     'opponentbones',
-  'strafeswap'
-]
+let allSigils = {
+  'deathtouch': ["Touch of Death", "This card instantly kills any card it damages."],
+  'buffneighbours': ["Leader", "Creatures adjacent to this card gain 1 Power."],
+  'drawant': ["Ant Spawner", "When this card is played, an Ant enters your hand. The Ant inherits this card's other sigils."],
+  'flying': ["Airborne", "This card will ignore opposing cards and strike an opponent directly."],
+  'createdams': ["Dam Builder", "When this card is played, Dams are created on adjacent empty spaces. The Dams inherit this card's other sigils"],
+  'beesonhit': ["Bees Within", "When this card is struck, a Bee is created in your hand. The bee inherits this card's other sigils."],
+  'guarddog': ["Guardian", "When an opposing card is played opposite an empty space, this card moves to that space."],
+  'reach': ["Mighty Leap", "This card blocks opposing Airborne creatures."],
+  'sacrificial': ["Many Lives", "When this card is sacrificed, it does not perish. Allows for the sacrifice of non-living cards."],
+  'drawcopyondeath': ["Unkillable", "When this card perishes, a copy of it enters your hand."],
+  'createbells': ["Bellist", "When this card is played, Chimes are created on adjacent empty spaces. The Chimes inherit this other card's sigils. When a card with the Alarming sigil on the same side of the board as this card is struck, this card will attack the attacker."],
+  'strafe': ["Sprinter", "At the end of the owner's turn, this card moves in the sigil's direction."],
+  'evolve': ["Fledgling", "After surviving for 1 turn, this card grows into a stronger form."],
+  'drawcopy': ["Fecundity", "When this card is played, a copy of it enters your hand. The copy inherits this card's other sigils."],
+  'tripleblood': ["Worthy Sacrifice", "This card counts as 3 Blood rather than 1 Blood when sacrificed. Allows for the sacrifice of non-living cards."],
+  'submerge': ["Waterborne", "On the opponent's turn, creatures attacking this card's space attack directly."],
+  'corpseeater': ["Corpse Eater", "If a card that you own dies by combat, this card is played from your hand on its space."],
+  // 'tutor': ["name", "desc"],
+  'splitstrike': ["Bifurcated Strike", "This card will strike each opposing space to the left and right of the spaces across it."],
+  'tristrike': ["Trifurcated Strike", "This card will deal damage to the opposing spaces left, right, and opposite of it."],
+  'whackamole': ["Burrower", "This card will move to any empty space that is attacked by an enemy to block it."],
+  'strafepush': ["Hefty", "At the end of the owner's turn, this and adjacent cards move in the sigil's direction."], //this desc kinda sucks
+  // 'randomconsumable': ["name", "desc"],
+  'sharp': ["Sharp Quills", "Once this card is struck, the striker is dealt 1 damage."],
+  'quadruplebones': ["Bone King", "When this card dies, 4 Bones are awarded instead of 1."],
+  'tailonhit': ["Loose Tail", "When this card would be struck, a tail is created in its place and this card moves to the right."],
+  'debuffenemy': ["Stinky", "The creature opposing this card loses 1 Power."],
+  'drawrabbits': ["Rabbit Hole", "When this card is played, a Rabbit is created in your hand. The Rabbit inherits this card's other sigils."],
+  'doublestrike': ["Double Strike", "A card bearing this sigil will strike the opposing space an extra time when attacking."],
+  'bonedigger': ["Bone Digger", "At the end of the owner's turn, this card generates 1 Bone."],
+  'submergesquid': ["Kraken Waterborne", "On the opponent's turn, creatures attacking this card's space attack directly. This card becomes a Tentacle card when it emerges."],
+  'gainattackonkill': ["Blood Lust", "When this card kills an opposing card, it gains 1 Power for the game."],
+  'morsel': ["Morsel", "When this card is sacrificed, it transfers its stats onto the card it was sacrificed for."],
+  'deathshield': ["Armored", "The first time a card bearing this sigil would take damage, prevent that damage."],
+  'opponentbones': ["Scavenger", " 	While this card is played, opposing cards also grant Bones upon death."],
+  'strafeswap': ["Rampager", "At the end of the owner's turn, this card will move in the direction on the sigil. Cards in the way will replace where it was previously."],
+
+  // custom sigils
+  'loud': ["Alarming", "If this card is struck, any cards on its side with the Bellist sigil will attack the attacker. Gives adjacent cards with the Bell Ringer sigil +1 Power."],
+  // 'buffondeath': ["Ever Improving", "When this card dies, it gains 1 Power and 1 Health permanently."],
+  // 'gainattackonkillpermanent': ["Bloodier Lust", "When this card kills an opposing card, it gains 1 Power permanently."],
+  'sacrificialswap': ["Awakening", "When this card is sacrificed, it gains 2 Power and the Airborne sigil until it is next sacrificed."],
+  'belldamage': ["Bell Ringer", "If greater, this card's Power becomes how close it is to the combat bell, plus 1 for each card with the Alarming sigil adjacent to it."],
+  'carddamage': ["Card Counter", "If greater, this card's Power becomes the number of cards in your hand."],
+  'mirrordamage': ["Mirror Image", "If greater, this card's Power becomes the Power of the card opposing it."],
+  'sacdamage': ["Spilled Blood", "If greater, this card's Power becomes the number of creatures you sacrifice this round."],
+  'bonedamage': ["Bone Collector", "If greater, this card's Power becomes the number of Bones you have divided by 2 and rounded down."],
+  'antdamage': ["Swarmer", "If greater, this card's Power becomes the number of cards with this sigil on this side of the board."],
+
+  //misc
+  "randomability": ["Amorphous", "When this card is drawn, this sigil is replaced by a random sigil."]
+}
 
 module.exports = {allCards: allCards, allSigils: allSigils}
 
-//custom sigils for traits - "loud", "buffondeath", "gainattackonkillpermanent", "sacrificialswap", "belldamage", "carddamage", "mirrordamage", "sacdamage", "bonedamage"
+//custom sigils for traits - "loud", "buffondeath", "gainattackonkillpermanent", "sacrificialswap", "belldamage", "carddamage", "mirrordamage", "sacdamage", "bonedamage", "antdamage"
 //FIXME - add in long elk? dont have the files for it atm

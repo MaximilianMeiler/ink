@@ -1,6 +1,7 @@
 import './App.css';
+import {allSigils} from './cardList';
 
-function Card({val}) {
+function Card({val, setHoverHint}) {
   let sigilClasses = ["cardSigilSmall1", "cardSigilSmall2", "cardSigilPatch1", "cardSigilPatch2", "cardSigil1"]
 
   if (val)
@@ -30,6 +31,10 @@ function Card({val}) {
                   <img src={'./card_added_ability.png'} alt="Added sigil patch" className={`card sigilPatch${i - val.defaultSigils + 1}`}></img>
                 : <></>}  
                 <img src={`/ability_${val.sigils[i]}.png`} alt={`${val.sigils[i]} sigil`} className={`card ${sigilClasses[indexAdj]}`}></img>
+                <img src={`/ability_none.png`} alt={`${val.sigils[i]} sigil`} className={`card ${sigilClasses[indexAdj]}`} style={{zIndex:"100"}}
+                onMouseEnter={() => {
+                  setHoverHint(`${allSigils[val.sigils[i]][0]}: ${allSigils[val.sigils[i]][1]}`);
+                }} onMouseLeave={() => {setHoverHint("")}}></img>
               </div>
             )
           })

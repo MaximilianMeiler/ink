@@ -10,6 +10,7 @@ function App() {
   const [handHover, setHandHover] = useState(-1)
   const [hoverSection, setHoverSection] = useState(-1)
   const [handSelection, setHandSelection] = useState(-1);
+  const [hoverHint, setHoverHint] = useState("");
   const [draw, setDraw] = useState([]);
   const [scribes, setScribes] = useState([{open: false, index: -1}, {open: false, index: -1}, 0])
 
@@ -457,14 +458,17 @@ function App() {
 
       {room ? <div>
         
-        <div style={{display: "flex", justifyContent: "end", alignItems: "center", padding:"10px", gap: "10px"}}>
-          <div>Room: {room ? room.id : ""}</div>
-          <button onClick={() => {
-            if (room) {
-              socket.emit("clientRoomLeave", room.id)
-            }
-            setRoom(null);
-          }}>Leave room</button>
+        <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", padding:"10px", gap: "10px", maxHeight: "27.5px"}}>
+          <div>{hoverHint}</div>
+          <div style={{display: "flex", alignItems: "center", gap: "10px"}}>
+            <div>Room: {room ? room.id : ""}</div>
+            <button onClick={() => {
+              if (room) {
+                socket.emit("clientRoomLeave", room.id)
+              }
+              setRoom(null);
+            }}>Leave room</button>
+          </div>
         </div>
 
         {(room.gameState === "awaitingPlayers") ? <div>
@@ -486,7 +490,7 @@ function App() {
                   onMouseEnter={() => {setHandHover(index); setHoverSection(0);}}
                   onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 >
-                  <Card val={card}/>
+                  <Card val={card} setHoverHint={setHoverHint}/>
                 </div>
               })}
             </div>
@@ -497,7 +501,7 @@ function App() {
                   { card ? 
                     <div>
                       <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-                        <Card val={card}/>
+                        <Card val={card} setHoverHint={setHoverHint}/>
                       </div>
                       <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                         if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
@@ -521,7 +525,7 @@ function App() {
               <div className='gameSlot'>
                 <img src='/card_queue_slot.png' alt='empty draft slot' className='card cardSlot' style={room.draft.phase % 2 !== (room.player0 === socket.id ? 0 : 1) ? {transform: 'rotate(180deg)'} : {}}></img>
                 <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-                  {room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1) ? <Card val={blankCard}/> : <></>}
+                  {room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1) ? <Card val={blankCard} setHoverHint={setHoverHint}/> : <></>}
                 </div>
                 <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                   if (room.draft.phase % 2 === (room.player0 === socket.id ? 0 : 1)) {
@@ -550,7 +554,7 @@ function App() {
                   onMouseEnter={() => {setHandHover(index); setHoverSection(1);}}
                   onMouseLeave={() => {setHandHover(-1); setHoverSection(-1);}}
                 >
-                  <Card val={card}/>
+                  <Card val={card} setHoverHint={setHoverHint}/>
                 </div>
               })}
             </div>
@@ -589,7 +593,7 @@ function App() {
                       <div style={{position: "relative", marginTop:"18px", marginLeft:"14.5px", transition: "margin-top .1s ease-out, margin-left .1s ease-out, transform .2s"}}>
                         <Card val={{...val,
                           damage: calcTrueDamage(room.board, index, room.bones, room.hands)
-                        }}/>
+                        }} setHoverHint={setHoverHint}/>
                       </div>
                     : <></>
                     }
@@ -669,7 +673,7 @@ function App() {
                       setSendRoom({...room, sacrifices: []});
                     }}
                   >
-                    <Card val={card}/>
+                    <Card val={card} setHoverHint={setHoverHint}/>
                   </div>
                 })}
               </div>
@@ -684,7 +688,8 @@ function App() {
                   let drawnCard = structuredClone(draw[0]);
                   let randomIndex = drawnCard.sigils.indexOf("randomability"); //SIGILS - randomability
                   if (randomIndex >= 0) {
-                    drawnCard.sigils.splice(randomIndex, 1, allSigils[Math.floor(Math.random() * allSigils.length)])
+                    //FIXME - this should not be done client side
+                    drawnCard.sigils.splice(randomIndex, 1, Object.keys(allSigils)[Math.floor(Math.random() * allSigils.length-9)]) //update when new sigils added
                   }
                   drawnCard.clone = structuredClone(drawnCard); //FIXME? - all cards now have clones. Corresponding else statements / use of card "indexes" are redundant
                   newHands[room.player0 === socket.id ? 0 : 1].push(drawnCard);
@@ -747,7 +752,7 @@ function App() {
             <div className='gameSlot'>
               <img src='/card_slot_sacrifice.png' alt='empty sacrifice slot' className='card cardSlot'></img>
               <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-                {scribes[0].index !== -1 ? <Card val={room.decks[room.player0 === socket.id ? 0 : 1][scribes[0].index]}/> : <></>}
+                {scribes[0].index !== -1 ? <Card val={room.decks[room.player0 === socket.id ? 0 : 1][scribes[0].index]} setHoverHint={setHoverHint}/> : <></>}
               </div>
               <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                 setScribes([{open: !scribes[0].open, index: scribes[0].index}, {open: false, index: scribes[1].index}, scribes[2]]);
@@ -756,7 +761,7 @@ function App() {
             <div className='gameSlot'>
               <img src='/card_slot_host.png' alt='empty host slot' className='card cardSlot'></img>
               <div style={{marginTop:"18px", marginLeft:"14.5px"}}>
-              {scribes[1].index !== -1 ? <Card val={room.decks[room.player0 === socket.id ? 0 : 1][scribes[1].index]}/> : <></>}
+              {scribes[1].index !== -1 ? <Card val={room.decks[room.player0 === socket.id ? 0 : 1][scribes[1].index]} setHoverHint={setHoverHint}/> : <></>}
               </div>
               <img src='/card_slot.png' alt='empty card slot' className='card cardSlot' style={{zIndex:"50", opacity:"0"}} onClick={() => {
                 setScribes([{open: false, index: scribes[0].index}, {open: !scribes[1].open, index: scribes[1].index}, scribes[2]]);
@@ -805,7 +810,7 @@ function App() {
                               {open: false, index: scribes[1].open ? room.decks[room.player0 === socket.id ? 0 : 1].indexOf(card) : scribes[1].index}, scribes[2]])
                 }}
               >
-                <Card val={card}/>
+                <Card val={card} setHoverHint={setHoverHint}/>
               </div>
             })}
           </div> : <></>}
